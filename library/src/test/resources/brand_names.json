@@ -1,0 +1,36 @@
+{
+  "shop": {
+    "convenience": {
+      "A": {
+        "count": 1,
+        "tags": {
+          "a": "1"
+        }
+      },
+      "B": {
+        "count": 2,
+        "tags": {
+          "b": "1"
+        }
+      }
+    },
+    "alcohol": {
+      "C": {
+        "count": 3,
+        "tags": {
+          "c": "1"
+        }
+      }
+    }
+  },
+  "leisure": {
+    "pitch": {
+      "D": {
+        "count": 4,
+        "tags": {
+          "d": "1"
+        }
+      }
+    }
+  }
+}

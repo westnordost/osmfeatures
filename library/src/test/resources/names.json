@@ -1,0 +1,12 @@
+[
+  {
+    "tags": { "a": "x", "b": "y"},
+    "names": ["A", "B"],
+    "keywords": ["1", "2"]
+  },
+  {
+    "tags": { "c": "z"},
+    "names": ["C"],
+    "keywords": ["3"]
+  }
+]

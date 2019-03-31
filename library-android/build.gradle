@@ -1,0 +1,74 @@
+apply plugin: 'com.android.library'
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+group = "de.westnordost"
+archivesBaseName = "osmnames-android"
+version = 1.0
+
+android {
+    compileSdkVersion 28
+
+    defaultConfig {
+        minSdkVersion 9
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+    }
+}
+
+dependencies {
+    api (project(':library')) {
+        //api ('de.westnordost:osm-names:1.+') {
+        // it's already included in Android
+        exclude group: 'org.json', module: 'json'
+    }
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                name 'osmnames-android'
+                packaging 'jar'
+                description 'Android library to translate OSM tags to and from localized names'
+                url 'https://github.com/westnordost/osmnames'
+
+                scm {
+                    connection 'https://github.com/westnordost/osmnames.git'
+                    developerConnection 'https://github.com/westnordost/osmnames.git'
+                    url 'https://github.com/westnordost/osmnames'
+                }
+
+                licenses {
+                    license {
+                        name 'Apache License Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'westnordost'
+                        name 'Tobias Zwick'
+                        email 'osm@westnordost.de'
+                    }
+                }
+            }
+        }
+    }
+}
