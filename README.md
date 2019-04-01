@@ -8,7 +8,7 @@ Java and Android library to translate OSM tags to and from localized names.
 
 ## Possible use cases
 
-* Have a user find features on the map by searching for their common names, synonyms or keywords for that primary feature. For example, if the user inputs "supermarket", he wants to find all supermarkets - and not all places with "supermarket" in its name.
+* Have a user find features on the map by searching for their common names, synonyms or keywords for that primary feature. For example, if the user inputs "supermarket", he/she wants to find all supermarkets - and not all places with "supermarket" in its name.
 
 * Correctly refer to a feature with a set of tags from the map (of which detailed information is shown). For example  the "Query features" feature on openstreetmap.org.
 
