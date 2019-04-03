@@ -184,7 +184,7 @@ public class NamesDictionaries
 		List<String> result = new ArrayList<>(array.length());
 		for (int i = 0; i < array.length(); i++)
 		{
-			result.add(array.getString(i));
+			result.add(array.getString(i).intern());
 		}
 		return result;
 	}
