@@ -13,11 +13,34 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
-public class BrandNamesParserTest
+public class NamesDictionariesTest
 {
+	@Test public void parse_two_names()
+	{
+		List<Entry> names = loadNames("names.json");
+
+		assertEquals(2, names.size());
+		assertEquals(0, names.get(0).getCount());
+		assertEquals(mapOf(tag("a","x"), tag("b","y")), names.get(0).getTags());
+		assertEquals(listOf("A", "B"), names.get(0).getNames());
+		assertEquals(listOf("1", "2"), names.get(0).getKeywords());
+		assertEquals(0, names.get(1).getCount());
+		assertEquals(mapOf(tag("c","z")), names.get(1).getTags());
+		assertEquals(listOf("C"), names.get(1).getNames());
+		assertEquals(listOf("3"), names.get(1).getKeywords());
+	}
+
+	@Test public void keywords_is_optional()
+	{
+		List<Entry> names = loadNames("names_keywords_is_optional.json");
+
+		assertEquals(1, names.size());
+		assertEquals(listOf(), names.get(0).getKeywords());
+	}
+
 	@Test public void parse_brand_names()
 	{
-		Map<String, List<Entry>> names = load("brand_names.json");
+		Map<String, List<Entry>> names = loadBrandNames("brand_names.json");
 
 		assertEquals(1, names.size());
 		assertTrue(names.containsKey(null));
@@ -45,7 +68,7 @@ public class BrandNamesParserTest
 
 	@Test public void count_is_optional()
 	{
-		Map<String, List<Entry>> names = load("brand_names_count_is_optional.json");
+		Map<String, List<Entry>> names = loadBrandNames("brand_names_count_is_optional.json");
 
 		assertEquals(1, names.size());
 		assertTrue(names.containsKey(null));
@@ -57,7 +80,7 @@ public class BrandNamesParserTest
 
 	@Test public void brand_names_are_sorted_by_country_codes()
 	{
-		Map<String, List<Entry>> names = load("brand_names_country_codes.json");
+		Map<String, List<Entry>> names = loadBrandNames("brand_names_country_codes.json");
 
 		assertEquals(3, names.size());
 		assertTrue(names.containsKey(null));
@@ -72,9 +95,14 @@ public class BrandNamesParserTest
 		assertSame(names.get("DE").get(0), names.get("AT").get(0));
 	}
 
-	private Map<String, List<Entry>> load(String fileName)
+	private Map<String, List<Entry>> loadBrandNames(String fileName)
 	{
-		return new BrandNamesParser().parse(getClass().getClassLoader().getResourceAsStream(fileName));
+		return NamesDictionaries.parseBrandNames(getClass().getClassLoader().getResourceAsStream(fileName));
+	}
+
+	private List<Entry> loadNames(String fileName)
+	{
+		return NamesDictionaries.parseNames(getClass().getClassLoader().getResourceAsStream(fileName));
 	}
 
 	@SafeVarargs private static <T> List<T> listOf(T... items) { return Arrays.asList(items); }

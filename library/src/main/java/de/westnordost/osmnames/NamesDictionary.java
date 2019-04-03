@@ -37,7 +37,7 @@ public class NamesDictionary
 	public NamesDictionary(Collection<Entry> allEntries)
 	{
 		this.allEntries = allEntries;
-		
+
 		this.entriesByCategory = new HashMap<>();
 		for (Entry entry : allEntries)
 		{
@@ -224,7 +224,7 @@ public class NamesDictionary
 
 	private static final Pattern FIND_DIACRITICS = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
 
-	private static Set<String> CATEGORY_KEYS = new HashSet<String>(Arrays.asList(
+	private static Set<String> CATEGORY_KEYS = new HashSet<>(Arrays.asList(
 			"advertising","aerialway","aeroway","allotments","amenity","area","attraction",
 			"barrier","boundary","bridge","building","camp_site","circular","club","craft",
 			"embankment","emergency","entrance","ford","golf","healthcare","highway",
