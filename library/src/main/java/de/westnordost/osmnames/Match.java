@@ -1,31 +1,18 @@
 package de.westnordost.osmnames;
 
+import java.util.Map;
+
+/** A dictionary entry, linking name and terms with tags */
 public class Match
 {
-	private final Entry entry;
-	private final String word;
-	private final int wordIndex;
+	public final String name;
+	public final Map<String, String> tags;
+	public final String parentName;
 
-	public Match(Entry entry, String word, int wordIndex)
+	public Match(String name, Map<String,String> tags, String parentName)
 	{
-		this.entry = entry;
-		this.word = word;
-		this.wordIndex = wordIndex;
+		this.name = name;
+		this.tags = tags;
+		this.parentName = parentName;
 	}
-
-	/** @return the actual entry that has been found */
-	public Entry getEntry() { return entry; }
-
-	/** @return the matched word with which the entry has been found. */
-	public String getWord() { return word; }
-
-	/** @return starting index at which the search word has been found in the matched
-	 *          {@link #getWord() word}. -1 if the search word is not in the matched word at all
-	 *          which occurs when only a keyword has been matched.
-	 *   */
-	public int getWordIndex() { return wordIndex; }
-
-	/** @return whether the matched {@link #getWord() word} is the primary name of the
-	 *  {@link #getEntry() entry} */
-	public boolean isPrimaryNameMatch() { return word.equals(entry.getPrimaryName()); }
 }

@@ -12,36 +12,36 @@ import static de.westnordost.osmnames.NamesDictionary.*;
 import static org.junit.Assert.*;
 
 public class NamesDictionaryTest
-{
-	private final Entry bakery = entry(
+{/*
+	private final Match bakery = entry(
 			listOf("Bäckerei", "Konditorei"),
 			mapOf(tag("shop","bakery"))
 	);
-	private final Entry car_dealer = entry(
+	private final Match car_dealer = entry(
 			listOf("Autohändler"),
 			mapOf(tag("shop","car"))
 	);
-	private final Entry second_hand_car_dealer = entry(
+	private final Match second_hand_car_dealer = entry(
 			listOf("Gebrauchtwagenhändler"),
 			mapOf(tag("shop","car"), tag("second_hand", "only"))
 	);
-	private final Entry bank = entry(
+	private final Match bank = entry(
 			listOf("Bank", "Kreditinstitut"),
 			mapOf(tag("amenity","bank"))
 	);
-	private final Entry bench = entry(
+	private final Match bench = entry(
 			listOf("Parkbank", "Bank"),
 			mapOf(tag("amenity","bench"))
 	);
-	private final Entry casino = entry(
+	private final Match casino = entry(
 			listOf("Spielbank"),
 			mapOf(tag("amenity","casino"))
 	);
-	private final Entry atm = entry(
+	private final Match atm = entry(
 			listOf("Bankomat"),
 			mapOf(tag("amenity","atm"))
 	);
-	private final Entry stock_exchange = entry(
+	private final Match stock_exchange = entry(
 			listOf("Börse"),
 			mapOf(tag("amenity","stock_exchange")),
 			listOf("Banking")
@@ -166,20 +166,20 @@ public class NamesDictionaryTest
 		assertEquals(stock_exchange, findings.get(4).getEntry());
 	}
 
-	private static NamesDictionary dictionary(Entry... entries)
+	private static NamesDictionary dictionary(Match... entries)
 	{
 		return new NamesDictionary(listOf(entries));
 	}
 
-	private static Entry entry(List<String> names, Map<String, String> tags, List<String> keywords)
+	private static Match entry(List<String> names, Map<String, String> tags, List<String> keywords)
 	{
-		return new Entry(names, tags, keywords, 0);
+		return new Match(names, tags, keywords, 0);
 	}
 
-	private static Entry entry(List<String> names, Map<String, String> tags)
+	private static Match entry(List<String> names, Map<String, String> tags)
 	{
-		return new Entry(names, tags, null, 0);
+		return new Match(names, tags, null, 0);
 	}
 
-	@SafeVarargs private static <T> List<T> listOf(T... items) { return Arrays.asList(items); }
+	@SafeVarargs private static <T> List<T> listOf(T... items) { return Arrays.asList(items); }*/
 }

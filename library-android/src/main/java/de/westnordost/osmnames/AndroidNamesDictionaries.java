@@ -10,12 +10,12 @@ public class AndroidNamesDictionaries
 {
 	private AndroidNamesDictionaries() {} // cannot be instantiated
 
-	public static NamesDictionaries create(AssetManager assetManager, String basePath)
+	public static NamesDictionary create(AssetManager assetManager, String basePath) throws IOException
 	{
-		return new NamesDictionaries(new AssetManagerAccess(assetManager, basePath));
+		return new NamesDictionary(new AssetManagerAccess(assetManager, basePath));
 	}
 
-	static class AssetManagerAccess implements NamesDictionaries.FileAccessAdapter
+	static class AssetManagerAccess implements NamesDictionary.FileAccessAdapter
 	{
 		private final AssetManager assetManager;
 		private final String basePath;

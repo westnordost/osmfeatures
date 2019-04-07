@@ -1,0 +1,7 @@
+{
+  "presets": {
+    "some/id": {
+      "name": "Bäckerei"
+    }
+  }
+}

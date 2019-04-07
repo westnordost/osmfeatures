@@ -1,0 +1,8 @@
+{
+  "presets": {
+    "some/id": {
+      "tags": { "a": "b", "c": "d" },
+      "geometry": ["point"]
+    }
+  }
+}

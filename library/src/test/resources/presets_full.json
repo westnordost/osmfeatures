@@ -1,0 +1,15 @@
+{
+  "presets": {
+    "some/id": {
+      "tags": { "a": "b", "c": "d" },
+      "geometry": ["point", "vertex", "line", "area", "relation"],
+      "name": "foo",
+      "terms": ["1","2"],
+      "addTags": { "e": "f" },
+      "countryCodes": ["de","gb"],
+      "searchable": false,
+      "matchScore": 0.5,
+      "suggestion": true
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "presets": {
+    "some/id": {
+      "name": "bar",
+      "terms": ["a","b"]
+    }
+  }
+}
