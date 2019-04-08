@@ -1,0 +1,16 @@
+{
+  "presets": {
+    "some/id": {
+      "tags": { "a": "b", "c": "d" },
+      "geometry": ["point"]
+    },
+    "another/id": {
+      "tags": { "a": "b", "c": "d" },
+      "geometry": ["point"]
+    },
+    "yet/another/id": {
+      "tags": { "a": "b", "c": "d" },
+      "geometry": ["point"]
+    }
+  }
+}

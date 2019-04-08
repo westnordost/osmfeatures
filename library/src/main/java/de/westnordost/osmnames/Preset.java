@@ -10,8 +10,6 @@ import java.util.Map;
  *  with only the fields helpful for the dictionary */
 class Preset
 {
-	// TODO make nullsafe?
-
 	final String id;
 	final Map<String,String> tags;
 	final List<GeometryType> geometry;
@@ -32,16 +30,16 @@ class Preset
 	{
 		this.id = id;
 		this.tags = tags;
-		this.geometry = geometry != null ? Collections.unmodifiableList(geometry) : null;
+		this.geometry = Collections.unmodifiableList(geometry);
 		this.name = name;
-		this.terms = terms != null ? Collections.unmodifiableList(terms) : null;
-		this.countryCodes = countryCodes != null ? Collections.unmodifiableList(countryCodes) : null;
+		this.terms = terms != null ? Collections.unmodifiableList(terms) : Collections.emptyList();
+		this.countryCodes = countryCodes != null ? Collections.unmodifiableList(countryCodes) : Collections.emptyList();
 		this.searchable = searchable;
 		this.matchScore = matchScore;
 		this.suggestion = suggestion;
-		this.addTags = addTags != null ? Collections.unmodifiableMap(addTags) : null;
+		this.addTags = addTags != null ? Collections.unmodifiableMap(addTags) : Collections.emptyMap();
 
-		this.canonicalName = StringUtils.canonicalize(name);
+		this.canonicalName = name != null ? StringUtils.canonicalize(name) : null;
 		if(terms != null)
 		{
 			List<String> canonicalTerms = new ArrayList<>(terms.size());
@@ -53,7 +51,7 @@ class Preset
 		}
 		else
 		{
-			this.canonicalTerms = null;
+			this.canonicalTerms = Collections.emptyList();
 		}
 	}
 
@@ -70,7 +68,7 @@ class Preset
 		return id.substring(0, lastSlashIndex);
 	}
 
-	// not defined:
+	// not included:
 	// - fields
 	// - moreFields
 	// - icon

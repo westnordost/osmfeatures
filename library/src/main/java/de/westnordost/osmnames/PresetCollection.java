@@ -23,37 +23,42 @@ class PresetCollection
 	private final NamesDictionary.FileAccessAdapter fileAccess;
 
 	// id -> preset
-	private final Map<String, Preset> presets;
+	private final Map<String, Preset> allPresets;
+	private final Map<String, Preset> suggestionPresets;
 	// locale -> ( id -> preset )
 	private final Map<Locale, Map<String, Preset>> localizedPresets = new HashMap<>();
 
-	PresetCollection(NamesDictionary.FileAccessAdapter fileAccess) throws IOException
+	PresetCollection(NamesDictionary.FileAccessAdapter fileAccess)
 	{
 		this.fileAccess = fileAccess;
-		presets = loadPresets();
+		allPresets = loadPresets();
+		suggestionPresets = new HashMap<>();
+		for (Preset preset : allPresets.values())
+		{
+			if(preset.suggestion) suggestionPresets.put(preset.id, preset);
+		}
 		// already load localization for default locale
-		getAll(Locale.getDefault());
+		getOrLoadLocalizedPresets(Locale.getDefault());
 	}
 
 	Collection<Preset> getAll() { return getAll(Locale.getDefault()); }
 
 	Collection<Preset> getAll(Locale locale)
 	{
-		return Collections.unmodifiableCollection(
-				getOrLoadLocalizedPresetsWithFallback(locale).values()
-		);
+		return Collections.unmodifiableCollection(getOrLoadLocalizedPresets(locale).values());
 	}
 
 	Preset get(String id) { return get(id, Locale.getDefault()); }
 
 	Preset get(String id, Locale locale)
 	{
-		return getOrLoadLocalizedPresetsWithFallback(locale).get(id);
+		return getOrLoadLocalizedPresets(locale).get(id);
 	}
 
-	private Map<String, Preset> loadPresets() throws IOException
+	private Map<String, Preset> loadPresets()
 	{
 		try(InputStream is = fileAccess.open(PRESETS_FILE)) { return parsePresets(is); }
+		catch (IOException e) { throw new RuntimeException(e); }
 	}
 
 	private static Map<String, Preset> parsePresets(InputStream is)
@@ -72,13 +77,15 @@ class PresetCollection
 
 			List<GeometryType> geometry = parseList(p.getJSONArray("geometry"),
 					item -> GeometryType.valueOf(((String)item).toUpperCase(Locale.US)));
-			String name = p.optString("name");
+			boolean suggestion = p.optBoolean("suggestion", false);
+			String name;
+			if(suggestion) name = p.getString("name");
+			else           name = p.optString("name", null);
 			List<String> terms = parseList(p.optJSONArray("terms"), item -> (String)item);
 			List<String> countryCodes = parseList(p.optJSONArray("countryCodes"),
 					item -> ((String)item).toUpperCase(Locale.US).intern());
 			boolean searchable = p.optBoolean("searchable", true);
 			float matchScore = p.optFloat("matchScore", 1.0f);
-			boolean suggestion = p.optBoolean("suggestion", false);
 			Map<String,String> addTags = parseStringMap(p.optJSONObject("addTags"));
 
 			result.put(id.intern(), new Preset(
@@ -122,30 +129,29 @@ class PresetCollection
 		return result;
 	}
 
-
-	private Map<String, Preset> getOrLoadLocalizedPresetsWithFallback(Locale locale)
-	{
-		Map<String, Preset> entries = getOrLoadLocalizedPresets(locale);
-		if(entries == null && locale.getCountry().length() > 0)
-		{
-			Locale languageOnly = new Locale(locale.getLanguage());
-			entries = getOrLoadLocalizedPresets(languageOnly);
-			if(entries == null)
-			{
-				entries = presets;
-			}
-		}
-		assert entries != null;
-		return entries;
-	}
-
 	private Map<String, Preset> getOrLoadLocalizedPresets(Locale locale)
 	{
 		synchronized (localizedPresets)
 		{
 			if (!localizedPresets.containsKey(locale))
 			{
-				localizedPresets.put(locale, loadLocalizedPresets(locale));
+				Locale localeLanguage = new Locale(locale.getLanguage());
+				if (!localizedPresets.containsKey(localeLanguage))
+				{
+					localizedPresets.put(localeLanguage, loadLocalizedPresets(localeLanguage));
+				}
+				// merging language presets with country presets (country presets overwrite language presets)
+				if(!locale.getCountry().isEmpty())
+				{
+					Map<String, Preset> languagePresets = localizedPresets.get(localeLanguage);
+					Map<String, Preset> countryPresets = loadLocalizedPresets(locale);
+// TODO should return null if empty? -> and then fallback to suggestion presets on getAll()?
+					Map<String, Preset> localePresets = new HashMap<>();
+					if(languagePresets != null) localePresets.putAll(languagePresets);
+					if(countryPresets != null) localePresets.putAll(countryPresets);
+
+					localizedPresets.put(locale, localePresets);
+				}
 			}
 			return localizedPresets.get(locale);
 		}
@@ -170,7 +176,7 @@ class PresetCollection
 	private Map<String, Preset> parseLocalizedPresets(InputStream is)
 	{
 		JSONObject object = new JSONObject(new JSONTokener(is));
-		Map<String, Preset> result = new HashMap<>();
+		Map<String, Preset> result = new HashMap<>(suggestionPresets);
 		JSONObject presetsObject = object.getJSONObject("presets");
 		for (String id : presetsObject.keySet())
 		{
@@ -178,13 +184,20 @@ class PresetCollection
 			JSONObject localization = presetsObject.getJSONObject(id);
 
 			String name = localization.getString("name");
-			List<String> terms = new ArrayList<>(Arrays.asList(
-					localization.optString("terms","").split("\\s*,\\s*"))
-			);
-			// remove duplicate name from terms
-			terms.remove(name);
+			String termsStr = localization.optString("terms", null);
+			List<String> terms = null;
+			if(termsStr != null)
+			{
+				terms = new ArrayList<>(Arrays.asList(termsStr.split("\\s*,\\s*")));
+				// remove duplicate name from terms
+				terms.remove(name);
+			}
 
-			result.put(id, new Preset(presets.get(id), name, terms));
+			Preset base = allPresets.get(id);
+			// no base preset found! Skip this
+			if(base == null) continue;
+
+			result.put(id, new Preset(base, name, terms));
 		}
 		return result;
 	}

@@ -23,14 +23,14 @@ public class NamesDictionary
 		InputStream open(String name) throws IOException;
 	}
 
-	private final PresetCollection presets;
+	private final PresetCollection presetCollection;
 	private final Set<String> keys;
 
 	public NamesDictionary(FileAccessAdapter fileAccess) throws IOException
 	{
-		presets = new PresetCollection(fileAccess);
+		presetCollection = new PresetCollection(fileAccess);
 		keys = new HashSet<>();
-		for (Preset preset : presets.getAll(Locale.getDefault()))
+		for (Preset preset : presetCollection.getAll(Locale.getDefault()))
 		{
 			keys.addAll(preset.tags.keySet());
 		}
@@ -61,7 +61,7 @@ public class NamesDictionary
 		List<Preset> foundPresets = new ArrayList<>();
 		if(!relevantTags.isEmpty())
 		{
-			for (Preset preset : presets.getAll(locale))
+			for (Preset preset : presetCollection.getAll(locale))
 			{
 				if (geometry != null)
 					if (!preset.geometry.contains(geometry))
@@ -132,10 +132,10 @@ public class NamesDictionary
 
 		String canonicalSearch = StringUtils.canonicalize(search);
 
-		List<Preset> searchable = filter(presets.getAll(locale), preset ->
+		List<Preset> searchable = filter(presetCollection.getAll(locale), preset ->
 			preset.searchable &&
 			(geometry == null || preset.geometry.contains(geometry)) &&
-			(preset.countryCodes == null || (countryCode != null && preset.countryCodes.contains(countryCode)))
+			(preset.countryCodes.isEmpty() || (countryCode != null && preset.countryCodes.contains(countryCode)))
 		);
 
 		Comparator<Preset> sortNames = (a, b) -> {
@@ -182,7 +182,6 @@ public class NamesDictionary
 
 		List<Preset> termsMatches = filter(searchable, preset -> {
 			if(foundPresets.contains(preset)) return false;
-			if (preset.canonicalTerms == null) return false;
 			for (String s : preset.canonicalTerms)
 			{
 				if (s.startsWith(canonicalSearch)) return true;
@@ -225,14 +224,14 @@ public class NamesDictionary
 	{
 		String name = preset.name;
 		Map<String, String> tags = new HashMap<>(preset.tags);
-		if(preset.addTags != null) tags.putAll(preset.addTags);
+		tags.putAll(preset.addTags);
 		String parentName = null;
 		if(preset.suggestion)
 		{
 			String parentId = preset.getParentId();
 			if(parentId != null)
 			{
-				Preset parentPreset = presets.get(parentId, locale);
+				Preset parentPreset = presetCollection.get(parentId, locale);
 				if(parentPreset != null)
 				{
 					parentName = parentPreset.name;
