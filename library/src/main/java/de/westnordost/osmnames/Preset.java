@@ -30,29 +30,22 @@ class Preset
 	{
 		this.id = id;
 		this.tags = tags;
-		this.geometry = Collections.unmodifiableList(geometry);
+		this.geometry = geometry;
 		this.name = name;
-		this.terms = terms != null ? Collections.unmodifiableList(terms) : Collections.emptyList();
-		this.countryCodes = countryCodes != null ? Collections.unmodifiableList(countryCodes) : Collections.emptyList();
+		this.terms = terms;
+		this.countryCodes = countryCodes;
 		this.searchable = searchable;
 		this.matchScore = matchScore;
 		this.suggestion = suggestion;
 		this.addTags = addTags != null ? Collections.unmodifiableMap(addTags) : Collections.emptyMap();
 
-		this.canonicalName = name != null ? StringUtils.canonicalize(name) : null;
-		if(terms != null)
+		this.canonicalName = StringUtils.canonicalize(name);
+		List<String> canonicalTerms = new ArrayList<>(terms.size());
+		for (String term : terms)
 		{
-			List<String> canonicalTerms = new ArrayList<>(terms.size());
-			for (String term : terms)
-			{
-				canonicalTerms.add(StringUtils.canonicalize(term));
-			}
-			this.canonicalTerms = Collections.unmodifiableList(canonicalTerms);
+			canonicalTerms.add(StringUtils.canonicalize(term));
 		}
-		else
-		{
-			this.canonicalTerms = Collections.emptyList();
-		}
+		this.canonicalTerms = Collections.unmodifiableList(canonicalTerms);
 	}
 
 	Preset(Preset p, String name, List<String> terms)

@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -17,31 +18,32 @@ import java.util.Set;
 
 public class NamesDictionary
 {
-	public interface FileAccessAdapter
-	{
-		boolean exists(String name) throws IOException;
-		InputStream open(String name) throws IOException;
-	}
-
 	private final PresetCollection presetCollection;
 	private final Set<String> keys;
 
-	public NamesDictionary(FileAccessAdapter fileAccess) throws IOException
+	NamesDictionary(PresetCollection presetCollection)
 	{
-		presetCollection = new PresetCollection(fileAccess);
+		this.presetCollection = presetCollection;
 		keys = new HashSet<>();
-		for (Preset preset : presetCollection.getAll(Locale.getDefault()))
+		for (Preset preset : presetCollection.getAll(null))
 		{
 			keys.addAll(preset.tags.keySet());
 		}
 	}
 
-	public static NamesDictionary create(String path) throws IOException
+	public static NamesDictionary create(String path)
 	{
-		return new NamesDictionary(new FileSystemAccess(new File(path)));
+		return new NamesDictionary(new IDPresetCollection(new FileSystemAccess(new File(path))));
 	}
 
-	/** Find entries by a set of tags.
+	public List<Match> get(Map<String, String> tags, GeometryType geometry)
+	{
+		return get(tags, geometry, null);
+	}
+
+	/** Find entries by a set of tags. Returns a list because in rare cases, a set of tags may match
+	 *  multiple primary features, such as for tag combinations like
+	 *  <tt>shop=deli</tt> + <tt>amenity=cafe</tt>.
 	 *
 	 *  @param tags The tags the element has
 	 *  @param geometry the type of geometry the element has. Optional.
@@ -61,6 +63,8 @@ public class NamesDictionary
 		List<Preset> foundPresets = new ArrayList<>();
 		if(!relevantTags.isEmpty())
 		{
+			Set<String> removeIds = new HashSet<>();
+
 			for (Preset preset : presetCollection.getAll(locale))
 			{
 				if (geometry != null)
@@ -70,6 +74,7 @@ public class NamesDictionary
 				if (mapContainsAllEntries(relevantTags, preset.tags.entrySet()))
 				{
 					foundPresets.add(preset);
+					removeIds.addAll(getParentCategoryIds(preset.id));
 				}
 			}
 			Collections.sort(foundPresets, (a, b) -> {
@@ -79,8 +84,35 @@ public class NamesDictionary
 				// 2. presets with higher matchScore first
 				return (int) (100 * b.matchScore - 100 * a.matchScore);
 			});
+
+			// only return of each category the most specific thing. I.e. will return
+			// McDonalds only instead of McDonalds,Fast-Food Restaurant,Amenity
+			Iterator<Preset> it = foundPresets.iterator();
+			while(it.hasNext())
+			{
+				if(removeIds.contains(it.next().id)) it.remove();
+			}
 		}
 		return createMatches(foundPresets, -1, locale);
+	}
+
+	private static Collection<String> getParentCategoryIds(String id)
+	{
+		List<String> result = new ArrayList<>();
+		do
+		{
+			id = getParentId(id);
+			if(id != null) result.add(id);
+		}
+		while(id != null);
+		return result;
+	}
+
+	private static String getParentId(String id)
+	{
+		int lastSlashIndex = id.lastIndexOf("/");
+		if(lastSlashIndex == -1) return null;
+		return id.substring(0, lastSlashIndex);
 	}
 
 	private Map<String, String> createMapWithOnlyRelevantTagsRetained(Map<String, String> tags)
@@ -109,6 +141,11 @@ public class NamesDictionary
 		return mapValue == value || value != null && value.equals(mapValue);
 	}
 
+	public List<Match> find(String search, GeometryType geometry, String countryCode, int limit)
+	{
+		return find(search, geometry, countryCode, limit, null);
+	}
+
 	/**
 	 * Find entries by given search word.<br>
 	 * Results are sorted mainly in this order: Matches with names, with brand names, then matches
@@ -127,6 +164,8 @@ public class NamesDictionary
 	 */
 	public List<Match> find(String search, GeometryType geometry, String countryCode, int limit, Locale locale)
 	{
+		// TODO: possible performance improvement: Map of name -> preset for fast exact-matches
+
 		if(limit == 0) limit = 50;
 		if(locale == null) locale = Locale.getDefault();
 
@@ -145,10 +184,13 @@ public class NamesDictionary
 			// 2. exact matches case and diacritics insensitive first
 			int cExactMatchOrder = (b.canonicalName.equals(canonicalSearch)?1:0) - (a.canonicalName.equals(canonicalSearch)?1:0);
 			if(cExactMatchOrder != 0) return cExactMatchOrder;
-			// 3. presets with higher matchScore first
+			// 3. earlier matches in string first
+			int indexOfOrder = a.canonicalName.indexOf(canonicalSearch) - b.canonicalName.indexOf(canonicalSearch);
+			if(indexOfOrder != 0) return indexOfOrder;
+			// 4. presets with higher matchScore first
 			int matchScoreOrder = (int) (100 * b.matchScore - 100 * a.matchScore);
 			if(matchScoreOrder != 0) return matchScoreOrder;
-			// 4. shorter names first
+			// 5. shorter names first
 			return a.name.length() - b.name.length();
 		};
 
@@ -193,6 +235,8 @@ public class NamesDictionary
 
 		return createMatches(result, limit, locale);
 	}
+
+	// TODO: interface: get(String name) for exact-matches only?
 
 	private static boolean startsWordWith(String haystack, String needle)
 	{
@@ -241,7 +285,7 @@ public class NamesDictionary
 		return new Match(name, tags, parentName);
 	}
 
-	private static class FileSystemAccess implements FileAccessAdapter
+	private static class FileSystemAccess implements IDPresetCollection.FileAccessAdapter
 	{
 		private final File basePath;
 

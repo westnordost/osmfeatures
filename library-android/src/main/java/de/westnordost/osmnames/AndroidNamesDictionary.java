@@ -6,16 +6,16 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class AndroidNamesDictionaries
+public class AndroidNamesDictionary
 {
-	private AndroidNamesDictionaries() {} // cannot be instantiated
+	private AndroidNamesDictionary() {} // cannot be instantiated
 
 	public static NamesDictionary create(AssetManager assetManager, String basePath) throws IOException
 	{
-		return new NamesDictionary(new AssetManagerAccess(assetManager, basePath));
+		return new NamesDictionary(new IDPresetCollection(new AssetManagerAccess(assetManager, basePath)));
 	}
 
-	static class AssetManagerAccess implements NamesDictionary.FileAccessAdapter
+	static class AssetManagerAccess implements IDPresetCollection.FileAccessAdapter
 	{
 		private final AssetManager assetManager;
 		private final String basePath;

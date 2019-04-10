@@ -1,10 +1,12 @@
 {
   "presets": {
     "some/id": {
+      "name": "test",
       "tags": { "addr:*": "b" },
       "geometry": ["point"]
     },
     "another/id": {
+      "name": "test",
       "tags": { "a": "*" },
       "geometry": ["point"]
     }
