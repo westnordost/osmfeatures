@@ -2,7 +2,7 @@ package de.westnordost.osmnames;
 
 import java.util.Map;
 
-/** A dictionary entry, linking name and terms with tags */
+/** A map feature, linking name and terms with tags */
 public class Match
 {
 	public final String name;

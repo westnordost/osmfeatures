@@ -26,9 +26,15 @@ For Android, use
 NamesDictionary dictionary = AndroidNamesDictionary.create("path/within/assets/folder/to/data"));
 ```
 
+TODO note about how/where to get the data.
+
 ### Find matches by tags
 ```java
-List<Match> matches = dictionary.get(Map.of("amenity", "bench"), null, Locale.GERMAN);
+List<Match> matches = dictionary
+    .byTags(Map.of("amenity", "bench"))  // look for features that have the given tags
+    .forGeometry(GeometryType.POINT)     // limit the search to features that may be points
+    .forLocale(Locale.GERMAN)            // show results in German
+    .find();
 
 println(matches.get(0).name); // prints "Parkbank" (or something like this)
 ```
@@ -36,6 +42,12 @@ println(matches.get(0).name); // prints "Parkbank" (or something like this)
 ### Find matches by search word
 
 ```java
-List<Match> matches = dictionary.find("Bank", null, null, 0, Locale.GERMAN);
-// result list will have matches with at least amenity=bank and amenity=bench
+List<Match> matches = dictionary
+    .byTerm("Bank")                  // look for features matching "Bank"
+    .forGeometry(GeometryType.AREA)  // limit the search to features that may be areas
+    .forLocale(Locale.GERMAN)        // show results in German
+    .inCountry("DE")                 // also include things (brands) that only exist in Germany
+    .limit(10)                       // return at most 10 entries
+    .find();
+// result list will have matches with at least amenity=bank, but not amenity=bench because it is a point-feature
 ```
