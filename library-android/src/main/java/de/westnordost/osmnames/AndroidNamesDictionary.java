@@ -12,10 +12,10 @@ public class AndroidNamesDictionary
 
 	public static NamesDictionary create(AssetManager assetManager, String basePath) throws IOException
 	{
-		return new NamesDictionary(new IDPresetCollection(new AssetManagerAccess(assetManager, basePath)));
+		return new NamesDictionary(new iDPresetCollection(new AssetManagerAccess(assetManager, basePath)));
 	}
 
-	static class AssetManagerAccess implements IDPresetCollection.FileAccessAdapter
+	static class AssetManagerAccess implements iDPresetCollection.FileAccessAdapter
 	{
 		private final AssetManager assetManager;
 		private final String basePath;

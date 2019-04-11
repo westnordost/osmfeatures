@@ -15,7 +15,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-class IDPresetCollection implements PresetCollection
+class iDPresetCollection implements PresetCollection
 {
 	private static final String PRESETS_FILE = "presets.json";
 
@@ -32,7 +32,7 @@ class IDPresetCollection implements PresetCollection
 	// locale -> ( id -> preset )
 	private final Map<Locale, Map<String, Preset>> localizedPresets = new HashMap<>();
 
-	IDPresetCollection(FileAccessAdapter fileAccess)
+	iDPresetCollection(FileAccessAdapter fileAccess)
 	{
 		this.fileAccess = fileAccess;
 		allPresets = loadPresets();

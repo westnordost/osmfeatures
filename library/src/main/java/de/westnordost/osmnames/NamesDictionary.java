@@ -31,30 +31,20 @@ public class NamesDictionary
 		}
 	}
 
+	/** Create a new NamesDictionary which gets it's data from the given directory. */
 	public static NamesDictionary create(String path)
 	{
-		return new NamesDictionary(new IDPresetCollection(new FileSystemAccess(new File(path))));
+		return new NamesDictionary(new iDPresetCollection(new FileSystemAccess(new File(path))));
 	}
 
-	public List<Match> get(Map<String, String> tags, GeometryType geometry)
+	/** Find matches by a set of tags */
+	public QueryByTagBuilder byTags(Map<String, String> tags)
 	{
-		return get(tags, geometry, null);
+		return new QueryByTagBuilder(tags);
 	}
 
-	/** Find entries by a set of tags. Returns a list because in rare cases, a set of tags may match
-	 *  multiple primary features, such as for tag combinations like
-	 *  <tt>shop=deli</tt> + <tt>amenity=cafe</tt>.
-	 *
-	 *  @param tags The tags the element has
-	 *  @param geometry the type of geometry the element has. Optional.
-	 *  @param locale the Locale in which to present the results. Uses the current default locale if
-	 *                none is specified.
-	 *  @return a list of dictionary entries that match. Returns an empty list if nothing is found.
-	 * */
-	public List<Match> get(Map<String, String> tags, GeometryType geometry, Locale locale)
+	private List<Match> get(Map<String, String> tags, GeometryType geometry, Locale locale)
 	{
-		if(locale == null) locale = Locale.getDefault();
-
 		// TODO possible performance improvement: group presets by countryCodes (50% less iterations)
 		// TODO possible performance improvement: sort presets into a tree of tags (lookup in almost O(1))
 
@@ -141,34 +131,15 @@ public class NamesDictionary
 		return mapValue == value || value != null && value.equals(mapValue);
 	}
 
-	public List<Match> find(String search, GeometryType geometry, String countryCode, int limit)
+	/** Find matches by given search word */
+	public QueryByTermBuilder byTerm(String term)
 	{
-		return find(search, geometry, countryCode, limit, null);
+		return new QueryByTermBuilder(term);
 	}
 
-	/**
-	 * Find entries by given search word.<br>
-	 * Results are sorted mainly in this order: Matches with names, with brand names, then matches
-	 * with terms (keywords).
-	 *
-	 * @param search The term (name or keywords) to find the entries for
-	 * @param geometry the type of geometry the element has. Optional.
-	 * @param countryCode the ISO 3166-1 alpha-2 country code of the country the element is in.
-	 *                    Optional. Will only return non-country-specific results if none is
-	 *                    specified.
-	 * @param limit limit how many results to return at most. Default (if 0) 50, -1 for unlimited.
-	 * @param locale the Locale in which to present the results. Uses the current default locale if
-	 *               none is specified.
-	 *
-	 * @return The ordered list of findings. Empty if nothing has been found.
-	 */
-	public List<Match> find(String search, GeometryType geometry, String countryCode, int limit, Locale locale)
+	private List<Match> get(String search, GeometryType geometry, String countryCode, int limit, Locale locale)
 	{
 		// TODO: possible performance improvement: Map of name -> preset for fast exact-matches
-
-		if(limit == 0) limit = 50;
-		if(locale == null) locale = Locale.getDefault();
-
 		String canonicalSearch = StringUtils.canonicalize(search);
 
 		List<Preset> searchable = filter(presetCollection.getAll(locale), preset ->
@@ -285,7 +256,90 @@ public class NamesDictionary
 		return new Match(name, tags, parentName);
 	}
 
-	private static class FileSystemAccess implements IDPresetCollection.FileAccessAdapter
+	public class QueryByTagBuilder
+	{
+		private final Map<String, String> tags;
+		private GeometryType geometryType = null;
+		private Locale locale = Locale.getDefault();
+
+		private QueryByTagBuilder(Map<String, String> tags) { this.tags = tags; }
+
+		/** Sets for which geometry type to look. If not set or <tt>null</tt>, any will match. */
+		public QueryByTagBuilder forGeometry(GeometryType geometryType)
+		{
+			this.geometryType = geometryType;
+			return this;
+		}
+
+		/** Sets the locale in which to present the results. If none is specified, the default
+		 *  locale is used. */
+		public QueryByTagBuilder forLocale(Locale locale)
+		{
+			this.locale = locale;
+			return this;
+		}
+
+		/** Returns a list of dictionary entries that match or an empty list if nothing is
+		 *  found. <br>In rare cases, a set of tags may match multiple primary features, such as for
+		 *  tag combinations like <tt>shop=deli</tt> + <tt>amenity=cafe</tt>, so, this is why
+		 *  it is a list. */
+		public List<Match> find()
+		{
+			return get(tags, geometryType, locale);
+		}
+	}
+
+	public class QueryByTermBuilder
+	{
+		private final String term;
+		private GeometryType geometryType = null;
+		private Locale locale = Locale.getDefault();
+		private int limit = 50;
+		private String countryCode = null;
+
+		private QueryByTermBuilder(String term) { this.term = term; }
+
+		/** Sets for which geometry type to look. If not set or <tt>null</tt>, any will match. */
+		public QueryByTermBuilder forGeometry(GeometryType geometryType)
+		{
+			this.geometryType = geometryType;
+			return this;
+		}
+
+		/** Sets the locale in which to present the results. If none is specified, the default
+		 *  locale is used. */
+		public QueryByTermBuilder forLocale(Locale locale)
+		{
+			this.locale = locale;
+			return this;
+		}
+
+		/** the ISO 3166-1 alpha-2 country code of the country the element is in. If not specified,
+		 *  will only return matches that are not county-specific. */
+		public QueryByTermBuilder inCountry(String countryCode)
+		{
+			this.countryCode = countryCode;
+			return this;
+		}
+
+		/** limit how many results to return at most. Default is 50, -1 for unlimited. */
+		public QueryByTermBuilder limit(int limit)
+		{
+			this.limit = limit;
+			return this;
+		}
+
+		/** Returns a list of dictionary entries that match or an empty list if nothing is
+		 *  found. <br>
+		 *  Results are sorted mainly in this order: Matches with names, with brand names, then
+		 *  matches with terms (keywords). */
+		public List<Match> find()
+		{
+			return get(term, geometryType, countryCode, limit, locale);
+		}
+	}
+
+	private static class FileSystemAccess implements iDPresetCollection.FileAccessAdapter
 	{
 		private final File basePath;
 

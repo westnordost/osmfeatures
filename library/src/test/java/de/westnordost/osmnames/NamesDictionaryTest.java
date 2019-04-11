@@ -122,21 +122,21 @@ public class NamesDictionaryTest
 	{
 		Map<String,String> tags = mapOf(tag("shop", "supermarket"));
 		NamesDictionary dictionary = dictionary(bakery);
-		assertEquals(listOf(), dictionary.get(tags, null));
+		assertEquals(listOf(), dictionary.byTags(tags).find());
 	}
 
 	@Test public void find_no_entry_because_wrong_geometry()
 	{
 		Map<String,String> tags = mapOf(tag("shop", "bakery"));
 		NamesDictionary dictionary = dictionary(bakery);
-		assertEquals(listOf(), dictionary.get(tags, GeometryType.RELATION));
+		assertEquals(listOf(), dictionary.byTags(tags).forGeometry(GeometryType.RELATION).find());
 	}
 
 	@Test public void find_entry_by_tags()
 	{
 		Map<String,String> tags = mapOf(tag("shop", "bakery"));
 		NamesDictionary dictionary = dictionary(bakery);
-		List<Match> matches = dictionary.get(tags, null);
+		List<Match> matches = dictionary.byTags(tags).find();
 		assertEquals(1, matches.size());
 		assertEquals(bakery.name, matches.get(0).name);
 		assertEquals(bakery.tags, matches.get(0).tags);
@@ -147,7 +147,7 @@ public class NamesDictionaryTest
 	{
 		Map<String,String> tags = mapOf(tag("amenity", "scheißhaus"));
 		NamesDictionary dictionary = dictionary(scheisshaus);
-		List<Match> matches = dictionary.get(tags, null);
+		List<Match> matches = dictionary.byTags(tags).find();
 		assertEquals(1, matches.size());
 	}
 
@@ -155,7 +155,7 @@ public class NamesDictionaryTest
 	{
 		Map<String,String> tags = mapOf(tag("shop", "bakery"));
 		NamesDictionary dictionary = dictionary(bakery);
-		List<Match> matches = dictionary.get(tags, GeometryType.POINT);
+		List<Match> matches = dictionary.byTags(tags).forGeometry(GeometryType.POINT).find();
 		assertEquals(1, matches.size());
 		assertEquals(bakery.name, matches.get(0).name);
 		assertEquals(bakery.tags, matches.get(0).tags);
@@ -166,7 +166,7 @@ public class NamesDictionaryTest
 	{
 		Map<String,String> tags = mapOf(tag("shop", "bakery"), tag("name", "Ditsch"));
 		NamesDictionary dictionary = dictionary(bakery, ditsch);
-		List<Match> matches = dictionary.get(tags, null);
+		List<Match> matches = dictionary.byTags(tags).find();
 		assertEquals(1, matches.size());
 		assertEquals(ditsch.name, matches.get(0).name);
 		Map<String,String> expectedTags = new HashMap<>(ditsch.tags);
@@ -179,7 +179,7 @@ public class NamesDictionaryTest
 	{
 		Map<String,String> tags = mapOf(tag("shop", "bakery"), tag("amenity", "bank"));
 		NamesDictionary dictionary = dictionary(bakery, bank);
-		List<Match> matches = dictionary.get(tags, null);
+		List<Match> matches = dictionary.byTags(tags).find();
 		assertEquals(2, matches.size());
 	}
 
@@ -187,7 +187,7 @@ public class NamesDictionaryTest
 	{
 		Map<String,String> tags = mapOf(tag("shop", "car"));
 		NamesDictionary dictionary = dictionary(car_dealer, second_hand_car_dealer);
-		List<Match> matches = dictionary.get(tags, null);
+		List<Match> matches = dictionary.byTags(tags).find();
 		assertEquals(1, matches.size());
 		assertEquals(car_dealer.name, matches.get(0).name);
 	}
@@ -196,7 +196,7 @@ public class NamesDictionaryTest
 	{
 		Map<String,String> tags = mapOf(tag("shop", "car"), tag("second_hand", "only"));
 		NamesDictionary dictionary = dictionary(car_dealer, second_hand_car_dealer);
-		List<Match> matches = dictionary.get(tags, null);
+		List<Match> matches = dictionary.byTags(tags).find();
 		assertEquals(1, matches.size());
 		assertEquals(second_hand_car_dealer.name, matches.get(0).name);
 	}
@@ -204,32 +204,32 @@ public class NamesDictionaryTest
 	@Test public void find_no_entry_by_name()
 	{
 		NamesDictionary dictionary = dictionary(bakery);
-		assertEquals(listOf(), dictionary.find("Supermarkt", null, null, 0));
+		assertEquals(listOf(), dictionary.byTerm("Supermarkt").find());
 	}
 
 	@Test public void find_no_entry_by_name_because_wrong_geometry()
 	{
 		NamesDictionary dictionary = dictionary(bakery);
-		assertEquals(listOf(), dictionary.find("Bäckerei", GeometryType.LINE, null, 0));
+		assertEquals(listOf(), dictionary.byTerm("Bäckerei").forGeometry(GeometryType.LINE).find());
 	}
 
 	@Test public void find_no_entry_by_name_because_wrong_country()
 	{
 		NamesDictionary dictionary = dictionary(ditsch);
-		assertEquals(listOf(), dictionary.find("Ditsch", null, null, 0));
-		assertEquals(listOf(), dictionary.find("Ditsch", null, "AT", 0));
+		assertEquals(listOf(), dictionary.byTerm("Ditsch").find());
+		assertEquals(listOf(), dictionary.byTerm("Ditsch").inCountry("AT").find());
 	}
 
 	@Test public void find_no_non_searchable_entry_by_name()
 	{
 		NamesDictionary dictionary = dictionary(scheisshaus);
-		assertEquals(listOf(), dictionary.find("Scheißhaus", null, null, 0));
+		assertEquals(listOf(), dictionary.byTerm("Scheißhaus").find());
 	}
 
 	@Test public void find_entry_by_name()
 	{
 		NamesDictionary dictionary = dictionary(bakery);
-		List<Match> findings = dictionary.find("Bäckerei", null, null, 0);
+		List<Match> findings = dictionary.byTerm("Bäckerei").find();
 		assertEquals(1, findings.size());
 		assertEquals(bakery.name, findings.get(0).name);
 	}
@@ -237,7 +237,7 @@ public class NamesDictionaryTest
 	@Test public void find_entry_by_name_with_correct_geometry()
 	{
 		NamesDictionary dictionary = dictionary(bakery);
-		List<Match> findings = dictionary.find("Bäckerei", GeometryType.POINT, null, 0);
+		List<Match> findings = dictionary.byTerm("Bäckerei").forGeometry(GeometryType.POINT).find();
 		assertEquals(1, findings.size());
 		assertEquals(bakery.name, findings.get(0).name);
 	}
@@ -245,7 +245,7 @@ public class NamesDictionaryTest
 	@Test public void find_entry_by_name_with_correct_country()
 	{
 		NamesDictionary dictionary = dictionary(ditsch, bakery);
-		List<Match> findings = dictionary.find("Ditsch", null, "DE", 0);
+		List<Match> findings = dictionary.byTerm("Ditsch").inCountry("DE").find();
 		assertEquals(1, findings.size());
 		assertEquals(ditsch.name, findings.get(0).name);
 		assertEquals(bakery.name, findings.get(0).parentName);
@@ -254,7 +254,7 @@ public class NamesDictionaryTest
 	@Test public void find_entry_by_name_case_insensitive()
 	{
 		NamesDictionary dictionary = dictionary(bakery);
-		List<Match> findings = dictionary.find("BÄCkErEI", null, null, 0);
+		List<Match> findings = dictionary.byTerm("BÄCkErEI").find();
 		assertEquals(1, findings.size());
 		assertEquals(bakery.name, findings.get(0).name);
 	}
@@ -262,7 +262,7 @@ public class NamesDictionaryTest
 	@Test public void find_entry_by_name_diacritics_insensitive()
 	{
 		NamesDictionary dictionary = dictionary(bakery);
-		List<Match> findings = dictionary.find("Backérèi", null, null, 0);
+		List<Match> findings = dictionary.byTerm("Backérèi").find();
 		assertEquals(1, findings.size());
 		assertEquals(bakery.name, findings.get(0).name);
 	}
@@ -270,7 +270,7 @@ public class NamesDictionaryTest
 	@Test public void find_entry_by_term()
 	{
 		NamesDictionary dictionary = dictionary(bakery);
-		List<Match> findings = dictionary.find("bro", null, null, 0);
+		List<Match> findings = dictionary.byTerm("bro").find();
 		assertEquals(1, findings.size());
 		assertEquals(bakery.name, findings.get(0).name);
 	}
@@ -278,7 +278,7 @@ public class NamesDictionaryTest
 	@Test public void find_entry_by_term_case_insensitive()
 	{
 		NamesDictionary dictionary = dictionary(bakery);
-		List<Match> findings = dictionary.find("BRO", null, null, 0);
+		List<Match> findings = dictionary.byTerm("BRO").find();
 		assertEquals(1, findings.size());
 		assertEquals(bakery.name, findings.get(0).name);
 	}
@@ -286,7 +286,7 @@ public class NamesDictionaryTest
 	@Test public void find_entry_by_term_diacritics_insensitive()
 	{
 		NamesDictionary dictionary = dictionary(bakery);
-		List<Match> findings = dictionary.find("bró", null, null, 0);
+		List<Match> findings = dictionary.byTerm("bró").find();
 		assertEquals(1, findings.size());
 		assertEquals(bakery.name, findings.get(0).name);
 	}
@@ -294,14 +294,14 @@ public class NamesDictionaryTest
 	@Test public void find_multiple_entries_by_name()
 	{
 		NamesDictionary dictionary = dictionary(second_hand_car_dealer, car_dealer);
-		List<Match> matches = dictionary.find("auto", null, null, 0);
+		List<Match> matches = dictionary.byTerm("auto").find();
 		assertEquals(2, matches.size());
 	}
 
 	@Test public void find_multiple_entries_by_name_but_respect_limit()
 	{
 		NamesDictionary dictionary = dictionary(second_hand_car_dealer, car_dealer);
-		List<Match> matches = dictionary.find("auto", null, null, 1);
+		List<Match> matches = dictionary.byTerm("auto").limit(1).find();
 		assertEquals(1, matches.size());
 	}
 
@@ -310,7 +310,7 @@ public class NamesDictionaryTest
 		NamesDictionary dictionary = dictionary(
 				casino, baenk, bad_bank, stock_exchange, bank_of_liechtenstein, bank, bench, atm,
 				bank_of_america, deutsche_bank);
-		List<Match> findings = dictionary.find("Bank", null, null, 0);
+		List<Match> findings = dictionary.byTerm("Bank").find();
 		assertEquals(8, findings.size());
 		assertEquals(bank.name, findings.get(0).name); // exact name matches
 		assertEquals(baenk.name, findings.get(1).name); // exact name matches (diacritics and case insensitive)
@@ -323,11 +323,6 @@ public class NamesDictionaryTest
 
 		//assertEquals(casino.name, findings.get(X).name); // not included: "Spielbank" does not start with "bank"
 		//assertEquals(deutsche_bank.name, findings.get(X).name); // not included: "Deutsche Bank" does not start with "bank"
-	}
-
-	@Test public void integration_test_with_id_data()
-	{
-		// TODO
 	}
 
 	private static NamesDictionary dictionary(Preset... entries)

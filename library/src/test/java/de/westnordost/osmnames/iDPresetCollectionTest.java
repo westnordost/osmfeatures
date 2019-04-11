@@ -1,10 +1,15 @@
 package de.westnordost.osmnames;
 
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -13,13 +18,13 @@ import static de.westnordost.osmnames.GeometryType.*;
 import static de.westnordost.osmnames.MapEntry.*;
 import static org.junit.Assert.*;
 
-public class IDPresetCollectionTest
+public class iDPresetCollectionTest
 {
 	@Test public void presets_not_found_produces_runtime_exception()
 	{
 		try
 		{
-			new IDPresetCollection(new IDPresetCollection.FileAccessAdapter()
+			new iDPresetCollection(new iDPresetCollection.FileAccessAdapter()
 			{
 				@Override public boolean exists(String name) { return false; }
 				@Override public InputStream open(String name) throws IOException { throw new FileNotFoundException(); }
@@ -30,7 +35,7 @@ public class IDPresetCollectionTest
 
 	@Test public void load_presets_only()
 	{
-		IDPresetCollection presets = create("one_preset_full.json", null);
+		iDPresetCollection presets = create("one_preset_full.json", null);
 
 		assertEquals(1, presets.getAll(null).size());
 		Preset preset = presets.get("some/id", null);
@@ -49,7 +54,7 @@ public class IDPresetCollectionTest
 
 	@Test public void load_presets_only_defaults()
 	{
-		IDPresetCollection presets = create("one_preset_min.json", null);
+		iDPresetCollection presets = create("one_preset_min.json", null);
 
 		assertEquals(1, presets.getAll(null).size());
 		Preset preset = presets.get("some/id", null);
@@ -69,13 +74,13 @@ public class IDPresetCollectionTest
 
 	@Test public void load_presets_no_wildcards()
 	{
-		IDPresetCollection presets = create("one_preset_wildcard.json", null);
+		iDPresetCollection presets = create("one_preset_wildcard.json", null);
 		assertTrue(presets.getAll(null).isEmpty());
 	}
 
 	@Test public void load_presets_and_localization()
 	{
-		IDPresetCollection presets = create("one_preset_min.json", "localizations.json");
+		iDPresetCollection presets = create("one_preset_min.json", "localizations.json");
 
 		assertEquals(1, presets.getAll(Locale.US).size());
 		Preset preset = presets.get("some/id", Locale.US);
@@ -89,7 +94,7 @@ public class IDPresetCollectionTest
 
 	@Test public void load_presets_and_localization_defaults()
 	{
-		IDPresetCollection presets = create("one_preset_min.json", "localizations_min.json");
+		iDPresetCollection presets = create("one_preset_min.json", "localizations_min.json");
 
 		assertEquals(1, presets.getAll(Locale.US).size());
 		Preset preset = presets.get("some/id", Locale.US);
@@ -103,7 +108,7 @@ public class IDPresetCollectionTest
 
 	@Test public void load_presets_and_two_localizations()
 	{
-		IDPresetCollection presets = new IDPresetCollection(new IDPresetCollection.FileAccessAdapter()
+		iDPresetCollection presets = new iDPresetCollection(new iDPresetCollection.FileAccessAdapter()
 		{
 			@Override public boolean exists(String name)
 			{
@@ -134,7 +139,7 @@ public class IDPresetCollectionTest
 
 	@Test public void load_presets_and_merge_localizations()
 	{
-		IDPresetCollection presets = new IDPresetCollection(new IDPresetCollection.FileAccessAdapter()
+		iDPresetCollection presets = new iDPresetCollection(new iDPresetCollection.FileAccessAdapter()
 		{
 			@Override public boolean exists(String name)
 			{
@@ -163,9 +168,36 @@ public class IDPresetCollectionTest
 		assertEquals("Brückle", presets.get("yet/another/id", AUSTRIA).name);
 	}
 
-	private IDPresetCollection create(String presetFile, String localizationsFile)
+	@Test public void parse_some_real_data()
 	{
-		return new IDPresetCollection(new IDPresetCollection.FileAccessAdapter()
+		PresetCollection presetCollection = new iDPresetCollection(new iDPresetCollection.FileAccessAdapter()
+		{
+			@Override public boolean exists(String name) { return name.equals("presets.json") || name.equals("de.json"); }
+			@Override public InputStream open(String name) throws IOException
+			{
+				if(name.equals("presets.json"))
+				{
+					return new URL("https://raw.githubusercontent.com/openstreetmap/iD/master/data/presets/presets.json").openStream();
+				} else {
+					URL url = new URL("https://raw.githubusercontent.com/openstreetmap/iD/master/dist/locales/"+name);
+					String localeString = name.split("\\.")[0];
+					try(InputStream is = url.openStream())
+					{
+						JSONObject localizationJson = new JSONObject(new JSONTokener(is));
+						JSONObject presetsJson = localizationJson.getJSONObject(localeString).getJSONObject("presets").getJSONObject("presets");
+						String localizationJsonString = "{\"presets\": " + presetsJson.toString() +"}";
+						return new ByteArrayInputStream(localizationJsonString.getBytes(StandardCharsets.UTF_8));
+					}
+				}
+			}
+		});
+		// should not crash etc
+		assertTrue(presetCollection.getAll(Locale.GERMANY).size() > 1000);
+	}
+
+	private iDPresetCollection create(String presetFile, String localizationsFile)
+	{
+		return new iDPresetCollection(new iDPresetCollection.FileAccessAdapter()
 		{
 			@Override public boolean exists(String name)
 			{
