@@ -15,9 +15,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-class iDPresetCollection implements PresetCollection
+class iDFeatureCollection implements FeatureCollection
 {
-	private static final String PRESETS_FILE = "presets.json";
+	private static final String FEATURES_FILE = "presets.json";
 
 	public interface FileAccessAdapter
 	{
@@ -27,47 +27,47 @@ class iDPresetCollection implements PresetCollection
 
 	private final FileAccessAdapter fileAccess;
 
-	// id -> preset
-	private final Map<String, Preset> allPresets;
-	// locale -> ( id -> preset )
-	private final Map<Locale, Map<String, Preset>> localizedPresets = new HashMap<>();
+	// id -> feature
+	private final Map<String, Feature> allFeatures;
+	// locale -> ( id -> feature )
+	private final Map<Locale, Map<String, Feature>> localizedFeatures = new HashMap<>();
 
-	iDPresetCollection(FileAccessAdapter fileAccess)
+	iDFeatureCollection(FileAccessAdapter fileAccess)
 	{
 		this.fileAccess = fileAccess;
-		allPresets = loadPresets();
+		allFeatures = loadFeatures();
 		// already load localization for default locale
-		getOrLoadLocalizedPresets(Locale.getDefault());
+		getOrLoadLocalizedFeatures(Locale.getDefault());
 	}
 
-	@Override public Collection<Preset> getAll(Locale locale)
+	@Override public Collection<Feature> getAll(Locale locale)
 	{
-		if(locale == null) return Collections.unmodifiableCollection(allPresets.values());
-		return Collections.unmodifiableCollection(getOrLoadLocalizedPresetsWithFallbackToDefault(locale).values());
+		if(locale == null) return Collections.unmodifiableCollection(allFeatures.values());
+		return Collections.unmodifiableCollection(getOrLoadLocalizedFeaturesWithFallbackToDefault(locale).values());
 	}
 
-	@Override public Preset get(String id, Locale locale)
+	@Override public Feature get(String id, Locale locale)
 	{
-		if(locale == null) return allPresets.get(id);
-		return getOrLoadLocalizedPresetsWithFallbackToDefault(locale).get(id);
+		if(locale == null) return allFeatures.get(id);
+		return getOrLoadLocalizedFeaturesWithFallbackToDefault(locale).get(id);
 	}
 
-	private Map<String, Preset> loadPresets()
+	private Map<String, Feature> loadFeatures()
 	{
-		try(InputStream is = fileAccess.open(PRESETS_FILE)) { return parsePresets(is); }
+		try(InputStream is = fileAccess.open(FEATURES_FILE)) { return parseFeatures(is); }
 		catch (IOException e) { throw new RuntimeException(e); }
 	}
 
-	private static Map<String, Preset> parsePresets(InputStream is)
+	private static Map<String, Feature> parseFeatures(InputStream is)
 	{
 		JSONObject object = new JSONObject(new JSONTokener(is));
-		Map<String, Preset> result = new HashMap<>();
+		Map<String, Feature> result = new HashMap<>();
 		JSONObject presetObjects = object.getJSONObject("presets");
 		for (String id : presetObjects.keySet())
 		{
 			JSONObject p = presetObjects.getJSONObject(id);
 			Map<String,String> tags = parseStringMap(p.getJSONObject("tags"));
-			// drop presets with * in key or value of tags (for now), because they never describe
+			// drop features with * in key or value of tags (for now), because they never describe
 			// a concrete thing, but some category of things.
 			// TODO maybe drop this limitation
 			if(anyKeyOrValueContainsWildcard(tags)) continue;
@@ -83,7 +83,7 @@ class iDPresetCollection implements PresetCollection
 			float matchScore = p.optFloat("matchScore", 1.0f);
 			Map<String,String> addTags = parseStringMap(p.optJSONObject("addTags"));
 
-			result.put(id.intern(), new Preset(
+			result.put(id.intern(), new Feature(
 					id.intern(), tags, geometry, name, terms, countryCodes, searchable, matchScore,
 					suggestion, addTags
 			));
@@ -135,61 +135,61 @@ class iDPresetCollection implements PresetCollection
 		return Collections.unmodifiableMap(result);
 	}
 
-	private Map<String, Preset> getOrLoadLocalizedPresetsWithFallbackToDefault(Locale locale)
+	private Map<String, Feature> getOrLoadLocalizedFeaturesWithFallbackToDefault(Locale locale)
 	{
-		Map<String, Preset> result = getOrLoadLocalizedPresets(locale);
+		Map<String, Feature> result = getOrLoadLocalizedFeatures(locale);
 		if(result == null)
 		{
 			Locale localeLanguage = new Locale(locale.getLanguage());
-			result = getOrLoadLocalizedPresets(localeLanguage);
+			result = getOrLoadLocalizedFeatures(localeLanguage);
 		}
-		if(result == null) result = allPresets;
+		if(result == null) result = allFeatures;
 		return result;
 	}
 
-	private Map<String, Preset> getOrLoadLocalizedPresets(Locale locale)
+	private Map<String, Feature> getOrLoadLocalizedFeatures(Locale locale)
 	{
-		synchronized (localizedPresets)
+		synchronized (localizedFeatures)
 		{
-			if (!localizedPresets.containsKey(locale))
+			if (!localizedFeatures.containsKey(locale))
 			{
 				Locale localeLanguage = new Locale(locale.getLanguage());
-				if (!localizedPresets.containsKey(localeLanguage))
+				if (!localizedFeatures.containsKey(localeLanguage))
 				{
-					localizedPresets.put(localeLanguage, mergePresets(
-							loadLocalizedPresets(localeLanguage),
-							allPresets
+					localizedFeatures.put(localeLanguage, mergeFeatures(
+							loadLocalizedFeatures(localeLanguage),
+							allFeatures
 					));
 				}
-				// merging language presets with country presets (country presets overwrite language presets)
+				// merging language features with country features (country features overwrite language features)
 				if(!locale.getCountry().isEmpty())
 				{
-					Map<String, Preset> basePresets = localizedPresets.get(localeLanguage);
-					if(basePresets == null) basePresets = allPresets;
+					Map<String, Feature> baseFeatures = localizedFeatures.get(localeLanguage);
+					if(baseFeatures == null) baseFeatures = allFeatures;
 
-					localizedPresets.put(locale, mergePresets(
-						loadLocalizedPresets(locale),
-						basePresets
+					localizedFeatures.put(locale, mergeFeatures(
+						loadLocalizedFeatures(locale),
+						baseFeatures
 					));
 				}
 			}
-			return localizedPresets.get(locale);
+			return localizedFeatures.get(locale);
 		}
 	}
 
-	private static Map<String, Preset> mergePresets(Map<String, Preset> presets, Map<String, Preset> basePresets)
+	private static Map<String, Feature> mergeFeatures(Map<String, Feature> features, Map<String, Feature> baseFeatures)
 	{
-		if(presets != null && basePresets != null)
+		if(features != null && baseFeatures != null)
 		{
-			for (String id : basePresets.keySet())
+			for (String id : baseFeatures.keySet())
 			{
-				if (!presets.containsKey(id)) presets.put(id, basePresets.get(id));
+				if (!features.containsKey(id)) features.put(id, baseFeatures.get(id));
 			}
 		}
-		return presets;
+		return features;
 	}
 
-	private Map<String, Preset> loadLocalizedPresets(Locale locale)
+	private Map<String, Feature> loadLocalizedFeatures(Locale locale)
 	{
 		String lang = locale.getLanguage();
 		String country = locale.getCountry();
@@ -199,28 +199,28 @@ class iDPresetCollection implements PresetCollection
 			if (!fileAccess.exists(filename)) return null;
 			try (InputStream is = fileAccess.open(filename))
 			{
-				return parseLocalizedPresets(is);
+				return parseLocalizedFeatures(is);
 			}
 		}
 		catch (IOException e) { throw new RuntimeException(e); }
 	}
 
-	private Map<String, Preset> parseLocalizedPresets(InputStream is)
+	private Map<String, Feature> parseLocalizedFeatures(InputStream is)
 	{
 		JSONObject object = new JSONObject(new JSONTokener(is));
-		Map<String, Preset> result = new HashMap<>(allPresets.size());
+		Map<String, Feature> result = new HashMap<>(allFeatures.size());
 		JSONObject presetsObject = object.getJSONObject("presets");
 		for (String id : presetsObject.keySet())
 		{
 			id = id.intern();
-			Preset basePreset = allPresets.get(id);
-			if(basePreset == null) continue;
+			Feature baseFeatures = allFeatures.get(id);
+			if(baseFeatures == null) continue;
 
 			JSONObject localization = presetsObject.getJSONObject(id);
 			String name = localization.optString("name");
 			if(name == null || name.isEmpty()) continue;
 			List<String> terms = parseCommaSeparatedList(localization.optString("terms"), name);
-			result.put(id, new Preset(basePreset, name, terms));
+			result.put(id, new Feature(baseFeatures, name, terms));
 		}
 		return result;
 	}

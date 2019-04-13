@@ -5,10 +5,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-/** Subset of a preset as defined in the iD editor
+/** Subset of a feature as defined in the iD editor
  *  https://github.com/openstreetmap/iD/blob/master/data/presets/README.md
  *  with only the fields helpful for the dictionary */
-class Preset
+class Feature
 {
 	final String id;
 	final Map<String,String> tags;
@@ -24,9 +24,9 @@ class Preset
 	final String canonicalName;
 	final List<String> canonicalTerms;
 
-	Preset(String id, Map<String, String> tags, List<GeometryType> geometry, String name,
-		   List<String> terms, List<String> countryCodes, boolean searchable,
-		   float matchScore, boolean suggestion, Map<String, String> addTags)
+	Feature(String id, Map<String, String> tags, List<GeometryType> geometry, String name,
+			List<String> terms, List<String> countryCodes, boolean searchable,
+			float matchScore, boolean suggestion, Map<String, String> addTags)
 	{
 		this.id = id;
 		this.tags = tags;
@@ -48,7 +48,7 @@ class Preset
 		this.canonicalTerms = Collections.unmodifiableList(canonicalTerms);
 	}
 
-	Preset(Preset p, String name, List<String> terms)
+	Feature(Feature p, String name, List<String> terms)
 	{
 		this(p.id, p.tags, p.geometry, name, terms, p.countryCodes, p.searchable, p.matchScore,
 				p.suggestion, p.addTags);

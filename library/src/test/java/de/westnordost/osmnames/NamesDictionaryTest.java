@@ -15,13 +15,13 @@ public class NamesDictionaryTest
 {
 	private static final List<GeometryType> POINT = Collections.singletonList(GeometryType.POINT);
 
-	private final Preset bakery = preset(
+	private final Feature bakery = feature(
 			"shop/bakery",
 			mapOf(tag("shop","bakery")),
 			"Bäckerei",
 			listOf("Brot")
 	);
-	private final Preset ditsch = brandPreset(
+	private final Feature ditsch = brandFeature(
 			"shop/bakery/Ditsch",
 			mapOf(tag("shop","bakery"), tag("name","Ditsch")),
 			"Ditsch",
@@ -29,20 +29,20 @@ public class NamesDictionaryTest
 			mapOf(tag("wikipedia","de:Brezelb%C3%A4ckerei_Ditsch"))
 	);
 
-	private final Preset car_dealer = preset(
+	private final Feature car_dealer = feature(
 			"shop/car",
 			mapOf(tag("shop","car")),
 			"Autohändler",
 			listOf("auto")
 	);
-	private final Preset second_hand_car_dealer = preset(
+	private final Feature second_hand_car_dealer = feature(
 			"shop/car/second_hand",
 			mapOf(tag("shop","car"), tag("second_hand", "only")),
 			"Gebrauchtwagenhändler",
 			listOf("auto")
 	);
 
-	private final Preset scheisshaus = new Preset(
+	private final Feature scheisshaus = new Feature(
 			"amenity/scheißhaus",
 			mapOf(tag("amenity","scheißhaus")),
 			POINT,
@@ -52,45 +52,45 @@ public class NamesDictionaryTest
 			false, // <- not searchable!
 			0f, false, Collections.emptyMap());
 
-	private final Preset bank = preset(
+	private final Feature bank = feature(
 			"amenity/bank",
 			mapOf(tag("amenity","bank")),
 			"Bank",
 			listOf()
 	);
-	private final Preset bench = preset(
+	private final Feature bench = feature(
 			"amenity/bench",
 			mapOf(tag("amenity","bench")),
 			"Parkbank",
 			listOf("Bank"),
 			5.0f
 	);
-	private final Preset casino = preset(
+	private final Feature casino = feature(
 			"amenity/casino",
 			mapOf(tag("amenity","casino")),
 			"Spielbank",
 			listOf("Kasino")
 	);
-	private final Preset atm = preset(
+	private final Feature atm = feature(
 			"amenity/atm",
 			mapOf(tag("amenity","atm")),
 			"Bankomat",
 			listOf()
 	);
-	private final Preset stock_exchange = preset(
+	private final Feature stock_exchange = feature(
 			"amenity/stock_exchange",
 			mapOf(tag("amenity","stock_exchange")),
 			"Börse",
 			listOf("Banking")
 	);
-	private final Preset bank_of_america = brandPreset(
+	private final Feature bank_of_america = brandFeature(
 			"amenity/bank/Bank of America",
 			mapOf(tag("amenity","bank"), tag("name","Bank of America")),
 			"Bank of America",
 			listOf(),
 			mapOf()
 	);
-	private final Preset bank_of_liechtenstein = brandPreset(
+	private final Feature bank_of_liechtenstein = brandFeature(
 			"amenity/bank/Bank of Liechtenstein",
 			mapOf(tag("amenity","bank"), tag("name","Bank of Liechtenstein")),
 			"Bank of Liechtenstein",
@@ -98,20 +98,20 @@ public class NamesDictionaryTest
 			mapOf(),
 			0.2f
 	);
-	private final Preset deutsche_bank = brandPreset(
+	private final Feature deutsche_bank = brandFeature(
 			"amenity/bank/Deutsche Bank",
 			mapOf(tag("amenity","bank"), tag("name","Deutsche Bank")),
 			"Deutsche Bank",
 			listOf(),
 			mapOf()
 	);
-	private final Preset baenk = preset(
+	private final Feature baenk = feature(
 			"amenity/bänk",
 			mapOf(tag("amenity","bänk")),
 			"Bänk",
 			listOf()
 	);
-	private final Preset bad_bank = preset(
+	private final Feature bad_bank = feature(
 			"amenity/bank/bad",
 			mapOf(tag("amenity","bank"), tag("goodity","bad")),
 			"Bad Bank",
@@ -325,36 +325,36 @@ public class NamesDictionaryTest
 		//assertEquals(deutsche_bank.name, findings.get(X).name); // not included: "Deutsche Bank" does not start with "bank"
 	}
 
-	private static NamesDictionary dictionary(Preset... entries)
+	private static NamesDictionary dictionary(Feature... entries)
 	{
-		return new NamesDictionary(new TestPresetCollection(entries));
+		return new NamesDictionary(new TestFeatureCollection(entries));
 	}
 
-	private static Preset brandPreset(String id, Map<String, String> tags, String name,
-									  List<String> countryCodes, Map<String, String> addTags, float matchScore)
+	private static Feature brandFeature(String id, Map<String, String> tags, String name,
+										List<String> countryCodes, Map<String, String> addTags, float matchScore)
 	{
-		return new Preset(id, tags, POINT, name, Collections.emptyList(), countryCodes, true, matchScore,
+		return new Feature(id, tags, POINT, name, Collections.emptyList(), countryCodes, true, matchScore,
 				true, addTags);
 	}
 
-	private static Preset brandPreset(String id, Map<String, String> tags, String name,
-									  List<String> countryCodes, Map<String, String> addTags)
+	private static Feature brandFeature(String id, Map<String, String> tags, String name,
+										List<String> countryCodes, Map<String, String> addTags)
 	{
-		return new Preset(id, tags, POINT, name, Collections.emptyList(), countryCodes, true, 1.0f,
+		return new Feature(id, tags, POINT, name, Collections.emptyList(), countryCodes, true, 1.0f,
 				true, addTags);
 	}
 
-	private static Preset preset(String id, Map<String, String> tags, String name,
-								 List<String> terms, float matchScore)
+	private static Feature feature(String id, Map<String, String> tags, String name,
+								   List<String> terms, float matchScore)
 	{
-		return new Preset(id, tags, POINT, name, terms,
+		return new Feature(id, tags, POINT, name, terms,
 				Collections.emptyList(), true, matchScore, false, Collections.emptyMap()
 		);
 	}
 
-	private static Preset preset(String id, Map<String, String> tags, String name, List<String> terms)
+	private static Feature feature(String id, Map<String, String> tags, String name, List<String> terms)
 	{
-		return new Preset(id, tags, POINT, name, terms,
+		return new Feature(id, tags, POINT, name, terms,
 				Collections.emptyList(), true, 1.0f, false, Collections.emptyMap()
 		);
 	}

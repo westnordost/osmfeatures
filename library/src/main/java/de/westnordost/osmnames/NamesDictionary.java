@@ -18,23 +18,23 @@ import java.util.Set;
 
 public class NamesDictionary
 {
-	private final PresetCollection presetCollection;
+	private final FeatureCollection featureCollection;
 	private final Set<String> keys;
 
-	NamesDictionary(PresetCollection presetCollection)
+	NamesDictionary(FeatureCollection featureCollection)
 	{
-		this.presetCollection = presetCollection;
+		this.featureCollection = featureCollection;
 		keys = new HashSet<>();
-		for (Preset preset : presetCollection.getAll(null))
+		for (Feature feature : featureCollection.getAll(null))
 		{
-			keys.addAll(preset.tags.keySet());
+			keys.addAll(feature.tags.keySet());
 		}
 	}
 
 	/** Create a new NamesDictionary which gets it's data from the given directory. */
 	public static NamesDictionary create(String path)
 	{
-		return new NamesDictionary(new iDPresetCollection(new FileSystemAccess(new File(path))));
+		return new NamesDictionary(new iDFeatureCollection(new FileSystemAccess(new File(path))));
 	}
 
 	/** Find matches by a set of tags */
@@ -45,45 +45,45 @@ public class NamesDictionary
 
 	private List<Match> get(Map<String, String> tags, GeometryType geometry, Locale locale)
 	{
-		// TODO possible performance improvement: group presets by countryCodes (50% less iterations)
-		// TODO possible performance improvement: sort presets into a tree of tags (lookup in almost O(1))
+		// TODO possible performance improvement: group features by countryCodes (50% less iterations)
+		// TODO possible performance improvement: sort features into a tree of tags (lookup in almost O(1))
 
-		// little performance improvement: no use to look for tags that are not used for any preset
+		// little performance improvement: no use to look for tags that are not used for any feature
 		Map<String, String> relevantTags = createMapWithOnlyRelevantTagsRetained(tags);
-		List<Preset> foundPresets = new ArrayList<>();
+		List<Feature> foundFeatures = new ArrayList<>();
 		if(!relevantTags.isEmpty())
 		{
 			Set<String> removeIds = new HashSet<>();
 
-			for (Preset preset : presetCollection.getAll(locale))
+			for (Feature feature : featureCollection.getAll(locale))
 			{
 				if (geometry != null)
-					if (!preset.geometry.contains(geometry))
+					if (!feature.geometry.contains(geometry))
 						continue;
 
-				if (mapContainsAllEntries(relevantTags, preset.tags.entrySet()))
+				if (mapContainsAllEntries(relevantTags, feature.tags.entrySet()))
 				{
-					foundPresets.add(preset);
-					removeIds.addAll(getParentCategoryIds(preset.id));
+					foundFeatures.add(feature);
+					removeIds.addAll(getParentCategoryIds(feature.id));
 				}
 			}
-			Collections.sort(foundPresets, (a, b) -> {
-				// 1. presets with more matching tags first
+			Collections.sort(foundFeatures, (a, b) -> {
+				// 1. features with more matching tags first
 				int tagOrder = b.tags.size() - a.tags.size();
 				if(tagOrder != 0) return tagOrder;
-				// 2. presets with higher matchScore first
+				// 2. features with higher matchScore first
 				return (int) (100 * b.matchScore - 100 * a.matchScore);
 			});
 
 			// only return of each category the most specific thing. I.e. will return
 			// McDonalds only instead of McDonalds,Fast-Food Restaurant,Amenity
-			Iterator<Preset> it = foundPresets.iterator();
+			Iterator<Feature> it = foundFeatures.iterator();
 			while(it.hasNext())
 			{
 				if(removeIds.contains(it.next().id)) it.remove();
 			}
 		}
-		return createMatches(foundPresets, -1, locale);
+		return createMatches(foundFeatures, -1, locale);
 	}
 
 	private static Collection<String> getParentCategoryIds(String id)
@@ -139,16 +139,16 @@ public class NamesDictionary
 
 	private List<Match> get(String search, GeometryType geometry, String countryCode, int limit, Locale locale)
 	{
-		// TODO: possible performance improvement: Map of name -> preset for fast exact-matches
+		// TODO: possible performance improvement: Map of name -> feature for fast exact-matches
 		String canonicalSearch = StringUtils.canonicalize(search);
 
-		List<Preset> searchable = filter(presetCollection.getAll(locale), preset ->
-			preset.searchable &&
-			(geometry == null || preset.geometry.contains(geometry)) &&
-			(preset.countryCodes.isEmpty() || (countryCode != null && preset.countryCodes.contains(countryCode)))
+		List<Feature> searchable = filter(featureCollection.getAll(locale), feature ->
+			feature.searchable &&
+			(geometry == null || feature.geometry.contains(geometry)) &&
+			(feature.countryCodes.isEmpty() || (countryCode != null && feature.countryCodes.contains(countryCode)))
 		);
 
-		Comparator<Preset> sortNames = (a, b) -> {
+		Comparator<Feature> sortNames = (a, b) -> {
 			// 1. exact matches first
 			int exactMatchOrder = (b.name.equals(search)?1:0) - (a.name.equals(search)?1:0);
 			if(exactMatchOrder != 0) return exactMatchOrder;
@@ -158,44 +158,44 @@ public class NamesDictionary
 			// 3. earlier matches in string first
 			int indexOfOrder = a.canonicalName.indexOf(canonicalSearch) - b.canonicalName.indexOf(canonicalSearch);
 			if(indexOfOrder != 0) return indexOfOrder;
-			// 4. presets with higher matchScore first
+			// 4. features with higher matchScore first
 			int matchScoreOrder = (int) (100 * b.matchScore - 100 * a.matchScore);
 			if(matchScoreOrder != 0) return matchScoreOrder;
 			// 5. shorter names first
 			return a.name.length() - b.name.length();
 		};
 
-		Comparator<Preset> sortTerms = (a, b) -> {
-			// 3. presets with higher matchScore first
+		Comparator<Feature> sortTerms = (a, b) -> {
+			// 3. features with higher matchScore first
 			return (int) (100 * b.matchScore - 100 * a.matchScore);
 		};
 
-		Set<Preset> foundPresets = new HashSet<>();
-		List<Preset> result = new ArrayList<>();
+		Set<Feature> foundFeatures = new HashSet<>();
+		List<Feature> result = new ArrayList<>();
 
-		List<Preset> nameMatches = filter(searchable, preset ->
-				!preset.suggestion && startsWordWith(preset.canonicalName, canonicalSearch)
+		List<Feature> nameMatches = filter(searchable, feature ->
+				!feature.suggestion && startsWordWith(feature.canonicalName, canonicalSearch)
 		);
 		Collections.sort(nameMatches, sortNames);
 		result.addAll(nameMatches);
-		foundPresets.addAll(nameMatches);
+		foundFeatures.addAll(nameMatches);
 
 		// if limit is reached, can return earlier (performance improvement)
 		if(limit > 0 && result.size() >= limit) return createMatches(result, limit, locale);
 
-		List<Preset> brandNameMatches = filter(searchable, preset ->
-				preset.suggestion && preset.canonicalName.startsWith(canonicalSearch)
+		List<Feature> brandNameMatches = filter(searchable, feature ->
+				feature.suggestion && feature.canonicalName.startsWith(canonicalSearch)
 		);
 		Collections.sort(brandNameMatches, sortNames);
 		result.addAll(brandNameMatches);
-		foundPresets.addAll(brandNameMatches);
+		foundFeatures.addAll(brandNameMatches);
 
 		// if limit is reached, can return earlier (performance improvement)
 		if(limit > 0 && result.size() >= limit) return createMatches(result, limit, locale);
 
-		List<Preset> termsMatches = filter(searchable, preset -> {
-			if(foundPresets.contains(preset)) return false;
-			for (String s : preset.canonicalTerms)
+		List<Feature> termsMatches = filter(searchable, feature -> {
+			if(foundFeatures.contains(feature)) return false;
+			for (String s : feature.canonicalTerms)
 			{
 				if (s.startsWith(canonicalSearch)) return true;
 			}
@@ -223,33 +223,33 @@ public class NamesDictionary
 		return result;
 	}
 
-	private List<Match> createMatches(List<Preset> presetsList, int limit, Locale locale)
+	private List<Match> createMatches(List<Feature> featuresList, int limit, Locale locale)
 	{
-		int size = limit > 0 ? Math.min(presetsList.size(), limit) : presetsList.size();
+		int size = limit > 0 ? Math.min(featuresList.size(), limit) : featuresList.size();
 		List<Match> result = new ArrayList<>(size);
-		for (Preset preset : presetsList)
+		for (Feature feature : featuresList)
 		{
-			result.add(createMatch(preset, locale));
+			result.add(createMatch(feature, locale));
 			if(--limit == 0) return result;
 		}
 		return result;
 	}
 
-	private Match createMatch(Preset preset, Locale locale)
+	private Match createMatch(Feature feature, Locale locale)
 	{
-		String name = preset.name;
-		Map<String, String> tags = new HashMap<>(preset.tags);
-		tags.putAll(preset.addTags);
+		String name = feature.name;
+		Map<String, String> tags = new HashMap<>(feature.tags);
+		tags.putAll(feature.addTags);
 		String parentName = null;
-		if(preset.suggestion)
+		if(feature.suggestion)
 		{
-			String parentId = preset.getParentId();
+			String parentId = feature.getParentId();
 			if(parentId != null)
 			{
-				Preset parentPreset = presetCollection.get(parentId, locale);
-				if(parentPreset != null)
+				Feature parentFeature = featureCollection.get(parentId, locale);
+				if(parentFeature != null)
 				{
-					parentName = parentPreset.name;
+					parentName = parentFeature.name;
 				}
 			}
 		}
@@ -339,7 +339,7 @@ public class NamesDictionary
 		}
 	}
 
-	private static class FileSystemAccess implements iDPresetCollection.FileAccessAdapter
+	private static class FileSystemAccess implements iDFeatureCollection.FileAccessAdapter
 	{
 		private final File basePath;
 
