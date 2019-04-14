@@ -73,6 +73,8 @@ class iDFeatureCollection implements FeatureCollection
 			// a concrete thing, but some category of things.
 			// TODO maybe drop this limitation
 			if(anyKeyOrValueContainsWildcard(tags)) continue;
+			// also dropping features with empty tags (generic point, line, relation)
+			if(tags.isEmpty()) continue;
 
 			List<GeometryType> geometry = parseList(p.getJSONArray("geometry"),
 					item -> GeometryType.valueOf(((String)item).toUpperCase(Locale.US)));
