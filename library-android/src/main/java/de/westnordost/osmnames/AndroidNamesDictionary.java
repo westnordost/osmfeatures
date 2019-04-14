@@ -40,7 +40,7 @@ public class AndroidNamesDictionary
 
 		@Override public InputStream open(String name) throws IOException
 		{
-			return assetManager.open(basePath + File.pathSeparator + name);
+			return assetManager.open(basePath + File.separator + name);
 		}
 	}
 }
