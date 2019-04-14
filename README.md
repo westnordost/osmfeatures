@@ -16,17 +16,48 @@ For Android, use [`de.westnordost:osmnames-android:1.0`](https://maven-repositor
 
 ## Usage
 
-Point the dictionary to the directory where the data is located, use `NamesDictionary` as a singleton.
+### Get the data
+
+The data for the dictionary is not maintained in this repository. It actually uses the [preset data from iD](https://github.com/openstreetmap/iD/blob/master/data/presets/presets.json) and [the translations of the presets](https://github.com/openstreetmap/iD/tree/master/dist/locales). The former can just be copied, the latter must be fished out of the global localization files for iD.
+Do not forget to give attribution to iD since you are using their data.
+
+If you use gradle as your build tool, The easiest way to get this data is to put this task into your `build.gradle` and either execute this task manually from time to time or make the build process depend on it (by adding `preBuild.dependsOn(downloadPresets)`):
+
+```groovy
+task downloadPresets {
+    doLast {
+        def targetDir = "path/to/data" // <- the relative path to the directory where the data should go
+        def presetsUrl = new URL("https://raw.githubusercontent.com/openstreetmap/iD/master/data/presets/presets.json")
+        def contentsUrl = new URL("https://api.github.com/repos/openstreetmap/iD/contents/dist/locales")
+
+        new File("$targetDir/presets.json").withOutputStream { it << presetsUrl.openStream() }
+
+        def slurper = new JsonSlurper()
+        slurper.parse(contentsUrl, "UTF-8").each {
+            if(it.type == "file") {
+                def content = slurper.parse(new URL(it.download_url),"UTF-8")
+                def presets = content.values()[0]?.presets?.presets
+                if(presets) {
+                    def json = JsonOutput.prettyPrint(JsonOutput.toJson([presets: presets]))
+                    new File("$targetDir/${it.name}").write(json, "UTF-8")
+                }
+            }
+        }
+    }
+}
+```
+
+### Initialize dictionary
+
+Point the dictionary to the directory where the data is located (see above). Use `NamesDictionary` as a singleton.
 ```java
-NamesDictionary dictionary = NamesDictionary.create("path/to/data/"));
+NamesDictionary dictionary = NamesDictionary.create("path/to/data"));
 ```
 
 For Android, use
 ```java
 NamesDictionary dictionary = AndroidNamesDictionary.create("path/within/assets/folder/to/data"));
 ```
-
-TODO note about how/where to get the data.
 
 ### Find matches by tags
 ```java
