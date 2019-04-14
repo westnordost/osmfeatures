@@ -52,15 +52,9 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
 }
 
-artifacts {
-    archives javadocJar
-    archives sourcesJar
-}
-
 bintray {
     user = bintray_user
     key = bintray_api_key
-    configurations = ['archives']
     publications = ['Library']
     pkg {
         repo = 'maven'
