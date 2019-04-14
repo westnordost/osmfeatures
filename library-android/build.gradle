@@ -1,10 +1,25 @@
-apply plugin: 'com.android.library'
-apply plugin: 'maven'
-apply plugin: 'signing'
+plugins {
+    id "com.jfrog.bintray" version "1.8.4"
+    id "com.android.library"
+    id "maven-publish"
+}
 
-group = "de.westnordost"
-archivesBaseName = "osmnames-android"
-version = 1.0
+version = "1.0"
+group "de.westnordost"
+
+repositories {
+    mavenLocal()
+    google()
+    jcenter()
+}
+
+dependencies {
+    //api (project(':library')) {
+    api ('de.westnordost:osmnames:1.0') {
+        // it's already included in Android
+        exclude group: 'org.json', module: 'json'
+    }
+}
 
 android {
     compileSdkVersion 28
@@ -13,7 +28,7 @@ android {
         minSdkVersion 9
         targetSdkVersion 28
         versionCode 1
-        versionName "1.0"
+        versionName project.version
     }
 
     compileOptions {
@@ -22,55 +37,74 @@ android {
     }
 }
 
-dependencies {
-    api (project(':library')) {
-        //api ('de.westnordost:osm-names:1.+') {
-        // it's already included in Android
-        exclude group: 'org.json', module: 'json'
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    from javadoc.destinationDir
+    classifier = 'javadoc'
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+bintray {
+    user = bintray_user
+    key = bintray_api_key
+    configurations = ['archives']
+    publications = ['Library']
+    pkg {
+        repo = 'maven'
+        name = 'osmnames-android'
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/westnordost/osmnames.git'
+        version {
+            name = project.version
+            released = new Date()
+            gpg {
+                sign = true
+                passphrase = bintray_passphrase
+            }
+        }
     }
 }
 
-signing {
-    sign configurations.archives
-}
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-
-            pom.project {
-                name 'osmnames-android'
-                packaging 'jar'
-                description 'Android library to translate OSM tags to and from localized names'
-                url 'https://github.com/westnordost/osmnames'
-
+publishing {
+    publications {
+        Library(MavenPublication) {
+            artifact("$buildDir/outputs/aar/library-android-release.aar")
+            artifact sourcesJar
+            artifact javadocJar
+            artifactId "osmnames-android"
+            pom {
+                name = 'osmnames-android'
+                description = 'Android library to translate OSM tags to and from localized names.'
+                url = 'https://github.com/westnordost/osmnames'
                 scm {
-                    connection 'https://github.com/westnordost/osmnames.git'
-                    developerConnection 'https://github.com/westnordost/osmnames.git'
-                    url 'https://github.com/westnordost/osmnames'
+                    connection = 'https://github.com/westnordost/osmnames.git'
+                    developerConnection = 'https://github.com/westnordost/osmnames.git'
+                    url = 'https://github.com/westnordost/osmnames'
                 }
-
                 licenses {
                     license {
-                        name 'Apache License Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
                     }
                 }
-
                 developers {
                     developer {
-                        id 'westnordost'
-                        name 'Tobias Zwick'
-                        email 'osm@westnordost.de'
+                        id = 'westnordost'
+                        name = 'Tobias Zwick'
+                        email = 'osm@westnordost.de'
                     }
                 }
             }

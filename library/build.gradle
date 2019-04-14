@@ -11,7 +11,7 @@ sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
 
 repositories {
-    mavenCentral()
+    jcenter()
 }
 
 dependencies {
@@ -55,9 +55,30 @@ publishing {
             from components.java
             artifact sourcesJar
             artifact javadocJar
-            groupId project.group
             artifactId "osmnames"
-            version project.version
+            pom {
+                name = 'osmnames'
+                description = 'Java library to translate OSM tags to and from localized names.'
+                url = 'https://github.com/westnordost/osmnames'
+                scm {
+                    connection = 'https://github.com/westnordost/osmnames.git'
+                    developerConnection = 'https://github.com/westnordost/osmnames.git'
+                    url = 'https://github.com/westnordost/osmnames'
+                }
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'westnordost'
+                        name = 'Tobias Zwick'
+                        email = 'osm@westnordost.de'
+                    }
+                }
+            }
         }
     }
 }

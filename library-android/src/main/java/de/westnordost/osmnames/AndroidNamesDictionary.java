@@ -10,7 +10,8 @@ public class AndroidNamesDictionary
 {
 	private AndroidNamesDictionary() {} // cannot be instantiated
 
-	public static NamesDictionary create(AssetManager assetManager, String basePath) throws IOException
+	/** Create a new NamesDictionary which gets it's data from the given directory in the app's asset folder. */
+	public static NamesDictionary create(AssetManager assetManager, String basePath)
 	{
 		return new NamesDictionary(new iDFeatureCollection(new AssetManagerAccess(assetManager, basePath)));
 	}
