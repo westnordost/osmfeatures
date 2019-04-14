@@ -1,19 +1,20 @@
 package de.westnordost.osmnames;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 class iDFeatureCollection implements FeatureCollection
 {
@@ -55,16 +56,17 @@ class iDFeatureCollection implements FeatureCollection
 	private Map<String, Feature> loadFeatures()
 	{
 		try(InputStream is = fileAccess.open(FEATURES_FILE)) { return parseFeatures(is); }
-		catch (IOException e) { throw new RuntimeException(e); }
+		catch (IOException | JSONException e) { throw new RuntimeException(e); }
 	}
 
-	private static Map<String, Feature> parseFeatures(InputStream is)
+	private static Map<String, Feature> parseFeatures(InputStream is) throws JSONException, IOException
 	{
-		JSONObject object = new JSONObject(new JSONTokener(is));
+		JSONObject object = createFromInputStream(is);
 		Map<String, Feature> result = new HashMap<>();
 		JSONObject presetObjects = object.getJSONObject("presets");
-		for (String id : presetObjects.keySet())
+		for (Iterator<String> it = presetObjects.keys(); it.hasNext(); )
 		{
+			String id = it.next();
 			JSONObject p = presetObjects.getJSONObject(id);
 			Map<String,String> tags = parseStringMap(p.getJSONObject("tags"));
 			// drop features with * in key or value of tags (for now), because they never describe
@@ -80,7 +82,7 @@ class iDFeatureCollection implements FeatureCollection
 			List<String> countryCodes = parseList(p.optJSONArray("countryCodes"),
 					item -> ((String)item).toUpperCase(Locale.US).intern());
 			boolean searchable = p.optBoolean("searchable", true);
-			float matchScore = p.optFloat("matchScore", 1.0f);
+			double matchScore = p.optDouble("matchScore", 1.0);
 			Map<String,String> addTags = parseStringMap(p.optJSONObject("addTags"));
 
 			result.put(id.intern(), new Feature(
@@ -101,7 +103,7 @@ class iDFeatureCollection implements FeatureCollection
 	}
 
 	private interface Transformer<T> { T apply(Object item); }
-	private static <T> List<T> parseList(JSONArray array, Transformer<T> t)
+	private static <T> List<T> parseList(JSONArray array, Transformer<T> t) throws JSONException
 	{
 		if(array == null) return Collections.emptyList();
 		List<T> result = new ArrayList<>(array.length());
@@ -123,14 +125,14 @@ class iDFeatureCollection implements FeatureCollection
 		return Collections.unmodifiableList(result);
 	}
 
-	private static Map<String, String> parseStringMap(JSONObject map)
+	private static Map<String, String> parseStringMap(JSONObject map) throws JSONException
 	{
 		if(map == null) return Collections.emptyMap();
-		Set<String> keys = map.keySet();
-		Map<String, String> result = new HashMap<>(keys.size());
-		for (String key : keys)
+		Map<String, String> result = new HashMap<>(map.length());
+		for (Iterator<String> it = map.keys(); it.hasNext(); )
 		{
-			result.put(key.intern(), map.getString(key));
+			String key = it.next().intern();
+			result.put(key, map.getString(key));
 		}
 		return Collections.unmodifiableMap(result);
 	}
@@ -202,16 +204,17 @@ class iDFeatureCollection implements FeatureCollection
 				return parseLocalizedFeatures(is);
 			}
 		}
-		catch (IOException e) { throw new RuntimeException(e); }
+		catch (IOException | JSONException e) { throw new RuntimeException(e); }
 	}
 
-	private Map<String, Feature> parseLocalizedFeatures(InputStream is)
+	private Map<String, Feature> parseLocalizedFeatures(InputStream is) throws JSONException, IOException
 	{
-		JSONObject object = new JSONObject(new JSONTokener(is));
+		JSONObject object = createFromInputStream(is);
 		Map<String, Feature> result = new HashMap<>(allFeatures.size());
 		JSONObject presetsObject = object.getJSONObject("presets");
-		for (String id : presetsObject.keySet())
+		for (Iterator<String> it = presetsObject.keys(); it.hasNext(); )
 		{
+			String id = it.next();
 			id = id.intern();
 			Feature baseFeatures = allFeatures.get(id);
 			if(baseFeatures == null) continue;
@@ -223,5 +226,19 @@ class iDFeatureCollection implements FeatureCollection
 			result.put(id, new Feature(baseFeatures, name, terms));
 		}
 		return result;
+	}
+
+	// this is only necessary because Android uses some old version of org.json where
+	// new JSONObject(new JSONTokener(inputStream)) is not defined...
+	private static JSONObject createFromInputStream(InputStream inputStream) throws IOException
+	{
+		ByteArrayOutputStream result = new ByteArrayOutputStream();
+		byte[] buffer = new byte[1024];
+		int length;
+		while ((length = inputStream.read(buffer)) != -1) {
+			result.write(buffer, 0, length);
+		}
+		String jsonString = result.toString("UTF-8");
+		return new JSONObject(jsonString);
 	}
 }

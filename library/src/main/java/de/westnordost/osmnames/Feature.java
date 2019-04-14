@@ -17,7 +17,7 @@ class Feature
 	final List<String> terms;
 	final List<String> countryCodes;
 	final boolean searchable;
-	final float matchScore;
+	final double matchScore;
 	final boolean suggestion;
 	final Map<String,String> addTags;
 
@@ -26,7 +26,7 @@ class Feature
 
 	Feature(String id, Map<String, String> tags, List<GeometryType> geometry, String name,
 			List<String> terms, List<String> countryCodes, boolean searchable,
-			float matchScore, boolean suggestion, Map<String, String> addTags)
+			double matchScore, boolean suggestion, Map<String, String> addTags)
 	{
 		this.id = id;
 		this.tags = tags;
