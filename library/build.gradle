@@ -1,10 +1,11 @@
-apply plugin: 'java-library'
-apply plugin: 'maven'
-apply plugin: 'signing'
+plugins {
+    id "com.jfrog.bintray" version "1.8.4"
+    id "java-library"
+    id "maven-publish"
+}
 
-group = "de.westnordost"
-archivesBaseName = "osmnames"
-version = 1.0
+version = "1.0"
+group "de.westnordost"
 
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
@@ -18,64 +19,45 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 }
 
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-}
-
 task sourcesJar(type: Jar) {
-    classifier = 'sources'
     from sourceSets.main.allSource
+    classifier = 'sources'
 }
 
-artifacts {
-    archives javadocJar, sourcesJar
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    from javadoc.destinationDir
+    classifier = 'javadoc'
 }
 
-signing {
-    sign configurations.archives
+bintray {
+    user = bintray_user
+    key = bintray_api_key
+    publications = ['Library']
+    pkg {
+        repo = 'maven'
+        name = 'osmnames'
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/westnordost/osmnames.git'
+        version {
+            name = project.version
+            released = new Date()
+            gpg {
+                sign = true
+                passphrase = bintray_passphrase
+            }
+        }
+    }
 }
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-
-            pom.project {
-                name 'osmnames'
-                packaging 'jar'
-                description 'Java library to translate OSM tags to and from localized names'
-                url 'https://github.com/westnordost/osmnames'
-
-                scm {
-                    connection 'https://github.com/westnordost/osmnames.git'
-                    developerConnection 'https://github.com/westnordost/osmnames.git'
-                    url 'https://github.com/westnordost/osmnames'
-                }
-
-                licenses {
-                    license {
-                        name 'Apache License Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id 'westnordost'
-                        name 'Tobias Zwick'
-                        email 'osm@westnordost.de'
-                    }
-                }
-            }
+publishing {
+    publications {
+        Library(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            groupId project.group
+            artifactId "osmnames"
+            version project.version
         }
     }
 }
