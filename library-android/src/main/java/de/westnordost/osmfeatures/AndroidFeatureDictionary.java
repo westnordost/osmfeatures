@@ -6,9 +6,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class AndroidFeaturesDictionary
+public class AndroidFeatureDictionary
 {
-	private AndroidFeaturesDictionary() {} // cannot be instantiated
+	private AndroidFeatureDictionary() {} // cannot be instantiated
 
 	/** Create a new NamesDictionary which gets it's data from the given directory in the app's asset folder. */
 	public static FeatureDictionary create(AssetManager assetManager, String basePath)

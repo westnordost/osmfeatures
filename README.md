@@ -51,12 +51,12 @@ task downloadPresets {
 
 Point the dictionary to the directory where the data is located (see above). Use `FeaturesDictionary` as a singleton.
 ```java
-FeaturesDictionary dictionary = FeaturesDictionary.create("path/to/data"));
+FeatureDictionary dictionary = FeatureDictionary.create("path/to/data"));
 ```
 
 For Android, use
 ```java
-FeaturesDictionary dictionary = AndroidFeaturesDictionary.create("path/within/assets/folder/to/data"));
+FeatureDictionary dictionary = AndroidFeatureDictionary.create("path/within/assets/folder/to/data"));
 ```
 
 ### Find matches by tags
