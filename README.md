@@ -1,6 +1,6 @@
 # osmfeatures
 
-Java and Android library to translate OSM tags to and from localized names.
+A dictionary of OSM map features, accessible by terms and by tags for Java and Android.
 
 Requires Java 8.
 
