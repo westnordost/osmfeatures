@@ -15,7 +15,7 @@ repositories {
 
 dependencies {
     //api (project(':library')) {
-    api ('de.westnordost:osmnames:1.0') {
+    api ('de.westnordost:osmfeatures:1.0') {
         // it's already included in Android
         exclude group: 'org.json', module: 'json'
     }
@@ -58,9 +58,9 @@ bintray {
     publications = ['Library']
     pkg {
         repo = 'maven'
-        name = 'osmnames-android'
+        name = 'osmfeatures-android'
         licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/westnordost/osmnames.git'
+        vcsUrl = 'https://github.com/westnordost/osmfeatures.git'
         version {
             name = project.version
             released = new Date()
@@ -78,15 +78,15 @@ publishing {
             artifact("$buildDir/outputs/aar/library-android-release.aar")
             artifact sourcesJar
             artifact javadocJar
-            artifactId "osmnames-android"
+            artifactId "osmfeatures-android"
             pom {
-                name = 'osmnames-android'
+                name = 'osmfeatures-android'
                 description = 'Android library to translate OSM tags to and from localized names.'
-                url = 'https://github.com/westnordost/osmnames'
+                url = 'https://github.com/westnordost/osmfeatures'
                 scm {
-                    connection = 'https://github.com/westnordost/osmnames.git'
-                    developerConnection = 'https://github.com/westnordost/osmnames.git'
-                    url = 'https://github.com/westnordost/osmnames'
+                    connection = 'https://github.com/westnordost/osmfeatures.git'
+                    developerConnection = 'https://github.com/westnordost/osmfeatures.git'
+                    url = 'https://github.com/westnordost/osmfeatures'
                 }
                 licenses {
                     license {

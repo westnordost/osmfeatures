@@ -1,4 +1,4 @@
-# osmnames
+# osmfeatures
 
 Java and Android library to translate OSM tags to and from localized names.
 
@@ -10,9 +10,9 @@ Requires Java 8.
 
 ## Installation
 
-Add [`de.westnordost:osmnames:1.0`](https://maven-repository.com/artifact/de.westnordost/osmnames/1.0) as a Maven dependency or download the jar from there.
+Add [`de.westnordost:osmfeatures:1.0`](https://maven-repository.com/artifact/de.westnordost/osmfeatures/1.0) as a Maven dependency or download the jar from there.
 
-For Android, use [`de.westnordost:osmnames-android:1.0`](https://maven-repository.com/artifact/de.westnordost/osmnames-android/1.0).
+For Android, use [`de.westnordost:osmfeatures-android:1.0`](https://maven-repository.com/artifact/de.westnordost/osmfeatures-android/1.0).
 
 ## Usage
 
@@ -49,14 +49,14 @@ task downloadPresets {
 
 ### Initialize dictionary
 
-Point the dictionary to the directory where the data is located (see above). Use `NamesDictionary` as a singleton.
+Point the dictionary to the directory where the data is located (see above). Use `FeaturesDictionary` as a singleton.
 ```java
-NamesDictionary dictionary = NamesDictionary.create("path/to/data"));
+FeaturesDictionary dictionary = FeaturesDictionary.create("path/to/data"));
 ```
 
 For Android, use
 ```java
-NamesDictionary dictionary = AndroidNamesDictionary.create("path/within/assets/folder/to/data"));
+FeaturesDictionary dictionary = AndroidFeaturesDictionary.create("path/within/assets/folder/to/data"));
 ```
 
 ### Find matches by tags

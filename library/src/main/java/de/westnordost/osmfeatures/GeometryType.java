@@ -1,4 +1,4 @@
-package de.westnordost.osmnames;
+package de.westnordost.osmfeatures;
 
 public enum GeometryType
 {

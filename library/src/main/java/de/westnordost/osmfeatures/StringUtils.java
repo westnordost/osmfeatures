@@ -1,4 +1,4 @@
-package de.westnordost.osmnames;
+package de.westnordost.osmfeatures;
 
 import java.text.Normalizer;
 import java.util.Locale;

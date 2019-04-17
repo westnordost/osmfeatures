@@ -1,4 +1,4 @@
-package de.westnordost.osmnames;
+package de.westnordost.osmfeatures;
 
 import org.json.JSONArray;
 import org.json.JSONException;

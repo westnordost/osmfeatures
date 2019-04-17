@@ -35,9 +35,9 @@ bintray {
     publications = ['Library']
     pkg {
         repo = 'maven'
-        name = 'osmnames'
+        name = 'osmfeatures'
         licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/westnordost/osmnames.git'
+        vcsUrl = 'https://github.com/westnordost/osmfeatures.git'
         version {
             name = project.version
             released = new Date()
@@ -55,15 +55,15 @@ publishing {
             from components.java
             artifact sourcesJar
             artifact javadocJar
-            artifactId "osmnames"
+            artifactId "osmfeatures"
             pom {
-                name = 'osmnames'
+                name = 'osmfeatures'
                 description = 'Java library to translate OSM tags to and from localized names.'
-                url = 'https://github.com/westnordost/osmnames'
+                url = 'https://github.com/westnordost/osmfeatures'
                 scm {
-                    connection = 'https://github.com/westnordost/osmnames.git'
-                    developerConnection = 'https://github.com/westnordost/osmnames.git'
-                    url = 'https://github.com/westnordost/osmnames'
+                    connection = 'https://github.com/westnordost/osmfeatures.git'
+                    developerConnection = 'https://github.com/westnordost/osmfeatures.git'
+                    url = 'https://github.com/westnordost/osmfeatures'
                 }
                 licenses {
                     license {

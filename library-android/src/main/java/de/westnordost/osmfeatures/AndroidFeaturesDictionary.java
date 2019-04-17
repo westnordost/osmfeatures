@@ -1,4 +1,4 @@
-package de.westnordost.osmnames;
+package de.westnordost.osmfeatures;
 
 import android.content.res.AssetManager;
 
@@ -6,14 +6,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class AndroidNamesDictionary
+public class AndroidFeaturesDictionary
 {
-	private AndroidNamesDictionary() {} // cannot be instantiated
+	private AndroidFeaturesDictionary() {} // cannot be instantiated
 
 	/** Create a new NamesDictionary which gets it's data from the given directory in the app's asset folder. */
-	public static NamesDictionary create(AssetManager assetManager, String basePath)
+	public static FeatureDictionary create(AssetManager assetManager, String basePath)
 	{
-		return new NamesDictionary(new iDFeatureCollection(new AssetManagerAccess(assetManager, basePath)));
+		return new FeatureDictionary(new iDFeatureCollection(new AssetManagerAccess(assetManager, basePath)));
 	}
 
 	static class AssetManagerAccess implements iDFeatureCollection.FileAccessAdapter

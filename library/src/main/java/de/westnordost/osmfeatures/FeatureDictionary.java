@@ -1,4 +1,4 @@
-package de.westnordost.osmnames;
+package de.westnordost.osmfeatures;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,12 +16,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-public class NamesDictionary
+public class FeatureDictionary
 {
 	private final FeatureCollection featureCollection;
 	private final Set<String> keys;
 
-	NamesDictionary(FeatureCollection featureCollection)
+	FeatureDictionary(FeatureCollection featureCollection)
 	{
 		this.featureCollection = featureCollection;
 		keys = new HashSet<>();
@@ -31,10 +31,10 @@ public class NamesDictionary
 		}
 	}
 
-	/** Create a new NamesDictionary which gets it's data from the given directory. */
-	public static NamesDictionary create(String path)
+	/** Create a new FeatureDictionary which gets it's data from the given directory. */
+	public static FeatureDictionary create(String path)
 	{
-		return new NamesDictionary(new iDFeatureCollection(new FileSystemAccess(new File(path))));
+		return new FeatureDictionary(new iDFeatureCollection(new FileSystemAccess(new File(path))));
 	}
 
 	/** Find matches by a set of tags */

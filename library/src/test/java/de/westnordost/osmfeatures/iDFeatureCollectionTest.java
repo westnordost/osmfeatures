@@ -1,4 +1,4 @@
-package de.westnordost.osmnames;
+package de.westnordost.osmfeatures;
 
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -14,8 +14,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-import static de.westnordost.osmnames.GeometryType.*;
-import static de.westnordost.osmnames.MapEntry.*;
 import static org.junit.Assert.*;
 
 public class iDFeatureCollectionTest
@@ -40,8 +38,8 @@ public class iDFeatureCollectionTest
 		assertEquals(1, features.getAll(null).size());
 		Feature feature = features.get("some/id", null);
 		assertEquals("some/id", feature.id);
-		assertEquals(mapOf(tag("a","b"),tag("c","d")), feature.tags);
-		assertEquals(listOf(POINT, VERTEX, LINE, AREA, RELATION), feature.geometry);
+		assertEquals(MapEntry.mapOf(MapEntry.tag("a","b"), MapEntry.tag("c","d")), feature.tags);
+		assertEquals(listOf(GeometryType.POINT, GeometryType.VERTEX, GeometryType.LINE, GeometryType.AREA, GeometryType.RELATION), feature.geometry);
 
 		assertEquals(listOf("DE", "GB"), feature.countryCodes);
 		assertEquals("foo", feature.name);
@@ -49,7 +47,7 @@ public class iDFeatureCollectionTest
 		assertEquals(listOf("1","2"), feature.terms);
 		assertEquals(0.5f, feature.matchScore, 0.001f);
 		assertFalse(feature.searchable);
-		assertEquals(mapOf(tag("e","f")), feature.addTags);
+		assertEquals(MapEntry.mapOf(MapEntry.tag("e","f")), feature.addTags);
 	}
 
 	@Test public void load_features_only_defaults()
@@ -60,8 +58,8 @@ public class iDFeatureCollectionTest
 		Feature feature = features.get("some/id", null);
 
 		assertEquals("some/id", feature.id);
-		assertEquals(mapOf(tag("a","b"),tag("c","d")), feature.tags);
-		assertEquals(listOf(POINT), feature.geometry);
+		assertEquals(MapEntry.mapOf(MapEntry.tag("a","b"), MapEntry.tag("c","d")), feature.tags);
+		assertEquals(listOf(GeometryType.POINT), feature.geometry);
 
 		assertTrue(feature.countryCodes.isEmpty());
 		assertEquals("test",feature.name);
@@ -86,8 +84,8 @@ public class iDFeatureCollectionTest
 		Feature feature = features.get("some/id", Locale.US);
 
 		assertEquals("some/id", feature.id);
-		assertEquals(mapOf(tag("a","b"),tag("c","d")), feature.tags);
-		assertEquals(listOf(POINT), feature.geometry);
+		assertEquals(MapEntry.mapOf(MapEntry.tag("a","b"), MapEntry.tag("c","d")), feature.tags);
+		assertEquals(listOf(GeometryType.POINT), feature.geometry);
 		assertEquals("bar", feature.name);
 		assertEquals(listOf("a", "b"), feature.terms);
 	}
@@ -100,8 +98,8 @@ public class iDFeatureCollectionTest
 		Feature feature = features.get("some/id", Locale.US);
 
 		assertEquals("some/id", feature.id);
-		assertEquals(mapOf(tag("a","b"),tag("c","d")), feature.tags);
-		assertEquals(listOf(POINT), feature.geometry);
+		assertEquals(MapEntry.mapOf(MapEntry.tag("a","b"), MapEntry.tag("c","d")), feature.tags);
+		assertEquals(listOf(GeometryType.POINT), feature.geometry);
 		assertEquals("bar", feature.name);
 		assertTrue(feature.terms.isEmpty());
 	}
