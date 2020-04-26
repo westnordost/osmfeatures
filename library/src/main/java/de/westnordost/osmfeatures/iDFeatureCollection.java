@@ -63,11 +63,10 @@ class iDFeatureCollection implements FeatureCollection
 	{
 		JSONObject object = createFromInputStream(is);
 		Map<String, Feature> result = new HashMap<>();
-		JSONObject presetObjects = object.getJSONObject("presets");
-		for (Iterator<String> it = presetObjects.keys(); it.hasNext(); )
+		for (Iterator<String> it = object.keys(); it.hasNext(); )
 		{
 			String id = it.next();
-			JSONObject p = presetObjects.getJSONObject(id);
+			JSONObject p = object.getJSONObject(id);
 			Map<String,String> tags = parseStringMap(p.getJSONObject("tags"));
 			// drop features with * in key or value of tags (for now), because they never describe
 			// a concrete thing, but some category of things.
