@@ -29,7 +29,7 @@ If you use gradle as your build tool, The easiest way to get this data is to put
 task downloadPresets {
     doLast {
         def targetDir = "path/to/data" // <- the relative path to the directory where the data should go
-        def presetsUrl = new URL("https://raw.githubusercontent.com/openstreetmap/iD/master/data/presets/presets.json")
+        def presetsUrl = new URL("https://raw.githubusercontent.com/openstreetmap/iD/release/data/presets/presets.json")
         def contentsUrl = new URL("https://api.github.com/repos/openstreetmap/iD/contents/dist/locales")
 
         new File("$targetDir/presets.json").withOutputStream { it << presetsUrl.openStream() }
