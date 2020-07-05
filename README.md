@@ -55,7 +55,7 @@ task downloadPresets {
 
 ### Initialize dictionary
 
-Point the dictionary to the directory where the data is located (see above). Use `FeaturesDictionary` as a singleton.
+Point the dictionary to the directory where the data is located (see above). Use `FeatureDictionary` as a singleton.
 ```java
 FeatureDictionary dictionary = FeatureDictionary.create("path/to/data"));
 ```
