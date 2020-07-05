@@ -28,6 +28,7 @@ If you use gradle as your build tool, The easiest way to get this data is to put
 ```groovy
 
 import groovy.json.JsonSlurper
+import groovy.json.JsonOutput
 
 task downloadPresets {
     doLast {
