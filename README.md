@@ -26,21 +26,24 @@ Do not forget to give attribution to iD since you are using their data.
 If you use gradle as your build tool, The easiest way to get this data is to put this task into your `build.gradle` and either execute this task manually from time to time or make the build process depend on it (by adding `preBuild.dependsOn(downloadPresets)`):
 
 ```groovy
+
+import groovy.json.JsonSlurper
+
 task downloadPresets {
     doLast {
         def targetDir = "path/to/data" // <- the relative path to the directory where the data should go
-        def presetsUrl = new URL("https://raw.githubusercontent.com/openstreetmap/iD/release/data/presets/presets.json")
+        def presetsUrl = new URL("https://raw.githubusercontent.com/openstreetmap/iD/develop/data/presets/presets.json")
         def contentsUrl = new URL("https://api.github.com/repos/openstreetmap/iD/contents/dist/locales")
-
         new File("$targetDir/presets.json").withOutputStream { it << presetsUrl.openStream() }
 
         def slurper = new JsonSlurper()
+        slurper.type = JsonParserType.INDEX_OVERLAY
         slurper.parse(contentsUrl, "UTF-8").each {
             if(it.type == "file") {
                 def content = slurper.parse(new URL(it.download_url),"UTF-8")
                 def presets = content.values()[0]?.presets?.presets
                 if(presets) {
-                    def json = JsonOutput.prettyPrint(JsonOutput.toJson([presets: presets]))
+                    def json = unescapeUnicode(JsonOutput.prettyPrint(JsonOutput.toJson([presets: presets])))
                     new File("$targetDir/${it.name}").write(json, "UTF-8")
                 }
             }
