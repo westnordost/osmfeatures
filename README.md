@@ -32,24 +32,35 @@ import groovy.json.JsonOutput
 
 task downloadPresets {
     doLast {
-        def targetDir = "path/to/data" // <- the relative path to the directory where the data should go
+        def targetDir = "app/src/main/assets/osmfeatures"
         def presetsUrl = new URL("https://raw.githubusercontent.com/openstreetmap/iD/develop/data/presets/presets.json")
         def contentsUrl = new URL("https://api.github.com/repos/openstreetmap/iD/contents/dist/locales")
+
         new File("$targetDir/presets.json").withOutputStream { it << presetsUrl.openStream() }
 
         def slurper = new JsonSlurper()
-        slurper.type = JsonParserType.INDEX_OVERLAY
         slurper.parse(contentsUrl, "UTF-8").each {
             if(it.type == "file") {
+                def language = it.name.substring(0, it.name.lastIndexOf("."))
                 def content = slurper.parse(new URL(it.download_url),"UTF-8")
                 def presets = content.values()[0]?.presets?.presets
                 if(presets) {
-                    def json = unescapeUnicode(JsonOutput.prettyPrint(JsonOutput.toJson([presets: presets])))
-                    new File("$targetDir/${it.name}").write(json, "UTF-8")
+                    def json = JsonOutput.prettyPrint(JsonOutput.toJson([presets: presets]))
+                    def javaLanguage = bcp47LanguageTagToJavaLanguageTag(language)
+                    new File("$targetDir/${javaLanguage}.json").write(json, "UTF-8")
                 }
             }
         }
     }
+}
+
+// Java (and thus also Android) uses some old iso (language) codes. F.e. id -> in etc.
+// so the localized files also need to use the old iso codes
+static def bcp47LanguageTagToJavaLanguageTag(String bcp47) {
+    def locale = Locale.forLanguageTag(bcp47)
+    def result = locale.language
+    if (!locale.country.isEmpty()) result += "-" + locale.country
+    return result
 }
 ```
 
