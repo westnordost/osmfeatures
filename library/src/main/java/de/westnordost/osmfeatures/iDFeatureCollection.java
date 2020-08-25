@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -29,9 +30,9 @@ class iDFeatureCollection implements FeatureCollection
 	private final FileAccessAdapter fileAccess;
 
 	// id -> feature
-	private final Map<String, Feature> allFeatures;
+	private final LinkedHashMap<String, Feature> allFeatures;
 	// locale -> ( id -> feature )
-	private final Map<Locale, Map<String, Feature>> localizedFeatures = new HashMap<>();
+	private final Map<Locale, LinkedHashMap<String, Feature>> localizedFeatures = new HashMap<>();
 
 	iDFeatureCollection(FileAccessAdapter fileAccess)
 	{
@@ -53,16 +54,16 @@ class iDFeatureCollection implements FeatureCollection
 		return getOrLoadLocalizedFeaturesWithFallbackToDefault(locale).get(id);
 	}
 
-	private Map<String, Feature> loadFeatures()
+	private LinkedHashMap<String, Feature> loadFeatures()
 	{
 		try(InputStream is = fileAccess.open(FEATURES_FILE)) { return parseFeatures(is); }
 		catch (IOException | JSONException e) { throw new RuntimeException(e); }
 	}
 
-	private static Map<String, Feature> parseFeatures(InputStream is) throws JSONException, IOException
+	private static LinkedHashMap<String, Feature> parseFeatures(InputStream is) throws JSONException, IOException
 	{
 		JSONObject object = createFromInputStream(is);
-		Map<String, Feature> result = new HashMap<>();
+		LinkedHashMap<String, Feature> result = new LinkedHashMap<>();
 		for (Iterator<String> it = object.keys(); it.hasNext(); )
 		{
 			String id = it.next();
@@ -167,7 +168,7 @@ class iDFeatureCollection implements FeatureCollection
 				// merging language features with country features (country features overwrite language features)
 				if(!locale.getCountry().isEmpty())
 				{
-					Map<String, Feature> baseFeatures = localizedFeatures.get(localeLanguage);
+					LinkedHashMap<String, Feature> baseFeatures = localizedFeatures.get(localeLanguage);
 					if(baseFeatures == null) baseFeatures = allFeatures;
 
 					localizedFeatures.put(locale, mergeFeatures(
@@ -180,7 +181,7 @@ class iDFeatureCollection implements FeatureCollection
 		}
 	}
 
-	private static Map<String, Feature> mergeFeatures(Map<String, Feature> features, Map<String, Feature> baseFeatures)
+	private static LinkedHashMap<String, Feature> mergeFeatures(LinkedHashMap<String, Feature> features, LinkedHashMap<String, Feature> baseFeatures)
 	{
 		if(features != null && baseFeatures != null)
 		{
@@ -192,7 +193,7 @@ class iDFeatureCollection implements FeatureCollection
 		return features;
 	}
 
-	private Map<String, Feature> loadLocalizedFeatures(Locale locale)
+	private LinkedHashMap<String, Feature> loadLocalizedFeatures(Locale locale)
 	{
 		String lang = locale.getLanguage();
 		String country = locale.getCountry();
@@ -208,10 +209,10 @@ class iDFeatureCollection implements FeatureCollection
 		catch (IOException | JSONException e) { throw new RuntimeException(e); }
 	}
 
-	private Map<String, Feature> parseLocalizedFeatures(InputStream is) throws JSONException, IOException
+	private LinkedHashMap<String, Feature> parseLocalizedFeatures(InputStream is) throws JSONException, IOException
 	{
 		JSONObject object = createFromInputStream(is);
-		Map<String, Feature> result = new HashMap<>(allFeatures.size());
+		LinkedHashMap<String, Feature> result = new LinkedHashMap<>(allFeatures.size());
 		JSONObject presetsObject = object.getJSONObject("presets");
 		for (Iterator<String> it = presetsObject.keys(); it.hasNext(); )
 		{
