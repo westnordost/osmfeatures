@@ -26,7 +26,15 @@ public class FeatureDictionaryTest
 			mapOf(tag("shop","bakery"), tag("name","Ditsch")),
 			"Ditsch",
 			listOf("DE"),
-			mapOf(tag("wikipedia","de:Brezelb%C3%A4ckerei_Ditsch"))
+			mapOf(tag("wikipedia","de:Brezelb%C3%A4ckerei_Ditsch"), tag("brand", "Ditsch"))
+	);
+
+	private final Feature ditschRussian = brandFeature(
+			"shop/bakery/Дитсч",
+			mapOf(tag("shop","bakery"), tag("name","Ditsch")),
+			"Дитсч",
+			null,
+			mapOf(tag("wikipedia","de:Brezelb%C3%A4ckerei_Ditsch"), tag("brand", "Дитсч"))
 	);
 
 	private final Feature car_dealer = feature(
@@ -192,6 +200,16 @@ public class FeatureDictionaryTest
 		assertEquals(bakery.name, matches.get(0).name);
 		assertEquals(bakery.tags, matches.get(0).tags);
 		assertNull(matches.get(0).parentName);
+	}
+
+	@Test public void find_multiple_brands_sorts_by_matching_add_tags()
+	{
+		Map<String,String> tags = mapOf(tag("shop", "bakery"), tag("name", "Ditsch"), tag("brand", "Ditsch"));
+		FeatureDictionary dictionary = dictionary(ditschRussian, ditsch);
+		List<Match> matches = dictionary.byTags(tags).find();
+		assertEquals(2, matches.size());
+		assertEquals(ditsch.name, matches.get(0).name);
+		assertEquals(ditschRussian.name, matches.get(1).name);
 	}
 
 	@Test public void find_multiple_entries_by_tags()

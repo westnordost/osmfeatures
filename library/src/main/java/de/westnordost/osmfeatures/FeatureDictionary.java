@@ -75,7 +75,13 @@ public class FeatureDictionary
 				// 1. features with more matching tags first
 				int tagOrder = b.tags.size() - a.tags.size();
 				if(tagOrder != 0) return tagOrder;
-				// 2. features with higher matchScore first
+				// 2. features with more matching tags in addTags first
+				// https://github.com/openstreetmap/iD/issues/7927
+				int numberOfMatchedAddTags =
+						numberOfContainedEntriesInMap(tags, b.addTags.entrySet())
+						- numberOfContainedEntriesInMap(tags, a.addTags.entrySet());
+				if(numberOfMatchedAddTags != 0) return numberOfMatchedAddTags;
+				// 3. features with higher matchScore first
 				return (int) (100 * b.matchScore - 100 * a.matchScore);
 			});
 
@@ -126,6 +132,16 @@ public class FeatureDictionary
 			if(!mapContainsEntry(map, entry)) return false;
 		}
 		return true;
+	}
+
+	private static <K,V> int numberOfContainedEntriesInMap(Map<K,V> map, Collection<Map.Entry<K,V>> entries)
+	{
+		int found = 0;
+		for (Map.Entry<K, V> entry : entries)
+		{
+			if(mapContainsEntry(map, entry)) found++;
+		}
+		return found;
 	}
 
 	private static <K,V> boolean mapContainsEntry(Map<K,V> map, Map.Entry<K,V> entry)
