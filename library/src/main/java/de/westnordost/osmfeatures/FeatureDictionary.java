@@ -75,13 +75,18 @@ public class FeatureDictionary
 				// 1. features with more matching tags first
 				int tagOrder = b.tags.size() - a.tags.size();
 				if(tagOrder != 0) return tagOrder;
-				// 2. features with more matching tags in addTags first
+				// 2. if search is not limited by locale, return matches not limited by locale first
+				if(locale == null) {
+					int localeOrder = (b.countryCodes.isEmpty() ? 1 : 0) - (a.countryCodes.isEmpty() ? 1 : 0);
+					if (localeOrder != 0) return localeOrder;
+				}
+				// 3. features with more matching tags in addTags first
 				// https://github.com/openstreetmap/iD/issues/7927
 				int numberOfMatchedAddTags =
 						numberOfContainedEntriesInMap(tags, b.addTags.entrySet())
 						- numberOfContainedEntriesInMap(tags, a.addTags.entrySet());
 				if(numberOfMatchedAddTags != 0) return numberOfMatchedAddTags;
-				// 3. features with higher matchScore first
+				// 4. features with higher matchScore first
 				return (int) (100 * b.matchScore - 100 * a.matchScore);
 			});
 
