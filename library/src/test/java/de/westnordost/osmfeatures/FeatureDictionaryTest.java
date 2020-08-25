@@ -175,6 +175,25 @@ public class FeatureDictionaryTest
 		assertEquals("Bäckerei", matches.get(0).parentName);
 	}
 
+	@Test public void find_only_brands_finds_no_normal_entries()
+	{
+		Map<String,String> tags = mapOf(tag("shop", "bakery"), tag("name", "Ditsch"));
+		FeatureDictionary dictionary = dictionary(bakery);
+		List<Match> matches = dictionary.byTags(tags).isSuggestion(true).find();
+		assertEquals(0, matches.size());
+	}
+
+	@Test public void find_no_brands_finds_only_normal_entries()
+	{
+		Map<String,String> tags = mapOf(tag("shop", "bakery"), tag("name", "Ditsch"));
+		FeatureDictionary dictionary = dictionary(bakery);
+		List<Match> matches = dictionary.byTags(tags).isSuggestion(false).find();
+		assertEquals(1, matches.size());
+		assertEquals(bakery.name, matches.get(0).name);
+		assertEquals(bakery.tags, matches.get(0).tags);
+		assertNull(matches.get(0).parentName);
+	}
+
 	@Test public void find_multiple_entries_by_tags()
 	{
 		Map<String,String> tags = mapOf(tag("shop", "bakery"), tag("amenity", "bank"));

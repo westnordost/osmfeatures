@@ -43,7 +43,7 @@ public class FeatureDictionary
 		return new QueryByTagBuilder(tags);
 	}
 
-	private List<Match> get(Map<String, String> tags, GeometryType geometry, Locale locale)
+	private List<Match> get(Map<String, String> tags, GeometryType geometry, Boolean isSuggestion, Locale locale)
 	{
 		// TODO possible performance improvement: group features by countryCodes (50% less iterations)
 		// TODO possible performance improvement: sort features into a tree of tags (lookup in almost O(1))
@@ -59,6 +59,10 @@ public class FeatureDictionary
 			{
 				if (geometry != null)
 					if (!feature.geometry.contains(geometry))
+						continue;
+
+				if (isSuggestion != null)
+					if (feature.suggestion != isSuggestion)
 						continue;
 
 				if (mapContainsAllEntries(relevantTags, feature.tags.entrySet()))
@@ -261,6 +265,7 @@ public class FeatureDictionary
 		private final Map<String, String> tags;
 		private GeometryType geometryType = null;
 		private Locale locale = Locale.getDefault();
+		private Boolean suggestion = null;
 
 		private QueryByTagBuilder(Map<String, String> tags) { this.tags = tags; }
 
@@ -279,13 +284,21 @@ public class FeatureDictionary
 			return this;
 		}
 
+		/** Set whether to only include suggestions (=true) or to not include suggestions (=false).
+		 *  Suggestions are brands, like 7-Eleven. */
+		public QueryByTagBuilder isSuggestion(Boolean suggestion)
+		{
+			this.suggestion = suggestion;
+			return this;
+		}
+
 		/** Returns a list of dictionary entries that match or an empty list if nothing is
 		 *  found. <br>In rare cases, a set of tags may match multiple primary features, such as for
 		 *  tag combinations like <tt>shop=deli</tt> + <tt>amenity=cafe</tt>, so, this is why
 		 *  it is a list. */
 		public List<Match> find()
 		{
-			return get(tags, geometryType, locale);
+			return get(tags, geometryType, suggestion, locale);
 		}
 	}
 
