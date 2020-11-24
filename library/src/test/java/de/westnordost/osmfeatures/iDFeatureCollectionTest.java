@@ -175,7 +175,7 @@ public class iDFeatureCollectionTest
 			{
 				if(name.equals("presets.json"))
 				{
-					return new URL("https://raw.githubusercontent.com/openstreetmap/iD/develop/data/presets/presets.json").openStream();
+					return new URL("https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.min.json").openStream();
 				} else {
 					URL url = new URL("https://raw.githubusercontent.com/openstreetmap/iD/develop/dist/locales/"+name);
 					String localeString = name.split("\\.")[0];
