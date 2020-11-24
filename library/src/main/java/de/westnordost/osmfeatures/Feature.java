@@ -48,6 +48,7 @@ class Feature
 		this.canonicalTerms = Collections.unmodifiableList(canonicalTerms);
 	}
 
+	// TODO less memory would be a class named LocalizedFeature which simply has a reference to the "base" Feature
 	Feature(Feature p, String name, List<String> terms)
 	{
 		this(p.id, p.tags, p.geometry, name, terms, p.countryCodes, p.searchable, p.matchScore,
