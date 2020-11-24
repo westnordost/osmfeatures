@@ -15,14 +15,14 @@ public class FeatureDictionaryTest
 {
 	private static final List<GeometryType> POINT = Collections.singletonList(GeometryType.POINT);
 
-	private final Feature bakery = feature(
+	private final BaseFeature bakery = feature(
 			"shop/bakery",
 			mapOf(tag("shop","bakery")),
 			"Bäckerei",
 			listOf("Brot")
 	);
 
-	private final Feature ditsch = brandFeature(
+	private final BaseFeature ditsch = brandFeature(
 			"shop/bakery/Ditsch",
 			mapOf(tag("shop","bakery"), tag("name","Ditsch")),
 			"Ditsch",
@@ -30,7 +30,7 @@ public class FeatureDictionaryTest
 			mapOf(tag("wikipedia","de:Brezelb%C3%A4ckerei_Ditsch"), tag("brand", "Ditsch"))
 	);
 
-	private final Feature ditschRussian = brandFeature(
+	private final BaseFeature ditschRussian = brandFeature(
 			"shop/bakery/Дитсч",
 			mapOf(tag("shop","bakery"), tag("name","Ditsch")),
 			"Дитсч",
@@ -38,7 +38,7 @@ public class FeatureDictionaryTest
 			mapOf(tag("wikipedia","de:Brezelb%C3%A4ckerei_Ditsch"), tag("brand", "Дитсч"))
 	);
 
-	private final Feature ditschInternational = brandFeature(
+	private final BaseFeature ditschInternational = brandFeature(
 			"shop/bakery/Ditsh",
 			mapOf(tag("shop","bakery"), tag("name","Ditsch")),
 			"Ditsh",
@@ -46,20 +46,20 @@ public class FeatureDictionaryTest
 			mapOf(tag("wikipedia","de:Brezelb%C3%A4ckerei_Ditsch"))
 	);
 
-	private final Feature car_dealer = feature(
+	private final BaseFeature car_dealer = feature(
 			"shop/car",
 			mapOf(tag("shop","car")),
 			"Autohändler",
 			listOf("auto")
 	);
-	private final Feature second_hand_car_dealer = feature(
+	private final BaseFeature second_hand_car_dealer = feature(
 			"shop/car/second_hand",
 			mapOf(tag("shop","car"), tag("second_hand", "only")),
 			"Gebrauchtwagenhändler",
 			listOf("auto")
 	);
 
-	private final Feature scheisshaus = new Feature(
+	private final BaseFeature scheisshaus = new BaseFeature(
 			"amenity/scheißhaus",
 			mapOf(tag("amenity","scheißhaus")),
 			POINT,
@@ -69,45 +69,45 @@ public class FeatureDictionaryTest
 			false, // <- not searchable!
 			0f, false, Collections.emptyMap());
 
-	private final Feature bank = feature(
+	private final BaseFeature bank = feature(
 			"amenity/bank",
 			mapOf(tag("amenity","bank")),
 			"Bank",
 			listOf()
 	);
-	private final Feature bench = feature(
+	private final BaseFeature bench = feature(
 			"amenity/bench",
 			mapOf(tag("amenity","bench")),
 			"Parkbank",
 			listOf("Bank"),
 			5.0f
 	);
-	private final Feature casino = feature(
+	private final BaseFeature casino = feature(
 			"amenity/casino",
 			mapOf(tag("amenity","casino")),
 			"Spielbank",
 			listOf("Kasino")
 	);
-	private final Feature atm = feature(
+	private final BaseFeature atm = feature(
 			"amenity/atm",
 			mapOf(tag("amenity","atm")),
 			"Bankomat",
 			listOf()
 	);
-	private final Feature stock_exchange = feature(
+	private final BaseFeature stock_exchange = feature(
 			"amenity/stock_exchange",
 			mapOf(tag("amenity","stock_exchange")),
 			"Börse",
 			listOf("Banking")
 	);
-	private final Feature bank_of_america = brandFeature(
+	private final BaseFeature bank_of_america = brandFeature(
 			"amenity/bank/Bank of America",
 			mapOf(tag("amenity","bank"), tag("name","Bank of America")),
 			"Bank of America",
 			listOf(),
 			mapOf()
 	);
-	private final Feature bank_of_liechtenstein = brandFeature(
+	private final BaseFeature bank_of_liechtenstein = brandFeature(
 			"amenity/bank/Bank of Liechtenstein",
 			mapOf(tag("amenity","bank"), tag("name","Bank of Liechtenstein")),
 			"Bank of Liechtenstein",
@@ -115,20 +115,20 @@ public class FeatureDictionaryTest
 			mapOf(),
 			0.2f
 	);
-	private final Feature deutsche_bank = brandFeature(
+	private final BaseFeature deutsche_bank = brandFeature(
 			"amenity/bank/Deutsche Bank",
 			mapOf(tag("amenity","bank"), tag("name","Deutsche Bank")),
 			"Deutsche Bank",
 			listOf(),
 			mapOf()
 	);
-	private final Feature baenk = feature(
+	private final BaseFeature baenk = feature(
 			"amenity/bänk",
 			mapOf(tag("amenity","bänk")),
 			"Bänk",
 			listOf()
 	);
-	private final Feature bad_bank = feature(
+	private final BaseFeature bad_bank = feature(
 			"amenity/bank/bad",
 			mapOf(tag("amenity","bank"), tag("goodity","bad")),
 			"Bad Bank",
@@ -155,8 +155,8 @@ public class FeatureDictionaryTest
 		FeatureDictionary dictionary = dictionary(bakery);
 		List<Match> matches = dictionary.byTags(tags).find();
 		assertEquals(1, matches.size());
-		assertEquals(bakery.name, matches.get(0).name);
-		assertEquals(bakery.tags, matches.get(0).tags);
+		assertEquals(bakery.getName(), matches.get(0).name);
+		assertEquals(bakery.getTags(), matches.get(0).tags);
 		assertNull(matches.get(0).parentName);
 	}
 
@@ -174,8 +174,8 @@ public class FeatureDictionaryTest
 		FeatureDictionary dictionary = dictionary(bakery);
 		List<Match> matches = dictionary.byTags(tags).forGeometry(GeometryType.POINT).find();
 		assertEquals(1, matches.size());
-		assertEquals(bakery.name, matches.get(0).name);
-		assertEquals(bakery.tags, matches.get(0).tags);
+		assertEquals(bakery.getName(), matches.get(0).name);
+		assertEquals(bakery.getTags(), matches.get(0).tags);
 		assertNull(matches.get(0).parentName);
 	}
 
@@ -185,9 +185,9 @@ public class FeatureDictionaryTest
 		FeatureDictionary dictionary = dictionary(bakery, ditsch);
 		List<Match> matches = dictionary.byTags(tags).find();
 		assertEquals(1, matches.size());
-		assertEquals(ditsch.name, matches.get(0).name);
-		Map<String,String> expectedTags = new HashMap<>(ditsch.tags);
-		expectedTags.putAll(ditsch.addTags);
+		assertEquals(ditsch.getName(), matches.get(0).name);
+		Map<String,String> expectedTags = new HashMap<>(ditsch.getTags());
+		expectedTags.putAll(ditsch.getAddTags());
 		assertEquals(expectedTags, matches.get(0).tags);
 		assertEquals("Bäckerei", matches.get(0).parentName);
 	}
@@ -206,8 +206,8 @@ public class FeatureDictionaryTest
 		FeatureDictionary dictionary = dictionary(bakery);
 		List<Match> matches = dictionary.byTags(tags).isSuggestion(false).find();
 		assertEquals(1, matches.size());
-		assertEquals(bakery.name, matches.get(0).name);
-		assertEquals(bakery.tags, matches.get(0).tags);
+		assertEquals(bakery.getName(), matches.get(0).name);
+		assertEquals(bakery.getTags(), matches.get(0).tags);
 		assertNull(matches.get(0).parentName);
 	}
 
@@ -217,8 +217,8 @@ public class FeatureDictionaryTest
 		FeatureDictionary dictionary = dictionary(ditschRussian, ditsch);
 		List<Match> matches = dictionary.byTags(tags).forLocale(null).find();
 		assertEquals(2, matches.size());
-		assertEquals(ditsch.name, matches.get(0).name);
-		assertEquals(ditschRussian.name, matches.get(1).name);
+		assertEquals(ditsch.getName(), matches.get(0).name);
+		assertEquals(ditschRussian.getName(), matches.get(1).name);
 	}
 
 	@Test public void find_multiple_brands_sorts_by_locale()
@@ -227,7 +227,7 @@ public class FeatureDictionaryTest
 		FeatureDictionary dictionary = dictionary(ditschRussian, ditschInternational, ditsch);
 		List<Match> matches = dictionary.byTags(tags).forLocale(null).find();
 		assertEquals(3, matches.size());
-		assertEquals(ditschInternational.name, matches.get(0).name);
+		assertEquals(ditschInternational.getName(), matches.get(0).name);
 	}
 
 	@Test public void find_multiple_entries_by_tags()
@@ -244,7 +244,7 @@ public class FeatureDictionaryTest
 		FeatureDictionary dictionary = dictionary(car_dealer, second_hand_car_dealer);
 		List<Match> matches = dictionary.byTags(tags).find();
 		assertEquals(1, matches.size());
-		assertEquals(car_dealer.name, matches.get(0).name);
+		assertEquals(car_dealer.getName(), matches.get(0).name);
 	}
 
 	@Test public void find_entry_with_specific_tags()
@@ -253,7 +253,7 @@ public class FeatureDictionaryTest
 		FeatureDictionary dictionary = dictionary(car_dealer, second_hand_car_dealer);
 		List<Match> matches = dictionary.byTags(tags).find();
 		assertEquals(1, matches.size());
-		assertEquals(second_hand_car_dealer.name, matches.get(0).name);
+		assertEquals(second_hand_car_dealer.getName(), matches.get(0).name);
 	}
 
 	@Test public void find_no_entry_by_name()
@@ -286,7 +286,7 @@ public class FeatureDictionaryTest
 		FeatureDictionary dictionary = dictionary(bakery);
 		List<Match> findings = dictionary.byTerm("Bäckerei").find();
 		assertEquals(1, findings.size());
-		assertEquals(bakery.name, findings.get(0).name);
+		assertEquals(bakery.getName(), findings.get(0).name);
 	}
 
 	@Test public void find_entry_by_name_with_correct_geometry()
@@ -294,7 +294,7 @@ public class FeatureDictionaryTest
 		FeatureDictionary dictionary = dictionary(bakery);
 		List<Match> findings = dictionary.byTerm("Bäckerei").forGeometry(GeometryType.POINT).find();
 		assertEquals(1, findings.size());
-		assertEquals(bakery.name, findings.get(0).name);
+		assertEquals(bakery.getName(), findings.get(0).name);
 	}
 
 	@Test public void find_entry_by_name_with_correct_country()
@@ -302,8 +302,8 @@ public class FeatureDictionaryTest
 		FeatureDictionary dictionary = dictionary(ditsch, bakery);
 		List<Match> findings = dictionary.byTerm("Ditsch").inCountry("DE").find();
 		assertEquals(1, findings.size());
-		assertEquals(ditsch.name, findings.get(0).name);
-		assertEquals(bakery.name, findings.get(0).parentName);
+		assertEquals(ditsch.getName(), findings.get(0).name);
+		assertEquals(bakery.getName(), findings.get(0).parentName);
 	}
 
 	@Test public void find_entry_by_name_case_insensitive()
@@ -311,7 +311,7 @@ public class FeatureDictionaryTest
 		FeatureDictionary dictionary = dictionary(bakery);
 		List<Match> findings = dictionary.byTerm("BÄCkErEI").find();
 		assertEquals(1, findings.size());
-		assertEquals(bakery.name, findings.get(0).name);
+		assertEquals(bakery.getName(), findings.get(0).name);
 	}
 
 	@Test public void find_entry_by_name_diacritics_insensitive()
@@ -319,7 +319,7 @@ public class FeatureDictionaryTest
 		FeatureDictionary dictionary = dictionary(bakery);
 		List<Match> findings = dictionary.byTerm("Backérèi").find();
 		assertEquals(1, findings.size());
-		assertEquals(bakery.name, findings.get(0).name);
+		assertEquals(bakery.getName(), findings.get(0).name);
 	}
 
 	@Test public void find_entry_by_term()
@@ -327,7 +327,7 @@ public class FeatureDictionaryTest
 		FeatureDictionary dictionary = dictionary(bakery);
 		List<Match> findings = dictionary.byTerm("bro").find();
 		assertEquals(1, findings.size());
-		assertEquals(bakery.name, findings.get(0).name);
+		assertEquals(bakery.getName(), findings.get(0).name);
 	}
 
 	@Test public void find_entry_by_term_case_insensitive()
@@ -335,7 +335,7 @@ public class FeatureDictionaryTest
 		FeatureDictionary dictionary = dictionary(bakery);
 		List<Match> findings = dictionary.byTerm("BRO").find();
 		assertEquals(1, findings.size());
-		assertEquals(bakery.name, findings.get(0).name);
+		assertEquals(bakery.getName(), findings.get(0).name);
 	}
 
 	@Test public void find_entry_by_term_diacritics_insensitive()
@@ -343,7 +343,7 @@ public class FeatureDictionaryTest
 		FeatureDictionary dictionary = dictionary(bakery);
 		List<Match> findings = dictionary.byTerm("bró").find();
 		assertEquals(1, findings.size());
-		assertEquals(bakery.name, findings.get(0).name);
+		assertEquals(bakery.getName(), findings.get(0).name);
 	}
 
 	@Test public void find_multiple_entries_by_name()
@@ -367,49 +367,49 @@ public class FeatureDictionaryTest
 				bank_of_america, deutsche_bank);
 		List<Match> findings = dictionary.byTerm("Bank").find();
 		assertEquals(8, findings.size());
-		assertEquals(bank.name, findings.get(0).name); // exact name matches
-		assertEquals(baenk.name, findings.get(1).name); // exact name matches (diacritics and case insensitive)
-		assertEquals(atm.name, findings.get(2).name); // starts-with name matches
-		assertEquals(bad_bank.name, findings.get(3).name); // starts-with-word name matches
-		assertEquals(bank_of_america.name, findings.get(4).name); // starts-with brand name matches
-		assertEquals(bank_of_liechtenstein.name, findings.get(5).name); // starts-with brand name matches - lower matchScore
-		assertEquals(bench.name, findings.get(6).name); // found word in terms - higher matchScore
-		assertEquals(stock_exchange.name, findings.get(7).name); // found word in terms - lower matchScore
+		assertEquals(bank.getName(), findings.get(0).name); // exact name matches
+		assertEquals(baenk.getName(), findings.get(1).name); // exact name matches (diacritics and case insensitive)
+		assertEquals(atm.getName(), findings.get(2).name); // starts-with name matches
+		assertEquals(bad_bank.getName(), findings.get(3).name); // starts-with-word name matches
+		assertEquals(bank_of_america.getName(), findings.get(4).name); // starts-with brand name matches
+		assertEquals(bank_of_liechtenstein.getName(), findings.get(5).name); // starts-with brand name matches - lower matchScore
+		assertEquals(bench.getName(), findings.get(6).name); // found word in terms - higher matchScore
+		assertEquals(stock_exchange.getName(), findings.get(7).name); // found word in terms - lower matchScore
 
 		//assertEquals(casino.name, findings.get(X).name); // not included: "Spielbank" does not start with "bank"
 		//assertEquals(deutsche_bank.name, findings.get(X).name); // not included: "Deutsche Bank" does not start with "bank"
 	}
 
-	private static FeatureDictionary dictionary(Feature... entries)
+	private static FeatureDictionary dictionary(BaseFeature... entries)
 	{
 		return new FeatureDictionary(new TestFeatureCollection(entries));
 	}
 
-	private static Feature brandFeature(String id, Map<String, String> tags, String name,
-										List<String> countryCodes, Map<String, String> addTags, float matchScore)
+	private static BaseFeature brandFeature(String id, Map<String, String> tags, String name,
+											List<String> countryCodes, Map<String, String> addTags, float matchScore)
 	{
-		return new Feature(id, tags, POINT, name, Collections.emptyList(), countryCodes, true, matchScore,
+		return new BaseFeature(id, tags, POINT, name, Collections.emptyList(), countryCodes, true, matchScore,
 				true, addTags);
 	}
 
-	private static Feature brandFeature(String id, Map<String, String> tags, String name,
-										List<String> countryCodes, Map<String, String> addTags)
+	private static BaseFeature brandFeature(String id, Map<String, String> tags, String name,
+											List<String> countryCodes, Map<String, String> addTags)
 	{
-		return new Feature(id, tags, POINT, name, Collections.emptyList(), countryCodes, true, 1.0f,
+		return new BaseFeature(id, tags, POINT, name, Collections.emptyList(), countryCodes, true, 1.0f,
 				true, addTags);
 	}
 
-	private static Feature feature(String id, Map<String, String> tags, String name,
-								   List<String> terms, float matchScore)
+	private static BaseFeature feature(String id, Map<String, String> tags, String name,
+									   List<String> terms, float matchScore)
 	{
-		return new Feature(id, tags, POINT, name, terms,
+		return new BaseFeature(id, tags, POINT, name, terms,
 				Collections.emptyList(), true, matchScore, false, Collections.emptyMap()
 		);
 	}
 
-	private static Feature feature(String id, Map<String, String> tags, String name, List<String> terms)
+	private static BaseFeature feature(String id, Map<String, String> tags, String name, List<String> terms)
 	{
-		return new Feature(id, tags, POINT, name, terms,
+		return new BaseFeature(id, tags, POINT, name, terms,
 				Collections.emptyList(), true, 1.0f, false, Collections.emptyMap()
 		);
 	}

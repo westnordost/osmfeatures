@@ -17,23 +17,18 @@ import java.util.Map;
 import java.util.Set;
 
 import static de.westnordost.osmfeatures.CollectionUtils.filter;
-import static de.westnordost.osmfeatures.CollectionUtils.mapContainedInEntries;
 import static de.westnordost.osmfeatures.CollectionUtils.numberOfContainedEntriesInMap;
 import static de.westnordost.osmfeatures.StringUtils.startsWordWith;
 
 public class FeatureDictionary
 {
 	private final FeatureCollection featureCollection;
-	private final Set<String> keys;
+	private final Map<Locale, FeatureTagTree> tagsIndices;
 
 	FeatureDictionary(FeatureCollection featureCollection)
 	{
 		this.featureCollection = featureCollection;
-		keys = new HashSet<>();
-		for (Feature feature : featureCollection.getAll(null))
-		{
-			keys.addAll(feature.tags.keySet());
-		}
+		tagsIndices = new HashMap<>();
 	}
 
 	/** Create a new FeatureDictionary which gets its data from the given directory. */
@@ -47,81 +42,75 @@ public class FeatureDictionary
 	{
 		return new QueryByTagBuilder(tags);
 	}
-	/** Find matches by a set of tags */
-	public QueryByTagBuilder byTags(Collection<Map.Entry<String, String>> tags)
-	{
-		return new QueryByTagBuilder(tags);
-	}
 
-	private List<Match> get(Collection<Map.Entry<String, String>> tags, GeometryType geometry, Boolean isSuggestion, Locale locale)
+	private List<Match> get(Map<String, String> tags, GeometryType geometry, Boolean isSuggestion, Locale locale)
 	{
-		// TODO possible performance improvement: group features by countryCodes (50% less iterations)
-		// TODO possible performance improvement: sort features into a tree of tags (lookup in almost O(1))
+		if(tags.isEmpty()) return Collections.emptyList();
 
-		// little performance improvement: no use to look for tags that are not used for any feature
-		List<Map.Entry<String, String>> relevantTags = filter(tags, e -> keys.contains(e.getKey()));
-		List<Feature> foundFeatures = new ArrayList<>();
-		if(!relevantTags.isEmpty())
+		List<Feature> foundFeatures = filter(getTagsIndex(locale).getAll(tags), feature ->
+				(geometry == null || feature.getGeometry().contains(geometry)) &&
+				(isSuggestion == null || feature.isSuggestion() == isSuggestion)
+		);
+
+		if (foundFeatures.size() > 1)
 		{
-			for (Feature feature : featureCollection.getAll(locale))
+			Set<String> removeIds = new HashSet<>();
+			for (Feature feature : foundFeatures)
 			{
-				if (geometry != null)
-					if (!feature.geometry.contains(geometry))
-						continue;
-
-				if (isSuggestion != null)
-					if (feature.suggestion != isSuggestion)
-						continue;
-
-				if (mapContainedInEntries(feature.tags, relevantTags))
+				removeIds.addAll(getParentCategoryIds(feature.getId()));
+			}
+			if (!removeIds.isEmpty())
+			{
+				// only return of each category the most specific thing. I.e. will return
+				// McDonalds only instead of McDonalds,Fast-Food Restaurant,Amenity
+				Iterator<Feature> it = foundFeatures.iterator();
+				while (it.hasNext())
 				{
-					foundFeatures.add(feature);
+					if (removeIds.contains(it.next().getId())) it.remove();
 				}
 			}
 
-			if (!foundFeatures.isEmpty()) {
-				Set<String> removeIds = new HashSet<>();
-				for (Feature feature : foundFeatures) {
-					removeIds.addAll(getParentCategoryIds(feature.id));
+			Collections.sort(foundFeatures, (a, b) ->
+			{
+				// 1. features with more matching tags first
+				int tagOrder = b.getTags().size() - a.getTags().size();
+				if(tagOrder != 0) return tagOrder;
+
+				// 2. if search is not limited by locale, return matches not limited by locale first
+				if(locale == null)
+				{
+					int localeOrder = (b.getCountryCodes().isEmpty() ? 1 : 0) - (a.getCountryCodes().isEmpty() ? 1 : 0);
+					if (localeOrder != 0) return localeOrder;
 				}
 
-				if (!removeIds.isEmpty()) {
-					// only return of each category the most specific thing. I.e. will return
-					// McDonalds only instead of McDonalds,Fast-Food Restaurant,Amenity
-					Iterator<Feature> it = foundFeatures.iterator();
-					while (it.hasNext()) {
-						if (removeIds.contains(it.next().id)) it.remove();
-					}
-				}
+				// 3. features with more matching tags in addTags first
+				// https://github.com/openstreetmap/iD/issues/7927
+				int numberOfMatchedAddTags =
+						numberOfContainedEntriesInMap(b.getAddTags(), tags.entrySet())
+						- numberOfContainedEntriesInMap(a.getAddTags(), tags.entrySet());
+				if(numberOfMatchedAddTags != 0) return numberOfMatchedAddTags;
 
-				Collections.sort(foundFeatures, createByTagSortComparator(tags, locale));
-			}
+				// 4. features with higher matchScore first
+				return (int) (100 * b.getMatchScore() - 100 * a.getMatchScore());
+			});
 		}
+
 		return createMatches(foundFeatures, -1, locale);
 	}
 
-	private static Comparator<Feature> createByTagSortComparator(Collection<Map.Entry<String, String>> tags, Locale locale) {
-		return (a, b) -> {
-			// 1. features with more matching tags first
-			int tagOrder = b.tags.size() - a.tags.size();
-			if(tagOrder != 0) return tagOrder;
-
-			// 2. if search is not limited by locale, return matches not limited by locale first
-			if(locale == null) {
-				int localeOrder = (b.countryCodes.isEmpty() ? 1 : 0) - (a.countryCodes.isEmpty() ? 1 : 0);
-				if (localeOrder != 0) return localeOrder;
+	private FeatureTagTree getTagsIndex(Locale locale)
+	{
+		if (!tagsIndices.containsKey(locale))
+		{
+			synchronized (tagsIndices)
+			{
+				if (!tagsIndices.containsKey(locale))
+				{
+					tagsIndices.put(locale, new FeatureTagTree(featureCollection.getAll(locale)));
+				}
 			}
-
-			// 3. features with more matching tags in addTags first
-			// https://github.com/openstreetmap/iD/issues/7927
-			int numberOfMatchedAddTags =
-					numberOfContainedEntriesInMap(b.addTags, tags)
-							- numberOfContainedEntriesInMap(a.addTags, tags);
-			if(numberOfMatchedAddTags != 0) return numberOfMatchedAddTags;
-
-			// 4. features with higher matchScore first
-			return (int) (100 * b.matchScore - 100 * a.matchScore);
-		};
+		}
+		return tagsIndices.get(locale);
 	}
 
 	private static Collection<String> getParentCategoryIds(String id)
@@ -155,38 +144,40 @@ public class FeatureDictionary
 		String canonicalSearch = StringUtils.canonicalize(search);
 
 		List<Feature> searchable = filter(featureCollection.getAll(locale), feature ->
-			feature.searchable &&
-			(geometry == null || feature.geometry.contains(geometry)) &&
-			(feature.countryCodes.isEmpty() || (countryCode != null && feature.countryCodes.contains(countryCode)))
+			feature.isSearchable() &&
+			(geometry == null || feature.getGeometry().contains(geometry)) &&
+			(feature.getCountryCodes().isEmpty() || (countryCode != null && feature.getCountryCodes().contains(countryCode)))
 		);
 
-		Comparator<Feature> sortNames = (a, b) -> {
+		Comparator<Feature> sortNames = (a, b) ->
+		{
 			// 1. exact matches first
-			int exactMatchOrder = (b.name.equals(search)?1:0) - (a.name.equals(search)?1:0);
+			int exactMatchOrder = (b.getName().equals(search)?1:0) - (a.getName().equals(search)?1:0);
 			if(exactMatchOrder != 0) return exactMatchOrder;
 			// 2. exact matches case and diacritics insensitive first
-			int cExactMatchOrder = (b.canonicalName.equals(canonicalSearch)?1:0) - (a.canonicalName.equals(canonicalSearch)?1:0);
+			int cExactMatchOrder = (b.getCanonicalName().equals(canonicalSearch)?1:0) - (a.getCanonicalName().equals(canonicalSearch)?1:0);
 			if(cExactMatchOrder != 0) return cExactMatchOrder;
 			// 3. earlier matches in string first
-			int indexOfOrder = a.canonicalName.indexOf(canonicalSearch) - b.canonicalName.indexOf(canonicalSearch);
+			int indexOfOrder = a.getCanonicalName().indexOf(canonicalSearch) - b.getCanonicalName().indexOf(canonicalSearch);
 			if(indexOfOrder != 0) return indexOfOrder;
 			// 4. features with higher matchScore first
-			int matchScoreOrder = (int) (100 * b.matchScore - 100 * a.matchScore);
+			int matchScoreOrder = (int) (100 * b.getMatchScore() - 100 * a.getMatchScore());
 			if(matchScoreOrder != 0) return matchScoreOrder;
 			// 5. shorter names first
-			return a.name.length() - b.name.length();
+			return a.getName().length() - b.getName().length();
 		};
 
-		Comparator<Feature> sortTerms = (a, b) -> {
+		Comparator<Feature> sortTerms = (a, b) ->
+		{
 			// 3. features with higher matchScore first
-			return (int) (100 * b.matchScore - 100 * a.matchScore);
+			return (int) (100 * b.getMatchScore() - 100 * a.getMatchScore());
 		};
 
 		Set<Feature> foundFeatures = new HashSet<>();
 		List<Feature> result = new ArrayList<>();
 
 		List<Feature> nameMatches = filter(searchable, feature ->
-				!feature.suggestion && startsWordWith(feature.canonicalName, canonicalSearch)
+				!feature.isSuggestion() && startsWordWith(feature.getCanonicalName(), canonicalSearch)
 		);
 		Collections.sort(nameMatches, sortNames);
 		result.addAll(nameMatches);
@@ -196,7 +187,7 @@ public class FeatureDictionary
 		if(limit > 0 && result.size() >= limit) return createMatches(result, limit, locale);
 
 		List<Feature> brandNameMatches = filter(searchable, feature ->
-				feature.suggestion && feature.canonicalName.startsWith(canonicalSearch)
+				feature.isSuggestion() && feature.getCanonicalName().startsWith(canonicalSearch)
 		);
 		Collections.sort(brandNameMatches, sortNames);
 		result.addAll(brandNameMatches);
@@ -205,9 +196,10 @@ public class FeatureDictionary
 		// if limit is reached, can return earlier (performance improvement)
 		if(limit > 0 && result.size() >= limit) return createMatches(result, limit, locale);
 
-		List<Feature> termsMatches = filter(searchable, feature -> {
+		List<Feature> termsMatches = filter(searchable, feature ->
+		{
 			if(foundFeatures.contains(feature)) return false;
-			for (String s : feature.canonicalTerms)
+			for (String s : feature.getCanonicalTerms())
 			{
 				if (s.startsWith(canonicalSearch)) return true;
 			}
@@ -235,11 +227,11 @@ public class FeatureDictionary
 
 	private Match createMatch(Feature feature, Locale locale)
 	{
-		String name = feature.name;
-		Map<String, String> tags = new HashMap<>(feature.tags);
-		tags.putAll(feature.addTags);
+		String name = feature.getName();
+		Map<String, String> tags = new HashMap<>(feature.getTags());
+		tags.putAll(feature.getAddTags());
 		String parentName = null;
-		if(feature.suggestion)
+		if(feature.isSuggestion())
 		{
 			String parentId = feature.getParentId();
 			if(parentId != null)
@@ -247,7 +239,7 @@ public class FeatureDictionary
 				Feature parentFeature = featureCollection.get(parentId, locale);
 				if(parentFeature != null)
 				{
-					parentName = parentFeature.name;
+					parentName = parentFeature.getName();
 				}
 			}
 		}
@@ -256,13 +248,12 @@ public class FeatureDictionary
 
 	public class QueryByTagBuilder
 	{
-		private final Collection<Map.Entry<String, String>> tags;
+		private final Map<String, String> tags;
 		private GeometryType geometryType = null;
 		private Locale locale = Locale.getDefault();
 		private Boolean suggestion = null;
 
-		private QueryByTagBuilder(Map<String, String> tags) { this.tags = tags.entrySet(); }
-		private QueryByTagBuilder(Collection<Map.Entry<String, String>> tags) { this.tags = tags; }
+		private QueryByTagBuilder(Map<String, String> tags) { this.tags = tags; }
 
 		/** Sets for which geometry type to look. If not set or <tt>null</tt>, any will match. */
 		public QueryByTagBuilder forGeometry(GeometryType geometryType)

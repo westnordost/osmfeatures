@@ -14,7 +14,7 @@ public class TestFeatureCollection implements FeatureCollection
 		this.features = new HashMap<>(features.length);
 		for (Feature feature : features)
 		{
-			this.features.put(feature.id, feature);
+			this.features.put(feature.getId(), feature);
 		}
 	}
 

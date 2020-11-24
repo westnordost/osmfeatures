@@ -6,17 +6,14 @@ import java.util.Map;
 
 class CollectionUtils {
 
-    /** Whether all entries of the given map are also in the given entries */
-    static <K,V> boolean mapContainedInEntries(Map<K,V> map, Iterable<Map.Entry<K,V>> entries)
+    /** Whether the given map contains all the given entries */
+    static <K,V> boolean mapContainsAllEntries(Map<K,V> map, Iterable<Map.Entry<K,V>> entries)
     {
-        int found = 0;
-        int size = map.size();
         for (Map.Entry<K, V> entry : entries)
         {
-            if(mapContainsEntry(map, entry)) found++;
-            if(found == size) return true;
+            if(!mapContainsEntry(map, entry)) return false;
         }
-        return false;
+        return true;
     }
 
     /** Number of entries contained in the given map */

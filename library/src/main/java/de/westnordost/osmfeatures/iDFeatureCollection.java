@@ -87,7 +87,7 @@ class iDFeatureCollection implements FeatureCollection
 			double matchScore = p.optDouble("matchScore", 1.0);
 			Map<String,String> addTags = parseStringMap(p.optJSONObject("addTags"));
 
-			result.put(id.intern(), new Feature(
+			result.put(id.intern(), new BaseFeature(
 					id.intern(), tags, geometry, name, terms, countryCodes, searchable, matchScore,
 					suggestion, addTags
 			));
@@ -147,53 +147,56 @@ class iDFeatureCollection implements FeatureCollection
 			Locale localeLanguage = new Locale(locale.getLanguage());
 			result = getOrLoadLocalizedFeatures(localeLanguage);
 		}
-		if(result == null) result = allFeatures;
+		if(result == null) return allFeatures;
 		return result;
 	}
 
 	private Map<String, Feature> getOrLoadLocalizedFeatures(Locale locale)
 	{
-		synchronized (localizedFeatures)
+		if (!localizedFeatures.containsKey(locale))
 		{
-			if (!localizedFeatures.containsKey(locale))
+			synchronized (localizedFeatures)
 			{
-				Locale localeLanguage = new Locale(locale.getLanguage());
-				if (!localizedFeatures.containsKey(localeLanguage))
+				if (!localizedFeatures.containsKey(locale))
 				{
-					localizedFeatures.put(localeLanguage, mergeFeatures(
+					Locale localeLanguage = new Locale(locale.getLanguage());
+					if (!localizedFeatures.containsKey(localeLanguage))
+					{
+						localizedFeatures.put(localeLanguage, mergeFeatures(
 							loadLocalizedFeatures(localeLanguage),
 							allFeatures
-					));
-				}
-				// merging language features with country features (country features overwrite language features)
-				if(!locale.getCountry().isEmpty())
-				{
-					LinkedHashMap<String, Feature> baseFeatures = localizedFeatures.get(localeLanguage);
-					if(baseFeatures == null) baseFeatures = allFeatures;
+						));
+					}
+					// merging language features with country features (country features overwrite language features)
+					if(!locale.getCountry().isEmpty())
+					{
+						LinkedHashMap<String, ? extends Feature> features = localizedFeatures.get(localeLanguage);
+						if(features == null) features = allFeatures;
 
-					localizedFeatures.put(locale, mergeFeatures(
-						loadLocalizedFeatures(locale),
-						baseFeatures
-					));
+						localizedFeatures.put(locale, mergeFeatures(
+							loadLocalizedFeatures(locale),
+							features
+						));
+					}
 				}
 			}
-			return localizedFeatures.get(locale);
 		}
+		return localizedFeatures.get(locale);
 	}
 
-	private static LinkedHashMap<String, Feature> mergeFeatures(LinkedHashMap<String, Feature> features, LinkedHashMap<String, Feature> baseFeatures)
+	private static LinkedHashMap<String, Feature> mergeFeatures(LinkedHashMap<String, ? extends Feature> features, LinkedHashMap<String, ? extends Feature> baseFeatures)
 	{
-		if(features != null && baseFeatures != null)
+		if (baseFeatures == null || features == null) return null;
+		LinkedHashMap<String, Feature> result = new LinkedHashMap<>(baseFeatures.size());
+		for (String id : baseFeatures.keySet())
 		{
-			for (String id : baseFeatures.keySet())
-			{
-				if (!features.containsKey(id)) features.put(id, baseFeatures.get(id));
-			}
+			if (!features.containsKey(id)) result.put(id, baseFeatures.get(id));
+			else result.put(id, features.get(id));
 		}
-		return features;
+		return result;
 	}
 
-	private LinkedHashMap<String, Feature> loadLocalizedFeatures(Locale locale)
+	private LinkedHashMap<String, LocalizedFeature> loadLocalizedFeatures(Locale locale)
 	{
 		String lang = locale.getLanguage();
 		String country = locale.getCountry();
@@ -209,23 +212,23 @@ class iDFeatureCollection implements FeatureCollection
 		catch (IOException | JSONException e) { throw new RuntimeException(e); }
 	}
 
-	private LinkedHashMap<String, Feature> parseLocalizedFeatures(InputStream is) throws JSONException, IOException
+	private LinkedHashMap<String, LocalizedFeature> parseLocalizedFeatures(InputStream is) throws JSONException, IOException
 	{
 		JSONObject object = createFromInputStream(is);
-		LinkedHashMap<String, Feature> result = new LinkedHashMap<>(allFeatures.size());
+		LinkedHashMap<String, LocalizedFeature> result = new LinkedHashMap<>(allFeatures.size());
 		JSONObject presetsObject = object.getJSONObject("presets");
 		for (Iterator<String> it = presetsObject.keys(); it.hasNext(); )
 		{
 			String id = it.next();
 			id = id.intern();
-			Feature baseFeatures = allFeatures.get(id);
-			if(baseFeatures == null) continue;
+			Feature features = allFeatures.get(id);
+			if(features == null) continue;
 
 			JSONObject localization = presetsObject.getJSONObject(id);
 			String name = localization.optString("name");
 			if(name == null || name.isEmpty()) continue;
 			List<String> terms = parseCommaSeparatedList(localization.optString("terms"), name);
-			result.put(id, new Feature(baseFeatures, name, terms));
+			result.put(id, new LocalizedFeature((BaseFeature) features, name, terms));
 		}
 		return result;
 	}
