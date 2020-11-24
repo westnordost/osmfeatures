@@ -16,6 +16,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import static de.westnordost.osmfeatures.CollectionUtils.filter;
+import static de.westnordost.osmfeatures.CollectionUtils.mapContainedInEntries;
+import static de.westnordost.osmfeatures.CollectionUtils.numberOfContainedEntriesInMap;
+import static de.westnordost.osmfeatures.StringUtils.startsWordWith;
+
 public class FeatureDictionary
 {
 	private final FeatureCollection featureCollection;
@@ -31,7 +36,7 @@ public class FeatureDictionary
 		}
 	}
 
-	/** Create a new FeatureDictionary which gets it's data from the given directory. */
+	/** Create a new FeatureDictionary which gets its data from the given directory. */
 	public static FeatureDictionary create(String path)
 	{
 		return new FeatureDictionary(new iDFeatureCollection(new FileSystemAccess(new File(path))));
@@ -42,19 +47,22 @@ public class FeatureDictionary
 	{
 		return new QueryByTagBuilder(tags);
 	}
+	/** Find matches by a set of tags */
+	public QueryByTagBuilder byTags(Collection<Map.Entry<String, String>> tags)
+	{
+		return new QueryByTagBuilder(tags);
+	}
 
-	private List<Match> get(Map<String, String> tags, GeometryType geometry, Boolean isSuggestion, Locale locale)
+	private List<Match> get(Collection<Map.Entry<String, String>> tags, GeometryType geometry, Boolean isSuggestion, Locale locale)
 	{
 		// TODO possible performance improvement: group features by countryCodes (50% less iterations)
 		// TODO possible performance improvement: sort features into a tree of tags (lookup in almost O(1))
 
 		// little performance improvement: no use to look for tags that are not used for any feature
-		Map<String, String> relevantTags = createMapWithOnlyRelevantTagsRetained(tags);
+		List<Map.Entry<String, String>> relevantTags = filter(tags, e -> keys.contains(e.getKey()));
 		List<Feature> foundFeatures = new ArrayList<>();
 		if(!relevantTags.isEmpty())
 		{
-			Set<String> removeIds = new HashSet<>();
-
 			for (Feature feature : featureCollection.getAll(locale))
 			{
 				if (geometry != null)
@@ -65,40 +73,55 @@ public class FeatureDictionary
 					if (feature.suggestion != isSuggestion)
 						continue;
 
-				if (mapContainsAllEntries(relevantTags, feature.tags.entrySet()))
+				if (mapContainedInEntries(feature.tags, relevantTags))
 				{
 					foundFeatures.add(feature);
-					removeIds.addAll(getParentCategoryIds(feature.id));
 				}
 			}
-			Collections.sort(foundFeatures, (a, b) -> {
-				// 1. features with more matching tags first
-				int tagOrder = b.tags.size() - a.tags.size();
-				if(tagOrder != 0) return tagOrder;
-				// 2. if search is not limited by locale, return matches not limited by locale first
-				if(locale == null) {
-					int localeOrder = (b.countryCodes.isEmpty() ? 1 : 0) - (a.countryCodes.isEmpty() ? 1 : 0);
-					if (localeOrder != 0) return localeOrder;
-				}
-				// 3. features with more matching tags in addTags first
-				// https://github.com/openstreetmap/iD/issues/7927
-				int numberOfMatchedAddTags =
-						numberOfContainedEntriesInMap(tags, b.addTags.entrySet())
-						- numberOfContainedEntriesInMap(tags, a.addTags.entrySet());
-				if(numberOfMatchedAddTags != 0) return numberOfMatchedAddTags;
-				// 4. features with higher matchScore first
-				return (int) (100 * b.matchScore - 100 * a.matchScore);
-			});
 
-			// only return of each category the most specific thing. I.e. will return
-			// McDonalds only instead of McDonalds,Fast-Food Restaurant,Amenity
-			Iterator<Feature> it = foundFeatures.iterator();
-			while(it.hasNext())
-			{
-				if(removeIds.contains(it.next().id)) it.remove();
+			if (!foundFeatures.isEmpty()) {
+				Set<String> removeIds = new HashSet<>();
+				for (Feature feature : foundFeatures) {
+					removeIds.addAll(getParentCategoryIds(feature.id));
+				}
+
+				if (!removeIds.isEmpty()) {
+					// only return of each category the most specific thing. I.e. will return
+					// McDonalds only instead of McDonalds,Fast-Food Restaurant,Amenity
+					Iterator<Feature> it = foundFeatures.iterator();
+					while (it.hasNext()) {
+						if (removeIds.contains(it.next().id)) it.remove();
+					}
+				}
+
+				Collections.sort(foundFeatures, createByTagSortComparator(tags, locale));
 			}
 		}
 		return createMatches(foundFeatures, -1, locale);
+	}
+
+	private static Comparator<Feature> createByTagSortComparator(Collection<Map.Entry<String, String>> tags, Locale locale) {
+		return (a, b) -> {
+			// 1. features with more matching tags first
+			int tagOrder = b.tags.size() - a.tags.size();
+			if(tagOrder != 0) return tagOrder;
+
+			// 2. if search is not limited by locale, return matches not limited by locale first
+			if(locale == null) {
+				int localeOrder = (b.countryCodes.isEmpty() ? 1 : 0) - (a.countryCodes.isEmpty() ? 1 : 0);
+				if (localeOrder != 0) return localeOrder;
+			}
+
+			// 3. features with more matching tags in addTags first
+			// https://github.com/openstreetmap/iD/issues/7927
+			int numberOfMatchedAddTags =
+					numberOfContainedEntriesInMap(b.addTags, tags)
+							- numberOfContainedEntriesInMap(a.addTags, tags);
+			if(numberOfMatchedAddTags != 0) return numberOfMatchedAddTags;
+
+			// 4. features with higher matchScore first
+			return (int) (100 * b.matchScore - 100 * a.matchScore);
+		};
 	}
 
 	private static Collection<String> getParentCategoryIds(String id)
@@ -118,42 +141,6 @@ public class FeatureDictionary
 		int lastSlashIndex = id.lastIndexOf("/");
 		if(lastSlashIndex == -1) return null;
 		return id.substring(0, lastSlashIndex);
-	}
-
-	private Map<String, String> createMapWithOnlyRelevantTagsRetained(Map<String, String> tags)
-	{
-		Map<String, String> result = new HashMap<>();
-		for (Map.Entry<String, String> e : tags.entrySet())
-		{
-			if(keys.contains(e.getKey())) result.put(e.getKey(), e.getValue());
-		}
-		return result;
-	}
-
-	private static <K,V> boolean mapContainsAllEntries(Map<K,V> map, Collection<Map.Entry<K,V>> entries)
-	{
-		for (Map.Entry<K, V> entry : entries)
-		{
-			if(!mapContainsEntry(map, entry)) return false;
-		}
-		return true;
-	}
-
-	private static <K,V> int numberOfContainedEntriesInMap(Map<K,V> map, Collection<Map.Entry<K,V>> entries)
-	{
-		int found = 0;
-		for (Map.Entry<K, V> entry : entries)
-		{
-			if(mapContainsEntry(map, entry)) found++;
-		}
-		return found;
-	}
-
-	private static <K,V> boolean mapContainsEntry(Map<K,V> map, Map.Entry<K,V> entry)
-	{
-		V mapValue = map.get(entry.getKey());
-		V value = entry.getValue();
-		return mapValue == value || value != null && value.equals(mapValue);
 	}
 
 	/** Find matches by given search word */
@@ -234,20 +221,6 @@ public class FeatureDictionary
 
 	// TODO: interface: get(String name) for exact-matches only?
 
-	private static boolean startsWordWith(String haystack, String needle)
-	{
-		int indexOf = haystack.indexOf(needle);
-		return indexOf == 0 || indexOf > 0 && haystack.charAt(indexOf-1) == ' ';
-	}
-
-	private interface Predicate<T> { boolean fn(T v); }
-	private static <T> List<T> filter(Iterable<T> collection, Predicate<T> predicate)
-	{
-		List<T> result = new ArrayList<>();
-		for (T v : collection) if(predicate.fn(v)) result.add(v);
-		return result;
-	}
-
 	private List<Match> createMatches(List<Feature> featuresList, int limit, Locale locale)
 	{
 		int size = limit > 0 ? Math.min(featuresList.size(), limit) : featuresList.size();
@@ -283,12 +256,13 @@ public class FeatureDictionary
 
 	public class QueryByTagBuilder
 	{
-		private final Map<String, String> tags;
+		private final Collection<Map.Entry<String, String>> tags;
 		private GeometryType geometryType = null;
 		private Locale locale = Locale.getDefault();
 		private Boolean suggestion = null;
 
-		private QueryByTagBuilder(Map<String, String> tags) { this.tags = tags; }
+		private QueryByTagBuilder(Map<String, String> tags) { this.tags = tags.entrySet(); }
+		private QueryByTagBuilder(Collection<Map.Entry<String, String>> tags) { this.tags = tags; }
 
 		/** Sets for which geometry type to look. If not set or <tt>null</tt>, any will match. */
 		public QueryByTagBuilder forGeometry(GeometryType geometryType)

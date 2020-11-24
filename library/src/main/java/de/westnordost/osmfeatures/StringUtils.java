@@ -17,4 +17,10 @@ class StringUtils
 	{
 		return stripDiacritics(str).toLowerCase(Locale.US);
 	}
+
+	static boolean startsWordWith(String haystack, String needle)
+	{
+		int indexOf = haystack.indexOf(needle);
+		return indexOf == 0 || indexOf > 0 && haystack.charAt(indexOf-1) == ' ';
+	}
 }
