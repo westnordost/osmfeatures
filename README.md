@@ -74,19 +74,19 @@ FeatureDictionary dictionary = AndroidFeatureDictionary.create("path/within/asse
 
 ### Find matches by tags
 ```java
-List<Match> matches = dictionary
+List<Feature> matches = dictionary
     .byTags(Map.of("amenity", "bench"))  // look for features that have the given tags
     .forGeometry(GeometryType.POINT)     // limit the search to features that may be points
     .forLocale(Locale.GERMAN)            // show results in German
     .find();
 
-println(matches.get(0).name); // prints "Parkbank" (or something like this)
+println(matches.get(0).getName()); // prints "Parkbank" (or something like this)
 ```
 
 ### Find matches by search word
 
 ```java
-List<Match> matches = dictionary
+List<Feature> matches = dictionary
     .byTerm("Bank")                  // look for features matching "Bank"
     .forGeometry(GeometryType.AREA)  // limit the search to features that may be areas
     .forLocale(Locale.GERMAN)        // show results in German

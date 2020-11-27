@@ -9,6 +9,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import static de.westnordost.osmfeatures.MapEntry.*;
+import static de.westnordost.osmfeatures.TestUtils.assertEqualsIgnoreOrder;
 import static de.westnordost.osmfeatures.TestUtils.listOf;
 import static org.junit.Assert.*;
 
@@ -165,61 +166,47 @@ public class FeatureDictionaryTest
 	{
 		Map<String,String> tags = mapOf(tag("shop", "bakery"));
 		FeatureDictionary dictionary = dictionary(Locale.GERMAN, bakery);
-		List<Match> matches = dictionary.byTags(tags).forLocale(Locale.ITALIAN, Locale.GERMAN).find();
-		assertEquals(1, matches.size());
-		assertEquals(bakery.getName(), matches.get(0).name);
-		assertEquals(bakery.getTags(), matches.get(0).tags);
-		assertNull(matches.get(0).parentName);
+		List<Feature> matches = dictionary.byTags(tags).forLocale(Locale.ITALIAN, Locale.GERMAN).find();
+		assertEquals(listOf(bakery), matches);
 	}
 
 	@Test public void find_entry_by_tags()
 	{
 		Map<String,String> tags = mapOf(tag("shop", "bakery"));
 		FeatureDictionary dictionary = dictionary(bakery);
-		List<Match> matches = dictionary.byTags(tags).find();
-		assertEquals(1, matches.size());
-		assertEquals(bakery.getName(), matches.get(0).name);
-		assertEquals(bakery.getTags(), matches.get(0).tags);
-		assertNull(matches.get(0).parentName);
+		List<Feature> matches = dictionary.byTags(tags).find();
+		assertEquals(listOf(bakery), matches);
 	}
 
 	@Test public void find_non_searchable_entry_by_tags()
 	{
 		Map<String,String> tags = mapOf(tag("amenity", "scheißhaus"));
 		FeatureDictionary dictionary = dictionary(scheisshaus);
-		List<Match> matches = dictionary.byTags(tags).find();
-		assertEquals(1, matches.size());
+		List<Feature> matches = dictionary.byTags(tags).find();
+		assertEquals(listOf(scheisshaus), matches);
 	}
 
 	@Test public void find_entry_by_tags_correct_geometry()
 	{
 		Map<String,String> tags = mapOf(tag("shop", "bakery"));
 		FeatureDictionary dictionary = dictionary(bakery);
-		List<Match> matches = dictionary.byTags(tags).forGeometry(GeometryType.POINT).find();
-		assertEquals(1, matches.size());
-		assertEquals(bakery.getName(), matches.get(0).name);
-		assertEquals(bakery.getTags(), matches.get(0).tags);
-		assertNull(matches.get(0).parentName);
+		List<Feature> matches = dictionary.byTags(tags).forGeometry(GeometryType.POINT).find();
+		assertEquals(listOf(bakery), matches);
 	}
 
 	@Test public void find_brand_entry_by_tags()
 	{
 		Map<String,String> tags = mapOf(tag("shop", "bakery"), tag("name", "Ditsch"));
 		FeatureDictionary dictionary = dictionary(bakery, ditsch);
-		List<Match> matches = dictionary.byTags(tags).find();
-		assertEquals(1, matches.size());
-		assertEquals(ditsch.getName(), matches.get(0).name);
-		Map<String,String> expectedTags = new HashMap<>(ditsch.getTags());
-		expectedTags.putAll(ditsch.getAddTags());
-		assertEquals(expectedTags, matches.get(0).tags);
-		assertEquals("Bäckerei", matches.get(0).parentName);
+		List<Feature> matches = dictionary.byTags(tags).find();
+		assertEquals(listOf(ditsch), matches);
 	}
 
 	@Test public void find_only_brands_finds_no_normal_entries()
 	{
 		Map<String,String> tags = mapOf(tag("shop", "bakery"), tag("name", "Ditsch"));
 		FeatureDictionary dictionary = dictionary(bakery);
-		List<Match> matches = dictionary.byTags(tags).isSuggestion(true).find();
+		List<Feature> matches = dictionary.byTags(tags).isSuggestion(true).find();
 		assertEquals(0, matches.size());
 	}
 
@@ -227,37 +214,31 @@ public class FeatureDictionaryTest
 	{
 		Map<String,String> tags = mapOf(tag("shop", "bakery"), tag("name", "Ditsch"));
 		FeatureDictionary dictionary = dictionary(bakery, ditsch);
-		List<Match> matches = dictionary.byTags(tags).isSuggestion(false).find();
-		assertEquals(1, matches.size());
-		assertEquals(bakery.getName(), matches.get(0).name);
-		assertEquals(bakery.getTags(), matches.get(0).tags);
-		assertNull(matches.get(0).parentName);
+		List<Feature> matches = dictionary.byTags(tags).isSuggestion(false).find();
+		assertEquals(listOf(bakery), matches);
 	}
 
 	@Test public void find_multiple_brands_sorts_by_matching_add_tags()
 	{
 		Map<String,String> tags = mapOf(tag("shop", "bakery"), tag("name", "Ditsch"), tag("brand", "Ditsch"));
 		FeatureDictionary dictionary = dictionary(ditschRussian, ditsch);
-		List<Match> matches = dictionary.byTags(tags).forLocale((Locale) null).find();
-		assertEquals(2, matches.size());
-		assertEquals(ditsch.getName(), matches.get(0).name);
-		assertEquals(ditschRussian.getName(), matches.get(1).name);
+		List<Feature> matches = dictionary.byTags(tags).forLocale((Locale) null).find();
+		assertEquals(listOf(ditsch, ditschRussian), matches);
 	}
 
 	@Test public void find_multiple_brands_sorts_by_locale()
 	{
 		Map<String,String> tags = mapOf(tag("shop", "bakery"), tag("name", "Ditsch"));
 		FeatureDictionary dictionary = dictionary(ditschRussian, ditschInternational, ditsch);
-		List<Match> matches = dictionary.byTags(tags).forLocale((Locale) null).find();
-		assertEquals(3, matches.size());
-		assertEquals(ditschInternational.getName(), matches.get(0).name);
+		List<Feature> matches = dictionary.byTags(tags).forLocale((Locale) null).find();
+		assertEquals(ditschInternational, matches.get(0));
 	}
 
 	@Test public void find_multiple_entries_by_tags()
 	{
 		Map<String,String> tags = mapOf(tag("shop", "bakery"), tag("amenity", "bank"));
 		FeatureDictionary dictionary = dictionary(bakery, bank);
-		List<Match> matches = dictionary.byTags(tags).find();
+		List<Feature> matches = dictionary.byTags(tags).find();
 		assertEquals(2, matches.size());
 	}
 
@@ -265,18 +246,16 @@ public class FeatureDictionaryTest
 	{
 		Map<String,String> tags = mapOf(tag("shop", "car"));
 		FeatureDictionary dictionary = dictionary(car_dealer, second_hand_car_dealer);
-		List<Match> matches = dictionary.byTags(tags).find();
-		assertEquals(1, matches.size());
-		assertEquals(car_dealer.getName(), matches.get(0).name);
+		List<Feature> matches = dictionary.byTags(tags).find();
+		assertEquals(listOf(car_dealer), matches);
 	}
 
 	@Test public void find_entry_with_specific_tags()
 	{
 		Map<String,String> tags = mapOf(tag("shop", "car"), tag("second_hand", "only"));
 		FeatureDictionary dictionary = dictionary(car_dealer, second_hand_car_dealer);
-		List<Match> matches = dictionary.byTags(tags).find();
-		assertEquals(1, matches.size());
-		assertEquals(second_hand_car_dealer.getName(), matches.get(0).name);
+		List<Feature> matches = dictionary.byTags(tags).find();
+		assertEquals(listOf(second_hand_car_dealer), matches);
 	}
 
 	@Test public void find_no_entry_by_name()
@@ -307,97 +286,85 @@ public class FeatureDictionaryTest
 	@Test public void find_entry_by_name()
 	{
 		FeatureDictionary dictionary = dictionary(bakery);
-		List<Match> findings = dictionary.byTerm("Bäckerei").find();
-		assertEquals(1, findings.size());
-		assertEquals(bakery.getName(), findings.get(0).name);
+		List<Feature> matches = dictionary.byTerm("Bäckerei").find();
+		assertEquals(listOf(bakery), matches);
 	}
 
 	@Test public void find_entry_by_name_with_correct_geometry()
 	{
 		FeatureDictionary dictionary = dictionary(bakery);
-		List<Match> findings = dictionary.byTerm("Bäckerei").forGeometry(GeometryType.POINT).find();
-		assertEquals(1, findings.size());
-		assertEquals(bakery.getName(), findings.get(0).name);
+		List<Feature> matches = dictionary.byTerm("Bäckerei").forGeometry(GeometryType.POINT).find();
+		assertEquals(listOf(bakery), matches);
 	}
 
 	@Test public void find_entry_by_name_with_correct_country()
 	{
 		FeatureDictionary dictionary = dictionary(ditsch, bakery);
-		List<Match> findings = dictionary.byTerm("Ditsch").inCountry("DE").find();
-		assertEquals(1, findings.size());
-		assertEquals(ditsch.getName(), findings.get(0).name);
-		assertEquals(bakery.getName(), findings.get(0).parentName);
+		List<Feature> matches = dictionary.byTerm("Ditsch").inCountry("DE").find();
+		assertEquals(listOf(ditsch), matches);
 	}
 
 	@Test public void find_entry_by_name_case_insensitive()
 	{
 		FeatureDictionary dictionary = dictionary(bakery);
-		List<Match> findings = dictionary.byTerm("BÄCkErEI").find();
-		assertEquals(1, findings.size());
-		assertEquals(bakery.getName(), findings.get(0).name);
+		List<Feature> matches = dictionary.byTerm("BÄCkErEI").find();
+		assertEquals(listOf(bakery), matches);
 	}
 
 	@Test public void find_entry_by_name_diacritics_insensitive()
 	{
 		FeatureDictionary dictionary = dictionary(bakery);
-		List<Match> findings = dictionary.byTerm("Backérèi").find();
-		assertEquals(1, findings.size());
-		assertEquals(bakery.getName(), findings.get(0).name);
+		List<Feature> matches = dictionary.byTerm("Backérèi").find();
+		assertEquals(listOf(bakery), matches);
 	}
 
 	@Test public void find_entry_by_term()
 	{
 		FeatureDictionary dictionary = dictionary(bakery);
-		List<Match> findings = dictionary.byTerm("bro").find();
-		assertEquals(1, findings.size());
-		assertEquals(bakery.getName(), findings.get(0).name);
+		List<Feature> matches = dictionary.byTerm("bro").find();
+		assertEquals(listOf(bakery), matches);
 	}
 
 	@Test public void find_entry_by_term_case_insensitive()
 	{
 		FeatureDictionary dictionary = dictionary(bakery);
-		List<Match> findings = dictionary.byTerm("BRO").find();
-		assertEquals(1, findings.size());
-		assertEquals(bakery.getName(), findings.get(0).name);
+		List<Feature> matches = dictionary.byTerm("BRO").find();
+		assertEquals(listOf(bakery), matches);
 	}
 
 	@Test public void find_entry_by_term_diacritics_insensitive()
 	{
 		FeatureDictionary dictionary = dictionary(bakery);
-		List<Match> findings = dictionary.byTerm("bró").find();
-		assertEquals(1, findings.size());
-		assertEquals(bakery.getName(), findings.get(0).name);
+		List<Feature> matches = dictionary.byTerm("bró").find();
+		assertEquals(listOf(bakery), matches);
 	}
 
-	@Test public void find_multiple_entries_by_name()
+	@Test public void find_multiple_entries_by_term()
 	{
 		FeatureDictionary dictionary = dictionary(second_hand_car_dealer, car_dealer);
-		List<Match> matches = dictionary.byTerm("auto").find();
-		assertEquals(2, matches.size());
+		List<Feature> matches = dictionary.byTerm("auto").find();
+		assertEqualsIgnoreOrder(listOf(second_hand_car_dealer, car_dealer), matches);
 	}
 
 	@Test public void find_multiple_entries_by_name_but_respect_limit()
 	{
 		FeatureDictionary dictionary = dictionary(second_hand_car_dealer, car_dealer);
-		List<Match> matches = dictionary.byTerm("auto").limit(1).find();
+		List<Feature> matches = dictionary.byTerm("auto").limit(1).find();
 		assertEquals(1, matches.size());
 	}
 
 	@Test public void find_only_brands_by_name_finds_no_normal_entries()
 	{
 		FeatureDictionary dictionary = dictionary(bakery);
-		List<Match> matches = dictionary.byTerm("Bäckerei").isSuggestion(true).find();
+		List<Feature> matches = dictionary.byTerm("Bäckerei").isSuggestion(true).find();
 		assertEquals(0, matches.size());
 	}
 
 	@Test public void find_no_brands_by_name_finds_only_normal_entries()
 	{
 		FeatureDictionary dictionary = dictionary(bank, bank_of_america);
-		List<Match> matches = dictionary.byTerm("Bank").isSuggestion(false).find();
-		assertEquals(1, matches.size());
-		assertEquals(bank.getName(), matches.get(0).name);
-		assertEquals(bank.getTags(), matches.get(0).tags);
-		assertNull(matches.get(0).parentName);
+		List<Feature> matches = dictionary.byTerm("Bank").isSuggestion(false).find();
+		assertEquals(listOf(bank), matches);
 	}
 
 	@Test public void find_no_entry_by_term_because_wrong_locale()
@@ -409,11 +376,8 @@ public class FeatureDictionaryTest
 	@Test public void find_entry_by_term_because_fallback_locale()
 	{
 		FeatureDictionary dictionary = dictionary(Locale.GERMAN, bakery);
-		List<Match> matches = dictionary.byTerm("Bäck").forLocale(Locale.ITALIAN, Locale.GERMAN).find();
-		assertEquals(1, matches.size());
-		assertEquals(bakery.getName(), matches.get(0).name);
-		assertEquals(bakery.getTags(), matches.get(0).tags);
-		assertNull(matches.get(0).parentName);
+		List<Feature> matches = dictionary.byTerm("Bäck").forLocale(Locale.ITALIAN, Locale.GERMAN).find();
+		assertEquals(listOf(bakery), matches);
 	}
 
 	@Test public void find_by_term_sorts_result_in_correct_order()
@@ -421,19 +385,19 @@ public class FeatureDictionaryTest
 		FeatureDictionary dictionary = dictionary(
 				casino, baenk, bad_bank, stock_exchange, bank_of_liechtenstein, bank, bench, atm,
 				bank_of_america, deutsche_bank);
-		List<Match> findings = dictionary.byTerm("Bank").find();
-		assertEquals(8, findings.size());
-		assertEquals(bank.getName(), findings.get(0).name); // exact name matches
-		assertEquals(baenk.getName(), findings.get(1).name); // exact name matches (diacritics and case insensitive)
-		assertEquals(atm.getName(), findings.get(2).name); // starts-with name matches
-		assertEquals(bad_bank.getName(), findings.get(3).name); // starts-with-word name matches
-		assertEquals(bank_of_america.getName(), findings.get(4).name); // starts-with brand name matches
-		assertEquals(bank_of_liechtenstein.getName(), findings.get(5).name); // starts-with brand name matches - lower matchScore
-		assertEquals(bench.getName(), findings.get(6).name); // found word in terms - higher matchScore
-		assertEquals(stock_exchange.getName(), findings.get(7).name); // found word in terms - lower matchScore
-
-		//assertEquals(casino.name, findings.get(X).name); // not included: "Spielbank" does not start with "bank"
-		//assertEquals(deutsche_bank.name, findings.get(X).name); // not included: "Deutsche Bank" does not start with "bank"
+		List<Feature> matches = dictionary.byTerm("Bank").find();
+		assertEquals(listOf(
+				bank,       // exact name matches
+				baenk,      // exact name matches (diacritics and case insensitive)
+				atm,        // starts-with name matches
+				bad_bank,   // starts-with-word name matches
+				bank_of_america,        // starts-with brand name matches
+				bank_of_liechtenstein,  // starts-with brand name matches - lower matchScore
+				bench,           // found word in terms - higher matchScore
+				stock_exchange   // found word in terms - lower matchScore
+				// casino,       // not included: "Spielbank" does not start with "bank"
+				// deutsche_bank // not included: "Deutsche Bank" does not start with "bank"
+		), matches);
 	}
 
 	@Test public void some_tests_with_real_data()
@@ -443,26 +407,26 @@ public class FeatureDictionaryTest
 		featureCollection.getAllLocalized(listOf(Locale.ENGLISH));
 		FeatureDictionary dictionary = new FeatureDictionary(featureCollection);
 
-		List<Match> matches = dictionary
+		List<Feature> matches = dictionary
 				.byTags(mapOf(tag("amenity", "studio")))
 				.forLocale(Locale.ENGLISH)
 				.find();
 		assertEquals(1, matches.size());
-		assertEquals("Studio", matches.get(0).name);
+		assertEquals("Studio", matches.get(0).getName());
 
-		List<Match> matches2 = dictionary
+		List<Feature> matches2 = dictionary
 				.byTags(mapOf(tag("amenity", "studio"), tag("studio", "audio")))
 				.forLocale(Locale.ENGLISH)
 				.find();
 		assertEquals(1, matches2.size());
-		assertEquals("Recording Studio", matches2.get(0).name);
+		assertEquals("Recording Studio", matches2.get(0).getName());
 
-		List<Match> matches3 = dictionary
+		List<Feature> matches3 = dictionary
 				.byTerm("Chines")
 				.forLocale(Locale.ENGLISH)
 				.find();
 		assertEquals(1, matches3.size());
-		assertEquals("Chinese Restaurant", matches3.get(0).name);
+		assertEquals("Chinese Restaurant", matches3.get(0).getName());
 	}
 
 	private static FeatureDictionary dictionary(Feature... entries)

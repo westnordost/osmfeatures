@@ -53,7 +53,7 @@ public class FeatureDictionary
 		return new QueryByTagBuilder(tags);
 	}
 
-	private List<Match> get(Map<String, String> tags, GeometryType geometry, Boolean isSuggestion, List<Locale> locales)
+	private List<Feature> get(Map<String, String> tags, GeometryType geometry, Boolean isSuggestion, List<Locale> locales)
 	{
 		if(tags.isEmpty()) return Collections.emptyList();
 
@@ -111,7 +111,7 @@ public class FeatureDictionary
 			return (int) (100 * b.getMatchScore() - 100 * a.getMatchScore());
 		});
 
-		return createMatches(foundFeatures, -1, locales);
+		return foundFeatures;
 	}
 
 	/** Find matches by given search word */
@@ -120,7 +120,7 @@ public class FeatureDictionary
 		return new QueryByTermBuilder(term);
 	}
 
-	private List<Match> get(String search, GeometryType geometry, String countryCode, Boolean isSuggestion, int limit, List<Locale> locales)
+	private List<Feature> get(String search, GeometryType geometry, String countryCode, Boolean isSuggestion, int limit, List<Locale> locales)
 	{
 		String canonicalSearch = StringUtils.canonicalize(search);
 
@@ -158,7 +158,7 @@ public class FeatureDictionary
 			result.addAll(foundFeaturesByName);
 
 			// if limit is reached, can return earlier (performance improvement)
-			if(limit > 0 && result.size() >= limit) return createMatches(result, limit, locales);
+			if(limit > 0 && result.size() >= limit) return result.subList(0, Math.min(limit, result.size()));
 
 		}
 		if (isSuggestion == null || isSuggestion)
@@ -171,7 +171,7 @@ public class FeatureDictionary
 			result.addAll(foundBrandFeatures);
 
 			// if limit is reached, can return earlier (performance improvement)
-			if(limit > 0 && result.size() >= limit) return createMatches(result, limit, locales);
+			if(limit > 0 && result.size() >= limit) return result.subList(0, Math.min(limit, result.size()));
 		}
 		if (isSuggestion == null || !isSuggestion)
 		{
@@ -192,7 +192,7 @@ public class FeatureDictionary
 			});
 			result.addAll(foundFeaturesByTerm);
 		}
-		return createMatches(result, limit, locales);
+		return result.subList(0, Math.min(limit, result.size()));
 	}
 
 	/** lazily get or create tags index for given locale(s) */
@@ -269,44 +269,6 @@ public class FeatureDictionary
 			);
 	}
 
-	private List<Match> createMatches(List<Feature> featuresList, int limit, List<Locale> locales)
-	{
-		int size = limit > 0 ? Math.min(featuresList.size(), limit) : featuresList.size();
-		List<Match> result = new ArrayList<>(size);
-		for (Feature feature : featuresList)
-		{
-			result.add(createMatch(feature, locales));
-			if(--limit == 0) return result;
-		}
-		return result;
-	}
-
-	private Match createMatch(Feature feature, List<Locale> locales)
-	{
-		String name = feature.getName();
-		Map<String, String> tags = new HashMap<>(feature.getTags().size() + feature.getAddTags().size());
-		tags.putAll(feature.getTags());
-		tags.putAll(feature.getAddTags());
-		String parentName = null;
-		if(feature.isSuggestion())
-		{
-			Feature parentFeature = getParentFeature(feature, locales);
-			if(parentFeature != null)
-			{
-				parentName = parentFeature.getName();
-			}
-		}
-		return new Match(name, tags, parentName);
-	}
-
-	private Feature getParentFeature(Feature feature, List<Locale> locales)
-	{
-		int lastSlashIndex = feature.getId().lastIndexOf("/");
-		if(lastSlashIndex == -1) return null;
-		String parentId = feature.getId().substring(0, lastSlashIndex);
-		return featureCollection.get(parentId, locales);
-	}
-
 	public class QueryByTagBuilder
 	{
 		private final Map<String, String> tags;
@@ -352,7 +314,7 @@ public class FeatureDictionary
 		 *  found. <br>In rare cases, a set of tags may match multiple primary features, such as for
 		 *  tag combinations like <tt>shop=deli</tt> + <tt>amenity=cafe</tt>, so, this is why
 		 *  it is a list. */
-		public List<Match> find()
+		public List<Feature> find()
 		{
 			return get(tags, geometryType, suggestion, Arrays.asList(locale));
 		}
@@ -420,7 +382,7 @@ public class FeatureDictionary
 		 *  found. <br>
 		 *  Results are sorted mainly in this order: Matches with names, with brand names, then
 		 *  matches with terms (keywords). */
-		public List<Match> find()
+		public List<Feature> find()
 		{
 			return get(term, geometryType, countryCode, suggestion, limit, Arrays.asList(locale));
 		}
