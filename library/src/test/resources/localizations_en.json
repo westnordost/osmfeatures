@@ -1,7 +1,7 @@
-{
+{ "xx": { "presets" : {
   "presets": {
     "some/id": {
       "name": "Bakery"
     }
   }
-}
+}}}

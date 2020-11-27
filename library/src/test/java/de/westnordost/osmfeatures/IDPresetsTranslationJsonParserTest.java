@@ -1,9 +1,7 @@
 package de.westnordost.osmfeatures;
 
-import org.json.JSONObject;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -59,10 +57,7 @@ public class IDPresetsTranslationJsonParserTest {
         }
 
         URL rawTranslationsURL = new URL("https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/translations/de.json");
-        JSONObject jsonObject = JsonUtils.createFromInputStream(rawTranslationsURL.openStream());
-        String translationString = jsonObject.getJSONObject("de").getJSONObject("presets").toString();
-        InputStream is = new ByteArrayInputStream(translationString.getBytes("UTF-8"));
-        List<LocalizedFeature> translatedFeatures = new IDPresetsTranslationJsonParser().parse(is, Locale.GERMAN, featureMap);
+        List<LocalizedFeature> translatedFeatures = new IDPresetsTranslationJsonParser().parse(rawTranslationsURL.openStream(), Locale.GERMAN, featureMap);
 
         // should not crash etc
         assertTrue(translatedFeatures.size() > 1000);

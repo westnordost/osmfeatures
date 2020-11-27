@@ -1,4 +1,4 @@
-{
+{ "xx": { "presets" : {
   "presets": {
     "some/id": {
       "name": "Backhusl"
@@ -7,4 +7,4 @@
       "name": "Brückle"
     }
   }
-}
+}}}

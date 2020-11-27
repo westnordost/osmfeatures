@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -17,11 +18,7 @@ import static de.westnordost.osmfeatures.JsonUtils.parseCommaSeparatedList;
 /** Parses a file from
  *  https://github.com/openstreetmap/id-tagging-schema/tree/main/dist/translations
  *  , given the base features are already parsed.
- *
- *  Note: The translation files contain more than just the translations for the presets. To be
- *  precise, the parser assumes the translation files to be reduced to everything in
- *  [language code] -> presets -> presets
- *  see README.md */
+ */
 class IDPresetsTranslationJsonParser {
 
     public List<LocalizedFeature> parse(
@@ -29,7 +26,13 @@ class IDPresetsTranslationJsonParser {
     ) throws JSONException, IOException
     {
         JSONObject object = createFromInputStream(is);
-        JSONObject presetsObject = object.getJSONObject("presets");
+        String languageKey = object.keys().next();
+        JSONObject languageObject = object.optJSONObject(languageKey);
+        if (languageObject == null) return Collections.emptyList();
+        JSONObject presetsContainerObject = languageObject.optJSONObject("presets");
+        if (presetsContainerObject == null) return Collections.emptyList();
+        JSONObject presetsObject = presetsContainerObject.optJSONObject("presets");
+        if (presetsObject == null) return Collections.emptyList();
         List<LocalizedFeature> result = new ArrayList<>(presetsObject.length());
         for (Iterator<String> it = presetsObject.keys(); it.hasNext(); )
         {

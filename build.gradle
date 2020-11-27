@@ -13,3 +13,34 @@ buildscript {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+import groovy.json.JsonSlurper
+
+task downloadPresets {
+    doLast {
+        def targetDir = "$projectDir/presets"
+        def presetsUrl = new URL("https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json")
+        def contentsUrl = new URL("https://api.github.com/repos/openstreetmap/id-tagging-schema/contents/dist/translations")
+
+        new File("$targetDir/presets.json").withOutputStream { it << presetsUrl.openStream() }
+
+        def slurper = new JsonSlurper()
+        slurper.parse(contentsUrl, "UTF-8").each {
+            if(it.type == "file") {
+                def language = it.name.substring(0, it.name.lastIndexOf("."))
+                def translationsUrl = new URL(it.download_url)
+                def javaLanguage = bcp47LanguageTagToJavaLanguageTag(language)
+                new File("$targetDir/${javaLanguage}.json").withOutputStream { it << translationsUrl.openStream() }
+            }
+        }
+    }
+}
+
+// Java (and thus also Android) uses some old iso (language) codes. F.e. id -> in etc.
+// so the localized files also need to use the old iso codes
+static def bcp47LanguageTagToJavaLanguageTag(String bcp47) {
+    def locale = Locale.forLanguageTag(bcp47)
+    def result = locale.language
+    if (!locale.country.isEmpty()) result += "-" + locale.country
+    return result
+}

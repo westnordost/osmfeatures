@@ -6,13 +6,13 @@ Requires Java 8.
 
 ## Copyright and License
 
-© 2019 Tobias Zwick. This library is released under the terms of the [Apache License Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt).
+© 2019-2020 Tobias Zwick. This library is released under the terms of the [Apache License Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt).
 
 ## Installation
 
-Add [`de.westnordost:osmfeatures:1.2`](http://jcenter.bintray.com/de/westnordost/osmfeatures/1.2/) as a Maven dependency or download the jar from there.
+Add [`de.westnordost:osmfeatures:2.0`](http://jcenter.bintray.com/de/westnordost/osmfeatures/2.0/) as a Maven dependency or download the jar from there.
 
-For Android, use [`de.westnordost:osmfeatures-android:1.2`](http://jcenter.bintray.com/de/westnordost/osmfeatures-android/1.2/).
+For Android, use [`de.westnordost:osmfeatures-android:2.0`](http://jcenter.bintray.com/de/westnordost/osmfeatures-android/2.0/).
 
 It's in the JCenter repository, not Maven Central.
 
@@ -20,19 +20,19 @@ It's in the JCenter repository, not Maven Central.
 
 ### Get the data
 
-The data for the dictionary is not maintained in this repository. It actually uses the [preset data from iD](https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json) and [the translations of the presets](https://github.com/openstreetmap/id-tagging-schema/tree/main/dist/translations). The former can just be copied, the latter must be fished out of the global localization files for iD.
+The data for the dictionary is not maintained in this repository.
+It actually uses the [preset data from iD](https://github.com/openstreetmap/id-tagging-schema/blob/main/dist/presets.json) and [the translations of the presets](https://github.com/openstreetmap/id-tagging-schema/tree/main/dist/translations).
+Just dump all the translations and the presets.json into the same directory.
 Do not forget to give attribution to iD since you are using their data.
 
 If you use gradle as your build tool, The easiest way to get this data is to put this task into your `build.gradle` and either execute this task manually from time to time or make the build process depend on it (by adding `preBuild.dependsOn(downloadPresets)`):
 
 ```groovy
-
 import groovy.json.JsonSlurper
-import groovy.json.JsonOutput
 
 task downloadPresets {
     doLast {
-        def targetDir = "app/src/main/assets/osmfeatures"
+        def targetDir = "$projectDir/path/to/where/the/data/should/go"
         def presetsUrl = new URL("https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json")
         def contentsUrl = new URL("https://api.github.com/repos/openstreetmap/id-tagging-schema/contents/dist/translations")
 
@@ -42,13 +42,9 @@ task downloadPresets {
         slurper.parse(contentsUrl, "UTF-8").each {
             if(it.type == "file") {
                 def language = it.name.substring(0, it.name.lastIndexOf("."))
-                def content = slurper.parse(new URL(it.download_url),"UTF-8")
-                def presets = content.values()[0]?.presets?.presets
-                if(presets) {
-                    def json = JsonOutput.prettyPrint(JsonOutput.toJson([presets: presets]))
-                    def javaLanguage = bcp47LanguageTagToJavaLanguageTag(language)
-                    new File("$targetDir/${javaLanguage}.json").write(json, "UTF-8")
-                }
+                def translationsUrl = new URL(it.download_url)
+                def javaLanguage = bcp47LanguageTagToJavaLanguageTag(language)
+                new File("$targetDir/${javaLanguage}.json").withOutputStream { it << translationsUrl.openStream() }
             }
         }
     }

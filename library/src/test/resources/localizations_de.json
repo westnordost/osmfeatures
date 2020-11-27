@@ -1,4 +1,4 @@
-{
+{ "xx": { "presets" : {
   "presets": {
     "some/id": {
       "name": "Bäckerei"
@@ -7,4 +7,4 @@
       "name": "Gullideckel"
     }
   }
-}
+}}}
