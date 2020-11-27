@@ -30,8 +30,10 @@ public class FeatureDictionary
 		termsIndexes = new HashMap<>();
 		Collection<Feature> brandFeatures = featureCollection.getAllSuggestions();
 		brandNameIndex = new FeatureTermIndex(brandFeatures, feature ->
-				Collections.singletonList(feature.getCanonicalName())
-		);
+		{
+			if (!feature.isSearchable()) return Collections.emptyList();
+			return Collections.singletonList(feature.getCanonicalName());
+		});
 		brandTagsIndex = new FeatureTagsIndex(brandFeatures);
 		// build indices for default locale
 		getTagsIndex(Arrays.asList(Locale.getDefault(), null));
