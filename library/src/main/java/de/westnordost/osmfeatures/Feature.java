@@ -7,7 +7,7 @@ import java.util.Map;
 /** Subset of a feature as defined in the iD editor
  *  https://github.com/ideditor/schema-builder#source-files
  *  with only the fields helpful for the dictionary */
-interface Feature {
+public interface Feature {
     String getId();
     Map<String,String> getTags();
     List<GeometryType> getGeometry();

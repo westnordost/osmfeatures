@@ -13,10 +13,10 @@ public class AndroidFeatureDictionary
 	/** Create a new NamesDictionary which gets it's data from the given directory in the app's asset folder. */
 	public static FeatureDictionary create(AssetManager assetManager, String basePath)
 	{
-		return new FeatureDictionary(new iDFeatureCollection(new AssetManagerAccess(assetManager, basePath)));
+		return new FeatureDictionary(new IDFeatureCollection(new AssetManagerAccess(assetManager, basePath)));
 	}
 
-	static class AssetManagerAccess implements iDFeatureCollection.FileAccessAdapter
+	static class AssetManagerAccess implements IDFeatureCollection.FileAccessAdapter
 	{
 		private final AssetManager assetManager;
 		private final String basePath;
