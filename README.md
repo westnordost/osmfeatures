@@ -20,7 +20,7 @@ It's in the JCenter repository, not Maven Central.
 
 ### Get the data
 
-The data for the dictionary is not maintained in this repository. It actually uses the [preset data from iD](https://raw.githubusercontent.com/openstreetmap/iD/release/data/presets/presets.json) and [the translations of the presets](https://github.com/openstreetmap/iD/tree/master/dist/locales). The former can just be copied, the latter must be fished out of the global localization files for iD.
+The data for the dictionary is not maintained in this repository. It actually uses the [preset data from iD](https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json) and [the translations of the presets](https://github.com/openstreetmap/id-tagging-schema/tree/main/dist/translations). The former can just be copied, the latter must be fished out of the global localization files for iD.
 Do not forget to give attribution to iD since you are using their data.
 
 If you use gradle as your build tool, The easiest way to get this data is to put this task into your `build.gradle` and either execute this task manually from time to time or make the build process depend on it (by adding `preBuild.dependsOn(downloadPresets)`):
