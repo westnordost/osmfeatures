@@ -5,7 +5,9 @@
     "name": "foo",
     "terms": "1,2",
     "addTags": { "e": "f" },
+    "removeTags": { "d": "g" },
     "countryCodes": ["de","gb"],
+    "notCountryCodes": ["it"],
     "searchable": false,
     "matchScore": 0.5,
     "suggestion": true

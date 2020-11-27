@@ -2,27 +2,28 @@ package de.westnordost.osmfeatures;
 
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static de.westnordost.osmfeatures.MapEntry.*;
+import static de.westnordost.osmfeatures.TestUtils.listOf;
 import static org.junit.Assert.*;
 
 public class FeatureDictionaryTest
 {
 	private static final List<GeometryType> POINT = Collections.singletonList(GeometryType.POINT);
 
-	private final BaseFeature bakery = feature(
+	private final Feature bakery = feature(
 			"shop/bakery",
 			mapOf(tag("shop","bakery")),
 			"Bäckerei",
 			listOf("Brot")
 	);
 
-	private final BaseFeature ditsch = brandFeature(
+	private final Feature ditsch = brandFeature(
 			"shop/bakery/Ditsch",
 			mapOf(tag("shop","bakery"), tag("name","Ditsch")),
 			"Ditsch",
@@ -30,7 +31,7 @@ public class FeatureDictionaryTest
 			mapOf(tag("wikipedia","de:Brezelb%C3%A4ckerei_Ditsch"), tag("brand", "Ditsch"))
 	);
 
-	private final BaseFeature ditschRussian = brandFeature(
+	private final Feature ditschRussian = brandFeature(
 			"shop/bakery/Дитсч",
 			mapOf(tag("shop","bakery"), tag("name","Ditsch")),
 			"Дитсч",
@@ -38,7 +39,7 @@ public class FeatureDictionaryTest
 			mapOf(tag("wikipedia","de:Brezelb%C3%A4ckerei_Ditsch"), tag("brand", "Дитсч"))
 	);
 
-	private final BaseFeature ditschInternational = brandFeature(
+	private final Feature ditschInternational = brandFeature(
 			"shop/bakery/Ditsh",
 			mapOf(tag("shop","bakery"), tag("name","Ditsch")),
 			"Ditsh",
@@ -46,68 +47,72 @@ public class FeatureDictionaryTest
 			mapOf(tag("wikipedia","de:Brezelb%C3%A4ckerei_Ditsch"))
 	);
 
-	private final BaseFeature car_dealer = feature(
+	private final Feature car_dealer = feature(
 			"shop/car",
 			mapOf(tag("shop","car")),
 			"Autohändler",
 			listOf("auto")
 	);
-	private final BaseFeature second_hand_car_dealer = feature(
+	private final Feature second_hand_car_dealer = feature(
 			"shop/car/second_hand",
 			mapOf(tag("shop","car"), tag("second_hand", "only")),
 			"Gebrauchtwagenhändler",
 			listOf("auto")
 	);
 
-	private final BaseFeature scheisshaus = new BaseFeature(
+	private final Feature scheisshaus = new BaseFeature(
 			"amenity/scheißhaus",
 			mapOf(tag("amenity","scheißhaus")),
 			POINT,
 			"Scheißhaus",
 			listOf(),
 			listOf(),
+			listOf(),
 			false, // <- not searchable!
-			0f, false, Collections.emptyMap());
+			0f,
+			false,
+			mapOf(),
+			mapOf());
 
-	private final BaseFeature bank = feature(
+	private final Feature bank = feature(
 			"amenity/bank",
 			mapOf(tag("amenity","bank")),
 			"Bank",
 			listOf()
 	);
-	private final BaseFeature bench = feature(
+	private final Feature bench = feature(
 			"amenity/bench",
 			mapOf(tag("amenity","bench")),
 			"Parkbank",
 			listOf("Bank"),
 			5.0f
 	);
-	private final BaseFeature casino = feature(
+	private final Feature casino = feature(
 			"amenity/casino",
 			mapOf(tag("amenity","casino")),
 			"Spielbank",
 			listOf("Kasino")
 	);
-	private final BaseFeature atm = feature(
+	private final Feature atm = feature(
 			"amenity/atm",
 			mapOf(tag("amenity","atm")),
 			"Bankomat",
 			listOf()
 	);
-	private final BaseFeature stock_exchange = feature(
+	private final Feature stock_exchange = feature(
 			"amenity/stock_exchange",
 			mapOf(tag("amenity","stock_exchange")),
 			"Börse",
 			listOf("Banking")
 	);
-	private final BaseFeature bank_of_america = brandFeature(
+	private final Feature bank_of_america = brandFeature(
 			"amenity/bank/Bank of America",
 			mapOf(tag("amenity","bank"), tag("name","Bank of America")),
 			"Bank of America",
 			listOf(),
 			mapOf()
 	);
-	private final BaseFeature bank_of_liechtenstein = brandFeature(
+	private final Feature bank_of_liechtenstein = brandFeature(
 			"amenity/bank/Bank of Liechtenstein",
 			mapOf(tag("amenity","bank"), tag("name","Bank of Liechtenstein")),
 			"Bank of Liechtenstein",
@@ -115,20 +120,20 @@ public class FeatureDictionaryTest
 			mapOf(),
 			0.2f
 	);
-	private final BaseFeature deutsche_bank = brandFeature(
+	private final Feature deutsche_bank = brandFeature(
 			"amenity/bank/Deutsche Bank",
 			mapOf(tag("amenity","bank"), tag("name","Deutsche Bank")),
 			"Deutsche Bank",
 			listOf(),
 			mapOf()
 	);
-	private final BaseFeature baenk = feature(
+	private final Feature baenk = feature(
 			"amenity/bänk",
 			mapOf(tag("amenity","bänk")),
 			"Bänk",
 			listOf()
 	);
-	private final BaseFeature bad_bank = feature(
+	private final Feature bad_bank = feature(
 			"amenity/bank/bad",
 			mapOf(tag("amenity","bank"), tag("goodity","bad")),
 			"Bad Bank",
@@ -215,7 +220,7 @@ public class FeatureDictionaryTest
 	{
 		Map<String,String> tags = mapOf(tag("shop", "bakery"), tag("name", "Ditsch"), tag("brand", "Ditsch"));
 		FeatureDictionary dictionary = dictionary(ditschRussian, ditsch);
-		List<Match> matches = dictionary.byTags(tags).forLocale(null).find();
+		List<Match> matches = dictionary.byTags(tags).forLocale((Locale) null).find();
 		assertEquals(2, matches.size());
 		assertEquals(ditsch.getName(), matches.get(0).name);
 		assertEquals(ditschRussian.getName(), matches.get(1).name);
@@ -225,7 +230,7 @@ public class FeatureDictionaryTest
 	{
 		Map<String,String> tags = mapOf(tag("shop", "bakery"), tag("name", "Ditsch"));
 		FeatureDictionary dictionary = dictionary(ditschRussian, ditschInternational, ditsch);
-		List<Match> matches = dictionary.byTags(tags).forLocale(null).find();
+		List<Match> matches = dictionary.byTags(tags).forLocale((Locale) null).find();
 		assertEquals(3, matches.size());
 		assertEquals(ditschInternational.getName(), matches.get(0).name);
 	}
@@ -380,39 +385,68 @@ public class FeatureDictionaryTest
 		//assertEquals(deutsche_bank.name, findings.get(X).name); // not included: "Deutsche Bank" does not start with "bank"
 	}
 
-	private static FeatureDictionary dictionary(BaseFeature... entries)
+	@Test public void some_tests_with_real_data()
+	{
+		FeatureCollection featureCollection = new IDFeatureCollection(new RealDataAccessAdapter());
+		featureCollection.getAllSuggestions();
+		featureCollection.getAllLocalized(listOf(Locale.ENGLISH));
+		long time = System.currentTimeMillis();
+		FeatureDictionary dictionary = new FeatureDictionary(featureCollection);
+		System.out.println(time - System.currentTimeMillis());
+
+		List<Match> matches = dictionary
+				.byTags(mapOf(tag("amenity", "studio")))
+				.forLocale(Locale.ENGLISH)
+				.find();
+		assertEquals(1, matches.size());
+		assertEquals("Studio", matches.get(0).name);
+
+		List<Match> matches2 = dictionary
+				.byTags(mapOf(tag("amenity", "studio"), tag("studio", "audio")))
+				.forLocale(Locale.ENGLISH)
+				.find();
+		assertEquals(1, matches2.size());
+		assertEquals("Recording Studio", matches2.get(0).name);
+
+		List<Match> matches3 = dictionary
+				.byTerm("Chines")
+				.forLocale(Locale.ENGLISH)
+				.find();
+		assertEquals(1, matches3.size());
+		assertEquals("Chinese Restaurant", matches3.get(0).name);
+	}
+
+	private static FeatureDictionary dictionary(Feature... entries)
 	{
 		return new FeatureDictionary(new TestFeatureCollection(entries));
 	}
 
-	private static BaseFeature brandFeature(String id, Map<String, String> tags, String name,
+	private static Feature brandFeature(String id, Map<String, String> tags, String name,
 											List<String> countryCodes, Map<String, String> addTags, float matchScore)
 	{
-		return new BaseFeature(id, tags, POINT, name, Collections.emptyList(), countryCodes, true, matchScore,
-				true, addTags);
+		return new BaseFeature(id, tags, POINT, name, listOf(), countryCodes, listOf(),
+				true, matchScore,true, addTags, mapOf());
 	}
 
-	private static BaseFeature brandFeature(String id, Map<String, String> tags, String name,
+	private static Feature brandFeature(String id, Map<String, String> tags, String name,
 											List<String> countryCodes, Map<String, String> addTags)
 	{
-		return new BaseFeature(id, tags, POINT, name, Collections.emptyList(), countryCodes, true, 1.0f,
-				true, addTags);
+		return new BaseFeature(id, tags, POINT, name, listOf(), countryCodes, listOf(),
+				true, 1.0f,true, addTags, mapOf());
 	}
 
-	private static BaseFeature feature(String id, Map<String, String> tags, String name,
+	private static Feature feature(String id, Map<String, String> tags, String name,
 									   List<String> terms, float matchScore)
 	{
-		return new BaseFeature(id, tags, POINT, name, terms,
-				Collections.emptyList(), true, matchScore, false, Collections.emptyMap()
+		return new BaseFeature(id, tags, POINT, name, terms, listOf(), listOf(),
+				true, matchScore, false, mapOf(), mapOf()
 		);
 	}
 
-	private static BaseFeature feature(String id, Map<String, String> tags, String name, List<String> terms)
+	private static Feature feature(String id, Map<String, String> tags, String name, List<String> terms)
 	{
-		return new BaseFeature(id, tags, POINT, name, terms,
-				Collections.emptyList(), true, 1.0f, false, Collections.emptyMap()
+		return new BaseFeature(id, tags, POINT, name, terms, listOf(), listOf(),
+				true, 1.0f, false, mapOf(), mapOf()
 		);
 	}
-
-	@SafeVarargs private static <T> List<T> listOf(T... items) { return Arrays.asList(items); }
 }

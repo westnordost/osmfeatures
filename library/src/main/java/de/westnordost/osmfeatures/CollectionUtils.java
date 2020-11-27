@@ -1,13 +1,30 @@
 package de.westnordost.osmfeatures;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 
 class CollectionUtils {
 
+    public interface CreateFn<K,V> { V create(K value); }
+
+    public static <K,V> V synchronizedGetOrCreate(Map<K,V> map, K key, CreateFn<K,V> createFn)
+    {
+        if (!map.containsKey(key))
+        {
+            synchronized (map)
+            {
+                if (!map.containsKey(key))
+                {
+                    map.put(key, createFn.create(key));
+                }
+            }
+        }
+        return map.get(key);
+    }
+
     /** Whether the given map contains all the given entries */
-    static <K,V> boolean mapContainsAllEntries(Map<K,V> map, Iterable<Map.Entry<K,V>> entries)
+    public static <K,V> boolean mapContainsAllEntries(Map<K,V> map, Iterable<Map.Entry<K,V>> entries)
     {
         for (Map.Entry<K, V> entry : entries)
         {
@@ -17,7 +34,7 @@ class CollectionUtils {
     }
 
     /** Number of entries contained in the given map */
-    static <K,V> int numberOfContainedEntriesInMap(Map<K,V> map, Iterable<Map.Entry<K,V>> entries)
+    public static <K,V> int numberOfContainedEntriesInMap(Map<K,V> map, Iterable<Map.Entry<K,V>> entries)
     {
         int found = 0;
         for (Map.Entry<K, V> entry : entries)
@@ -28,20 +45,19 @@ class CollectionUtils {
     }
 
     /** Whether the given map contains the given entry */
-    static <K,V> boolean mapContainsEntry(Map<K,V> map, Map.Entry<K,V> entry)
+    public static <K,V> boolean mapContainsEntry(Map<K,V> map, Map.Entry<K,V> entry)
     {
         V mapValue = map.get(entry.getKey());
         V value = entry.getValue();
         return mapValue == value || value != null && value.equals(mapValue);
     }
 
-    interface Predicate<T> { boolean fn(T v); }
+    public interface Predicate<T> { boolean fn(T v); }
 
-    /** Return a list of all elements in the given collection that fulfill the given predicate */
-    static <T> List<T> filter(Iterable<T> collection, Predicate<T> predicate)
+    /** Backport of Collection.removeIf */
+    public static <T> void removeIf(Collection<T> list, Predicate<T> predicate)
     {
-        List<T> result = new ArrayList<>();
-        for (T v : collection) if(predicate.fn(v)) result.add(v);
-        return result;
+        Iterator<T> it = list.iterator();
+        while(it.hasNext()) if (predicate.fn(it.next())) it.remove();
     }
 }

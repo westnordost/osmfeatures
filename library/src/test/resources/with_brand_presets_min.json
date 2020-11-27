@@ -1,0 +1,19 @@
+{
+  "a/brand": {
+    "name": "Duckworths",
+    "tags": { "a": "b", "c": "d" },
+    "geometry": ["point"],
+    "suggestion": true
+  },
+  "another/brand": {
+    "name": "Megamall",
+    "tags": { "a": "b", "c": "d" },
+    "geometry": ["point"],
+    "suggestion": true
+  },
+  "some/id": {
+    "name": "test",
+    "tags": { "a": "b", "c": "d" },
+    "geometry": ["point"]
+  }
+}

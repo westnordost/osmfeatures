@@ -33,8 +33,8 @@ import groovy.json.JsonOutput
 task downloadPresets {
     doLast {
         def targetDir = "app/src/main/assets/osmfeatures"
-        def presetsUrl = new URL("https://raw.githubusercontent.com/openstreetmap/iD/develop/data/presets/presets.json")
-        def contentsUrl = new URL("https://api.github.com/repos/openstreetmap/iD/contents/dist/locales")
+        def presetsUrl = new URL("https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json")
+        def contentsUrl = new URL("https://api.github.com/repos/openstreetmap/id-tagging-schema/contents/dist/translations")
 
         new File("$targetDir/presets.json").withOutputStream { it << presetsUrl.openStream() }
 

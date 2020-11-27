@@ -8,19 +8,13 @@ class StringUtils
 {
 	private static final Pattern FIND_DIACRITICS = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
 
-	static String stripDiacritics(String str)
-	{
-		return FIND_DIACRITICS.matcher(Normalizer.normalize(str, Normalizer.Form.NFD)).replaceAll("");
-	}
-
-	static String canonicalize(String str)
+	public static String canonicalize(String str)
 	{
 		return stripDiacritics(str).toLowerCase(Locale.US);
 	}
 
-	static boolean startsWordWith(String haystack, String needle)
+	private static String stripDiacritics(String str)
 	{
-		int indexOf = haystack.indexOf(needle);
-		return indexOf == 0 || indexOf > 0 && haystack.charAt(indexOf-1) == ' ';
+		return FIND_DIACRITICS.matcher(Normalizer.normalize(str, Normalizer.Form.NFD)).replaceAll("");
 	}
 }
