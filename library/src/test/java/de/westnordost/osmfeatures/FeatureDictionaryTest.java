@@ -154,6 +154,24 @@ public class FeatureDictionaryTest
 		assertEquals(listOf(), dictionary.byTags(tags).forGeometry(GeometryType.RELATION).find());
 	}
 
+	@Test public void find_no_entry_because_wrong_locale()
+	{
+		Map<String,String> tags = mapOf(tag("shop", "bakery"));
+		FeatureDictionary dictionary = dictionary(bakery);
+		assertEquals(listOf(), dictionary.byTags(tags).forLocale(Locale.ITALIAN).find());
+	}
+
+	@Test public void find_entry_because_fallback_locale()
+	{
+		Map<String,String> tags = mapOf(tag("shop", "bakery"));
+		FeatureDictionary dictionary = dictionary(Locale.GERMAN, bakery);
+		List<Match> matches = dictionary.byTags(tags).forLocale(Locale.ITALIAN, Locale.GERMAN).find();
+		assertEquals(1, matches.size());
+		assertEquals(bakery.getName(), matches.get(0).name);
+		assertEquals(bakery.getTags(), matches.get(0).tags);
+		assertNull(matches.get(0).parentName);
+	}
+
 	@Test public void find_entry_by_tags()
 	{
 		Map<String,String> tags = mapOf(tag("shop", "bakery"));
@@ -208,7 +226,7 @@ public class FeatureDictionaryTest
 	@Test public void find_no_brands_finds_only_normal_entries()
 	{
 		Map<String,String> tags = mapOf(tag("shop", "bakery"), tag("name", "Ditsch"));
-		FeatureDictionary dictionary = dictionary(bakery);
+		FeatureDictionary dictionary = dictionary(bakery, ditsch);
 		List<Match> matches = dictionary.byTags(tags).isSuggestion(false).find();
 		assertEquals(1, matches.size());
 		assertEquals(bakery.getName(), matches.get(0).name);
@@ -365,6 +383,39 @@ public class FeatureDictionaryTest
 		assertEquals(1, matches.size());
 	}
 
+	@Test public void find_only_brands_by_name_finds_no_normal_entries()
+	{
+		FeatureDictionary dictionary = dictionary(bakery);
+		List<Match> matches = dictionary.byTerm("Bäckerei").isSuggestion(true).find();
+		assertEquals(0, matches.size());
+	}
+
+	@Test public void find_no_brands_by_name_finds_only_normal_entries()
+	{
+		FeatureDictionary dictionary = dictionary(bank, bank_of_america);
+		List<Match> matches = dictionary.byTerm("Bank").isSuggestion(false).find();
+		assertEquals(1, matches.size());
+		assertEquals(bank.getName(), matches.get(0).name);
+		assertEquals(bank.getTags(), matches.get(0).tags);
+		assertNull(matches.get(0).parentName);
+	}
+
+	@Test public void find_no_entry_by_term_because_wrong_locale()
+	{
+		FeatureDictionary dictionary = dictionary(Locale.GERMAN, bakery);
+		assertEquals(listOf(), dictionary.byTerm("Bäck").forLocale(Locale.ITALIAN).find());
+	}
+
+	@Test public void find_entry_by_term_because_fallback_locale()
+	{
+		FeatureDictionary dictionary = dictionary(Locale.GERMAN, bakery);
+		List<Match> matches = dictionary.byTerm("Bäck").forLocale(Locale.ITALIAN, Locale.GERMAN).find();
+		assertEquals(1, matches.size());
+		assertEquals(bakery.getName(), matches.get(0).name);
+		assertEquals(bakery.getTags(), matches.get(0).tags);
+		assertNull(matches.get(0).parentName);
+	}
+
 	@Test public void find_by_term_sorts_result_in_correct_order()
 	{
 		FeatureDictionary dictionary = dictionary(
@@ -390,9 +441,7 @@ public class FeatureDictionaryTest
 		FeatureCollection featureCollection = new IDFeatureCollection(new RealDataAccessAdapter());
 		featureCollection.getAllSuggestions();
 		featureCollection.getAllLocalized(listOf(Locale.ENGLISH));
-		long time = System.currentTimeMillis();
 		FeatureDictionary dictionary = new FeatureDictionary(featureCollection);
-		System.out.println(time - System.currentTimeMillis());
 
 		List<Match> matches = dictionary
 				.byTags(mapOf(tag("amenity", "studio")))
@@ -418,7 +467,12 @@ public class FeatureDictionaryTest
 
 	private static FeatureDictionary dictionary(Feature... entries)
 	{
-		return new FeatureDictionary(new TestFeatureCollection(entries));
+		return dictionary(Locale.getDefault(), entries);
+	}
+
+	private static FeatureDictionary dictionary(Locale locale, Feature... entries)
+	{
+		return new FeatureDictionary(new TestFeatureCollection(locale, entries));
 	}
 
 	private static Feature brandFeature(String id, Map<String, String> tags, String name,

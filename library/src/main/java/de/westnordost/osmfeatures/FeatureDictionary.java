@@ -120,7 +120,7 @@ public class FeatureDictionary
 		return new QueryByTermBuilder(term);
 	}
 
-	private List<Match> get(String search, GeometryType geometry, String countryCode, int limit, List<Locale> locales)
+	private List<Match> get(String search, GeometryType geometry, String countryCode, Boolean isSuggestion, int limit, List<Locale> locales)
 	{
 		String canonicalSearch = StringUtils.canonicalize(search);
 
@@ -146,43 +146,52 @@ public class FeatureDictionary
 			return a.getName().length() - b.getName().length();
 		};
 
-		// a. matches with presets first
-		List<Feature> foundFeaturesByName = getNameIndex(locales).getAll(canonicalSearch);
-		removeIf(foundFeaturesByName, feature -> !isFeatureMatchingParameters(feature, geometry, countryCode));
-		Collections.sort(foundFeaturesByName, sortNames);
+		List<Feature> result = new ArrayList<>();
 
-		// if limit is reached, can return earlier (performance improvement)
-		if(limit > 0 && foundFeaturesByName.size() >= limit) return createMatches(foundFeaturesByName, limit, locales);
-
-		// b. matches with brand names second
-		List<Feature> result = new ArrayList<>(foundFeaturesByName);
-
-		List<Feature> foundBrandFeatures = brandNameIndex.getAll(canonicalSearch);
-		removeIf(foundBrandFeatures, feature -> !isFeatureMatchingParameters(feature, geometry, countryCode));
-		Collections.sort(foundBrandFeatures, sortNames);
-
-		result.addAll(foundBrandFeatures);
-
-		// if limit is reached, can return earlier (performance improvement)
-		if(limit > 0 && result.size() >= limit) return createMatches(result, limit, locales);
-
-		// c. matches with terms third
-		List<Feature> foundFeaturesByTerm = getTermsIndex(locales).getAll(canonicalSearch);
-		removeIf(foundFeaturesByTerm, feature -> !isFeatureMatchingParameters(feature, geometry, countryCode));
-
-		if (!foundFeaturesByTerm.isEmpty())
+		if (isSuggestion == null || !isSuggestion)
 		{
-			final Set<Feature> alreadyFoundFeatures = new HashSet<>(result);
-			removeIf(foundFeaturesByTerm, feature -> alreadyFoundFeatures.contains(feature));
+			// a. matches with presets first
+			List<Feature> foundFeaturesByName = getNameIndex(locales).getAll(canonicalSearch);
+			removeIf(foundFeaturesByName, feature -> !isFeatureMatchingParameters(feature, geometry, countryCode));
+			Collections.sort(foundFeaturesByName, sortNames);
+
+			result.addAll(foundFeaturesByName);
+
+			// if limit is reached, can return earlier (performance improvement)
+			if(limit > 0 && result.size() >= limit) return createMatches(result, limit, locales);
+
 		}
-
-		Collections.sort(foundFeaturesByTerm, (a, b) ->
+		if (isSuggestion == null || isSuggestion)
 		{
-			// 1. features with higher matchScore first
-			return (int) (100 * b.getMatchScore() - 100 * a.getMatchScore());
-		});
-		result.addAll(foundFeaturesByTerm);
+			// b. matches with brand names second
+			List<Feature> foundBrandFeatures = brandNameIndex.getAll(canonicalSearch);
+			removeIf(foundBrandFeatures, feature -> !isFeatureMatchingParameters(feature, geometry, countryCode));
+			Collections.sort(foundBrandFeatures, sortNames);
 
+			result.addAll(foundBrandFeatures);
+
+			// if limit is reached, can return earlier (performance improvement)
+			if(limit > 0 && result.size() >= limit) return createMatches(result, limit, locales);
+		}
+		if (isSuggestion == null || !isSuggestion)
+		{
+			// c. matches with terms third
+			List<Feature> foundFeaturesByTerm = getTermsIndex(locales).getAll(canonicalSearch);
+			removeIf(foundFeaturesByTerm, feature -> !isFeatureMatchingParameters(feature, geometry, countryCode));
+
+			if (!foundFeaturesByTerm.isEmpty())
+			{
+				final Set<Feature> alreadyFoundFeatures = new HashSet<>(result);
+				removeIf(foundFeaturesByTerm, feature -> alreadyFoundFeatures.contains(feature));
+			}
+
+			Collections.sort(foundFeaturesByTerm, (a, b) ->
+			{
+				// 1. features with higher matchScore first
+				return (int) (100 * b.getMatchScore() - 100 * a.getMatchScore());
+			});
+			result.addAll(foundFeaturesByTerm);
+		}
 		return createMatches(result, limit, locales);
 	}
 
@@ -322,7 +331,8 @@ public class FeatureDictionary
 		 *
 		 *  <p><code>null</code> means to include unlocalized results.</p>
 		 *
-		 *  <p>If nothing is specified, it defaults to <code>[Locale.getDefault(), null]</code>.</p>
+		 *  <p>If nothing is specified, it defaults to <code>[Locale.getDefault(), null]</code>,
+		 *  i.e. unlocalized results are included by default.</p>
 		 *   */
 		public QueryByTagBuilder forLocale(Locale... locale)
 		{
@@ -353,6 +363,7 @@ public class FeatureDictionary
 		private final String term;
 		private GeometryType geometryType = null;
 		private Locale[] locale = new Locale[]{Locale.getDefault()};
+		private Boolean suggestion = null;
 		private int limit = 50;
 		private String countryCode = null;
 
@@ -373,7 +384,8 @@ public class FeatureDictionary
 		 *
 		 *  <p><code>null</code> means to include unlocalized results.</p>
 		 *
-		 *  <p>If nothing is specified, it defaults to <code>[Locale.getDefault()]</code>.</p>
+		 *  <p>If nothing is specified, it defaults to <code>[Locale.getDefault()]</code>, i.e.
+		 *  unlocalized results are excluded by default.</p>
 		 *   */
 		public QueryByTermBuilder forLocale(Locale ...locale)
 		{
@@ -386,6 +398,14 @@ public class FeatureDictionary
 		public QueryByTermBuilder inCountry(String countryCode)
 		{
 			this.countryCode = countryCode;
+			return this;
+		}
+
+		/** Set whether to only include suggestions (=true) or to not include suggestions (=false).
+		 *  Suggestions are brands, like 7-Eleven. */
+		public QueryByTermBuilder isSuggestion(Boolean suggestion)
+		{
+			this.suggestion = suggestion;
 			return this;
 		}
 
@@ -402,7 +422,7 @@ public class FeatureDictionary
 		 *  matches with terms (keywords). */
 		public List<Match> find()
 		{
-			return get(term, geometryType, countryCode, limit, Arrays.asList(locale));
+			return get(term, geometryType, countryCode, suggestion, limit, Arrays.asList(locale));
 		}
 	}
 

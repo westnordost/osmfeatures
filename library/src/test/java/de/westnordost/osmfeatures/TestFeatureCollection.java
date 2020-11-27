@@ -1,6 +1,7 @@
 package de.westnordost.osmfeatures;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -10,9 +11,11 @@ public class TestFeatureCollection implements FeatureCollection
 {
 	private final Map<String, Feature> features;
 	private final Map<String, Feature> brandFeatures;
+	private final Locale locale;
 
-	public TestFeatureCollection(Feature...features)
+	public TestFeatureCollection(Locale locale, Feature...features)
 	{
+		this.locale = locale;
 		this.features = new HashMap<>(features.length);
 		this.brandFeatures = new HashMap<>(features.length);
 		for (Feature feature : features)
@@ -22,18 +25,24 @@ public class TestFeatureCollection implements FeatureCollection
 		}
 	}
 
+	public TestFeatureCollection(Feature...features)
+	{
+		this(null, features);
+	}
+
 	@Override public Collection<Feature> getAllSuggestions() {
 		return brandFeatures.values();
 	}
 
-	@Override public Collection<Feature> getAllLocalized(List<Locale> locale)
+	@Override public Collection<Feature> getAllLocalized(List<Locale> locales)
 	{
-		return features.values();
+		if (locales.contains(locale)) return features.values();
+		return Collections.emptyList();
 	}
 
-	@Override public Feature get(String id, List<Locale> locale)
+	@Override public Feature get(String id, List<Locale> locales)
 	{
-		Feature f = features.get(id);
+		Feature f = locales.contains(locale) ? features.get(id) : null;
 		return f != null ? f : brandFeatures.get(id);
 	}
 
