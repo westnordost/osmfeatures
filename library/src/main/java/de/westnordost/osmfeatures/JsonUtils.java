@@ -29,6 +29,16 @@ class JsonUtils {
         return Collections.unmodifiableList(result);
     }
 
+    public static List<String> parseCommaSeparatedList(String str, String remove)
+    {
+        if(str == null || str.isEmpty()) return Collections.emptyList();
+        String[] array = str.split("\\s*,\\s*");
+        List<String> result = new ArrayList<>(array.length);
+        Collections.addAll(result, array);
+        result.remove(remove);
+        return Collections.unmodifiableList(result);
+    }
+
     public static Map<String, String> parseStringMap(JSONObject map) throws JSONException
     {
         if(map == null) return Collections.emptyMap();
