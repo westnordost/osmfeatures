@@ -13,7 +13,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import static de.westnordost.osmfeatures.JsonUtils.createFromInputStream;
-import static de.westnordost.osmfeatures.JsonUtils.parseCommaSeparatedList;
+import static de.westnordost.osmfeatures.JsonUtils.parseList;
 
 /** Parses a file from
  *  https://github.com/openstreetmap/id-tagging-schema/tree/main/dist/translations
@@ -48,7 +48,7 @@ class IDPresetsTranslationJsonParser {
         if (feature == null) return null;
         String name = localization.optString("name");
         if(name == null || name.isEmpty()) return null;
-        List<String> terms = parseCommaSeparatedList(localization.optString("terms"), name);
+        List<String> terms = parseList(localization.optJSONArray("terms"), item -> (String)item);
         return new LocalizedFeature(feature, locale, name, terms);
     }
 }

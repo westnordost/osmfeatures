@@ -12,7 +12,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import static de.westnordost.osmfeatures.JsonUtils.createFromInputStream;
-import static de.westnordost.osmfeatures.JsonUtils.parseCommaSeparatedList;
 import static de.westnordost.osmfeatures.JsonUtils.parseList;
 import static de.westnordost.osmfeatures.JsonUtils.parseStringMap;
 
@@ -48,7 +47,7 @@ class IDPresetsJsonParser {
                 item -> GeometryType.valueOf(((String)item).toUpperCase(Locale.US)));
         boolean suggestion = p.optBoolean("suggestion", false);
         String name = p.getString("name");
-        List<String> terms = parseCommaSeparatedList(p.optString("terms"), name);
+        List<String> terms = parseList(p.optJSONArray("terms"), item -> (String)item);
         List<String> countryCodes = parseList(p.optJSONArray("countryCodes"),
                 item -> ((String)item).toUpperCase(Locale.US).intern());
         List<String> notCountryCodes = parseList(p.optJSONArray("notCountryCodes"),
