@@ -95,8 +95,8 @@ public class FeatureDictionary
 			if(locales.size() == 1 && locales.get(0) == null)
 			{
 				int localeOrder =
-					(b.getCountryCodes().isEmpty() && b.getNotCountryCodes().isEmpty() ? 1 : 0)
-					- (a.getCountryCodes().isEmpty() && a.getNotCountryCodes().isEmpty()? 1 : 0);
+					(b.getIncludeCountryCodes().isEmpty() && b.getExcludeCountryCodes().isEmpty() ? 1 : 0)
+					- (a.getIncludeCountryCodes().isEmpty() && a.getExcludeCountryCodes().isEmpty()? 1 : 0);
 				if (localeOrder != 0) return localeOrder;
 			}
 
@@ -260,11 +260,11 @@ public class FeatureDictionary
 			(
 				(
 					countryCode != null &&
-					feature.getCountryCodes().contains(countryCode) &&
-					!feature.getNotCountryCodes().contains(countryCode)
+					feature.getIncludeCountryCodes().contains(countryCode) &&
+					!feature.getExcludeCountryCodes().contains(countryCode)
 				) || (
-					feature.getCountryCodes().isEmpty() &&
-					feature.getNotCountryCodes().isEmpty()
+					feature.getIncludeCountryCodes().isEmpty() &&
+					feature.getExcludeCountryCodes().isEmpty()
 				)
 			);
 	}

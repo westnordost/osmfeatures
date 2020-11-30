@@ -3,7 +3,6 @@ package de.westnordost.osmfeatures;
 import org.junit.Test;
 
 import static de.westnordost.osmfeatures.MapEntry.mapOf;
-import static de.westnordost.osmfeatures.MapEntry.tag;
 import static de.westnordost.osmfeatures.TestUtils.assertEqualsIgnoreOrder;
 import static de.westnordost.osmfeatures.TestUtils.listOf;
 import static org.junit.Assert.assertTrue;
@@ -66,6 +65,8 @@ public class FeatureTermIndexTest
                 mapOf(),
                 listOf(GeometryType.POINT),
                 "name",
+                null,
+                null,
                 listOf(terms),
                 listOf(),
                 listOf(),

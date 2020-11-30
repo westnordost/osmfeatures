@@ -50,6 +50,7 @@ public class FeatureTagsIndexTest
                 mapOf(mapEntries),
                 listOf(GeometryType.POINT),
                 "name",
+                null, null,
                 listOf(),
                 listOf(),
                 listOf(),

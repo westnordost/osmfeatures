@@ -12,6 +12,7 @@ import static de.westnordost.osmfeatures.MapEntry.tag;
 import static de.westnordost.osmfeatures.TestUtils.listOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -27,9 +28,11 @@ public class IDPresetsJsonParserTest {
         assertEquals(mapOf(tag("a","b"), tag("c","d")), feature.getTags());
         assertEquals(listOf(GeometryType.POINT, GeometryType.VERTEX, GeometryType.LINE, GeometryType.AREA, GeometryType.RELATION), feature.getGeometry());
 
-        assertEquals(listOf("DE", "GB"), feature.getCountryCodes());
-        assertEquals(listOf("IT"), feature.getNotCountryCodes());
+        assertEquals(listOf("DE", "GB"), feature.getIncludeCountryCodes());
+        assertEquals(listOf("IT"), feature.getExcludeCountryCodes());
         assertEquals("foo", feature.getName());
+        assertEquals("abc", feature.getIcon());
+        assertEquals("someurl", feature.getImageURL());
         assertTrue(feature.isSuggestion());
         assertEquals(listOf("1","2"), feature.getTerms());
         assertEquals(0.5f, feature.getMatchScore(), 0.001f);
@@ -49,15 +52,16 @@ public class IDPresetsJsonParserTest {
         assertEquals(mapOf(tag("a","b"), tag("c","d")), feature.getTags());
         assertEquals(listOf(GeometryType.POINT), feature.getGeometry());
 
-        assertTrue(feature.getCountryCodes().isEmpty());
-        assertTrue(feature.getNotCountryCodes().isEmpty());
+        assertTrue(feature.getIncludeCountryCodes().isEmpty());
+        assertTrue(feature.getExcludeCountryCodes().isEmpty());
         assertEquals("test",feature.getName());
+        assertEquals("",feature.getIcon());
+        assertEquals("",feature.getImageURL());
         assertFalse(feature.isSuggestion());
         assertTrue(feature.getTerms().isEmpty());
         assertEquals(1.0f, feature.getMatchScore(), 0.001f);
         assertTrue(feature.isSearchable());
-        assertTrue(feature.getAddTags().isEmpty());
-        assertTrue(feature.getRemoveTags().isEmpty());
+        assertSame(feature.getAddTags(), feature.getTags());
         assertSame(feature.getAddTags(), feature.getRemoveTags());
     }
 

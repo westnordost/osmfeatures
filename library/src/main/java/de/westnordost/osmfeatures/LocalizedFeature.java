@@ -35,9 +35,11 @@ class LocalizedFeature implements Feature {
     @Override public Map<String, String> getTags() { return p.getTags(); }
     @Override public List<GeometryType> getGeometry() { return p.getGeometry(); }
     @Override public String getName() { return name; }
+    @Override public String getIcon() { return p.getIcon(); }
+    @Override public String getImageURL() { return p.getImageURL(); }
     @Override public List<String> getTerms() { return terms; }
-    @Override public List<String> getCountryCodes() { return p.getCountryCodes(); }
-    @Override public List<String> getNotCountryCodes() { return p.getNotCountryCodes(); }
+    @Override public List<String> getIncludeCountryCodes() { return p.getIncludeCountryCodes(); }
+    @Override public List<String> getExcludeCountryCodes() { return p.getExcludeCountryCodes(); }
     @Override public boolean isSearchable() { return p.isSearchable(); }
     @Override public double getMatchScore() { return p.getMatchScore(); }
     @Override public boolean isSuggestion() { return p.isSuggestion(); }

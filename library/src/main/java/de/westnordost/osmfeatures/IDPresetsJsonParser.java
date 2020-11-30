@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -47,19 +48,33 @@ class IDPresetsJsonParser {
                 item -> GeometryType.valueOf(((String)item).toUpperCase(Locale.US)));
         boolean suggestion = p.optBoolean("suggestion", false);
         String name = p.getString("name");
+        String icon = p.optString("icon");
+        String imageURL = p.optString("imageURL");
         List<String> terms = parseList(p.optJSONArray("terms"), item -> (String)item);
-        List<String> countryCodes = parseList(p.optJSONArray("countryCodes"),
-                item -> ((String)item).toUpperCase(Locale.US).intern());
-        List<String> notCountryCodes = parseList(p.optJSONArray("notCountryCodes"),
-                item -> ((String)item).toUpperCase(Locale.US).intern());
+
+        JSONObject locationSet = p.optJSONObject("locationSet");
+        List<String> includeCountryCodes;
+        List<String> excludeCountryCodes;
+        if (locationSet != null) {
+            includeCountryCodes = parseList(locationSet.optJSONArray("include"),
+                    item -> ((String)item).toUpperCase(Locale.US).intern());
+
+            excludeCountryCodes = parseList(locationSet.optJSONArray("exclude"),
+                    item -> ((String)item).toUpperCase(Locale.US).intern());
+        } else {
+            includeCountryCodes = Collections.emptyList();
+            excludeCountryCodes = Collections.emptyList();
+        }
+
         boolean searchable = p.optBoolean("searchable", true);
         double matchScore = p.optDouble("matchScore", 1.0);
-        Map<String,String> addTags = parseStringMap(p.optJSONObject("addTags"));
+        Map<String,String> addTags =
+                p.has("addTags") ? parseStringMap(p.optJSONObject("addTags")) : tags;
         Map<String,String> removeTags =
                 p.has("removeTags") ? parseStringMap(p.optJSONObject("removeTags")) : addTags;
 
         return new BaseFeature(
-                id, tags, geometry, name, terms, countryCodes, notCountryCodes,
+                id, tags, geometry, name, icon, imageURL, terms, includeCountryCodes, excludeCountryCodes,
                 searchable, matchScore, suggestion, addTags, removeTags
         );
     }

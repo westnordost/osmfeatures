@@ -66,6 +66,7 @@ public class FeatureDictionaryTest
 			mapOf(tag("amenity","scheißhaus")),
 			POINT,
 			"Scheißhaus",
+			null, null,
 			listOf(),
 			listOf(),
 			listOf(),
@@ -442,28 +443,28 @@ public class FeatureDictionaryTest
 	private static Feature brandFeature(String id, Map<String, String> tags, String name,
 											List<String> countryCodes, Map<String, String> addTags, float matchScore)
 	{
-		return new BaseFeature(id, tags, POINT, name, listOf(), countryCodes, listOf(),
+		return new BaseFeature(id, tags, POINT, name, null, null, listOf(), countryCodes, listOf(),
 				true, matchScore,true, addTags, mapOf());
 	}
 
 	private static Feature brandFeature(String id, Map<String, String> tags, String name,
 											List<String> countryCodes, Map<String, String> addTags)
 	{
-		return new BaseFeature(id, tags, POINT, name, listOf(), countryCodes, listOf(),
+		return new BaseFeature(id, tags, POINT, name, null, null, listOf(), countryCodes, listOf(),
 				true, 1.0f,true, addTags, mapOf());
 	}
 
 	private static Feature feature(String id, Map<String, String> tags, String name,
 									   List<String> terms, float matchScore)
 	{
-		return new BaseFeature(id, tags, POINT, name, terms, listOf(), listOf(),
+		return new BaseFeature(id, tags, POINT, name, null, null, terms, listOf(), listOf(),
 				true, matchScore, false, mapOf(), mapOf()
 		);
 	}
 
 	private static Feature feature(String id, Map<String, String> tags, String name, List<String> terms)
 	{
-		return new BaseFeature(id, tags, POINT, name, terms, listOf(), listOf(),
+		return new BaseFeature(id, tags, POINT, name, null, null, terms, listOf(), listOf(),
 				true, 1.0f, false, mapOf(), mapOf()
 		);
 	}

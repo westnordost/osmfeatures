@@ -12,9 +12,11 @@ public interface Feature {
     Map<String,String> getTags();
     List<GeometryType> getGeometry();
     String getName();
+    String getIcon();
+    String getImageURL();
     List<String> getTerms();
-    List<String> getCountryCodes();
-    List<String> getNotCountryCodes();
+    List<String> getIncludeCountryCodes();
+    List<String> getExcludeCountryCodes();
     boolean isSearchable();
     double getMatchScore();
     boolean isSuggestion();
@@ -28,10 +30,7 @@ public interface Feature {
 }
 
 // not included:
-// - locationSet replaces countryCodes + notCountryCodes in v2.0.0 TODO
 // - fields
 // - moreFields
-// - icon
-// - imageURL
 // - replacement
 // - reference
