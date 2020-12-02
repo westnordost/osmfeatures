@@ -235,7 +235,14 @@ public class FeatureDictionary
 	{
 		return new FeatureTermIndex(featureCollection.getAllLocalized(locales), feature -> {
 			if (!feature.isSearchable()) return Collections.emptyList();
-			return Arrays.asList(feature.getCanonicalName().split(" "));
+			String name = feature.getCanonicalName();
+			if (name.contains(" ")) {
+				List<String> names = new ArrayList<>(Arrays.asList(name.split(" ")));
+				names.add(name);
+				return names;
+			} else {
+				return Collections.singletonList(name);
+			}
 		});
 	}
 

@@ -5,6 +5,7 @@ import org.junit.Test;
 import static de.westnordost.osmfeatures.MapEntry.mapOf;
 import static de.westnordost.osmfeatures.TestUtils.assertEqualsIgnoreOrder;
 import static de.westnordost.osmfeatures.TestUtils.listOf;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class FeatureTermIndexTest
@@ -51,6 +52,13 @@ public class FeatureTermIndexTest
                 listOf(f1),
                 index.getAll("anyt")
         );
+    }
+
+    @Test public void dont_get_one_feature_twice()
+    {
+        Feature f1 = feature("something", "someone");
+        FeatureTermIndex index = index(f1);
+        assertEquals(listOf(f1), index.getAll("some"));
     }
 
     private static FeatureTermIndex index(Feature... features)

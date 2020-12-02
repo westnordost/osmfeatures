@@ -3,8 +3,10 @@ package de.westnordost.osmfeatures;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /** Index that makes finding Features whose name/term/... starts with a given string very efficient.
  *
@@ -31,13 +33,13 @@ class FeatureTermIndex
 
     public List<Feature> getAll(String startsWith)
     {
-        List<Feature> result = new ArrayList<>();
+        Set<Feature> result = new HashSet<>();
         for (String string : tree.getAll(startsWith))
         {
             List<Feature> fs = featureMap.get(string);
             if (fs != null) result.addAll(fs);
         }
-        return result;
+        return new ArrayList<>(result);
     }
 
     public interface Selector

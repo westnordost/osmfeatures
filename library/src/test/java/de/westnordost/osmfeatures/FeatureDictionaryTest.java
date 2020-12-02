@@ -3,7 +3,6 @@ package de.westnordost.osmfeatures;
 import org.junit.Test;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -139,6 +138,12 @@ public class FeatureDictionaryTest
 			"amenity/bank/bad",
 			mapOf(tag("amenity","bank"), tag("goodity","bad")),
 			"Bad Bank",
+			listOf()
+	);
+	private final Feature miniature_train_shop = feature(
+			"shop/miniature_train",
+			mapOf(tag("shop","miniature_train")),
+			"Miniature Train Shop",
 			listOf()
 	);
 
@@ -380,6 +385,27 @@ public class FeatureDictionaryTest
 		List<Feature> matches = dictionary.byTerm("Bäck").forLocale(Locale.ITALIAN, Locale.GERMAN).find();
 		assertEquals(listOf(bakery), matches);
 	}
+
+	@Test public void find_multi_word_brand_feature()
+	{
+		FeatureDictionary dictionary = dictionary(deutsche_bank);
+		assertEquals(listOf(deutsche_bank), dictionary.byTerm("Deutsche Ba").find());
+		assertEquals(listOf(deutsche_bank), dictionary.byTerm("Deut").find());
+		// by-word only for non-brand features
+		assertTrue(dictionary.byTerm("Ban").find().isEmpty());
+	}
+
+	@Test public void find_multi_word_feature()
+	{
+		FeatureDictionary dictionary = dictionary(miniature_train_shop);
+		assertEquals(listOf(miniature_train_shop), dictionary.byTerm("mini").find());
+		assertEquals(listOf(miniature_train_shop), dictionary.byTerm("train").find());
+		assertEquals(listOf(miniature_train_shop), dictionary.byTerm("shop").find());
+		assertEquals(listOf(miniature_train_shop), dictionary.byTerm("Miniature Trai").find());
+		assertTrue(dictionary.byTerm("Train Sho").find().isEmpty());
+	}
+
+
 
 	@Test public void find_by_term_sorts_result_in_correct_order()
 	{
