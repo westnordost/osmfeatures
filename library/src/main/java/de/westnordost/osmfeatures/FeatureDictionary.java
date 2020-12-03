@@ -1,9 +1,6 @@
 package de.westnordost.osmfeatures;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 
 import static de.westnordost.osmfeatures.CollectionUtils.numberOfContainedEntriesInMap;
@@ -22,9 +19,9 @@ public class FeatureDictionary
 	private final Map<List<Locale>, FeatureTermIndex> nameIndexes;
 	private final Map<List<Locale>, FeatureTermIndex> termsIndexes;
 
-	FeatureDictionary(FeatureCollection featureCollection)
+	FeatureDictionary(FeatureCollection ...featureCollections)
 	{
-		this.featureCollection = featureCollection;
+		this.featureCollection = new MultiFeatureCollection(featureCollections);
 		tagsIndexes = new HashMap<>();
 		nameIndexes = new HashMap<>();
 		termsIndexes = new HashMap<>();
@@ -42,9 +39,13 @@ public class FeatureDictionary
 	}
 
 	/** Create a new FeatureDictionary which gets its data from the given directory. */
-	public static FeatureDictionary create(String path)
+	public static FeatureDictionary create(String ...basePaths)
 	{
-		return new FeatureDictionary(new IDFeatureCollection(new FileSystemAccess(new File(path))));
+		IDFeatureCollection[] collections = new IDFeatureCollection[basePaths.length];
+		for (int i = 0; i < basePaths.length; i++) {
+			collections[i] = new IDFeatureCollection(new FileSystemAccess(new File(basePaths[i])));
+		}
+		return new FeatureDictionary(collections);
 	}
 
 	/** Find matches by a set of tags */
@@ -392,23 +393,6 @@ public class FeatureDictionary
 		public List<Feature> find()
 		{
 			return get(term, geometryType, countryCode, suggestion, limit, Arrays.asList(locale));
-		}
-	}
-
-	private static class FileSystemAccess implements IDFeatureCollection.FileAccessAdapter
-	{
-		private final File basePath;
-
-		FileSystemAccess(File basePath)
-		{
-			if(!basePath.isDirectory()) throw new IllegalArgumentException("basePath must be a directory");
-			this.basePath = basePath;
-		}
-
-		@Override public boolean exists(String name) { return new File(basePath, name).exists(); }
-		@Override public InputStream open(String name) throws IOException
-		{
-			return new FileInputStream(new File(basePath, name));
 		}
 	}
 }
