@@ -58,12 +58,19 @@ class IDPresetsJsonParser {
         if (locationSet != null) {
             includeCountryCodes = parseList(locationSet.optJSONArray("include"),
                     item -> ((String)item).toUpperCase(Locale.US).intern());
-
+            includeCountryCodes.remove("001");
+            for (String cc : includeCountryCodes) {
+                // some unsupported code, such as "150" or "city_national_bank_fl.geojson"
+                if (cc.length() > 2) return null;
+            }
             excludeCountryCodes = parseList(locationSet.optJSONArray("exclude"),
                     item -> ((String)item).toUpperCase(Locale.US).intern());
+            for (String cc : excludeCountryCodes) {
+                if (cc.length() > 2) return null;
+            }
         } else {
-            includeCountryCodes = Collections.emptyList();
-            excludeCountryCodes = Collections.emptyList();
+            includeCountryCodes = new ArrayList<>(0);
+            excludeCountryCodes = new ArrayList<>(0);
         }
 
         boolean searchable = p.optBoolean("searchable", true);
@@ -74,8 +81,16 @@ class IDPresetsJsonParser {
                 p.has("removeTags") ? parseStringMap(p.optJSONObject("removeTags")) : addTags;
 
         return new BaseFeature(
-                id, tags, geometry, name, icon, imageURL, terms, includeCountryCodes, excludeCountryCodes,
-                searchable, matchScore, suggestion, addTags, removeTags
+                id,
+                Collections.unmodifiableMap(tags),
+                Collections.unmodifiableList(geometry),
+                name, icon, imageURL,
+                Collections.unmodifiableList(terms),
+                Collections.unmodifiableList(includeCountryCodes),
+                Collections.unmodifiableList(excludeCountryCodes),
+                searchable, matchScore, suggestion,
+                Collections.unmodifiableMap(addTags),
+                Collections.unmodifiableMap(removeTags)
         );
     }
 

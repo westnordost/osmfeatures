@@ -49,6 +49,6 @@ class IDPresetsTranslationJsonParser {
         String name = localization.optString("name");
         if(name == null || name.isEmpty()) return null;
         List<String> terms = parseCommaSeparatedList(localization.optString("terms"), name);
-        return new LocalizedFeature(feature, locale, name, terms);
+        return new LocalizedFeature(feature, locale, name, Collections.unmodifiableList(terms));
     }
 }

@@ -12,7 +12,6 @@ import static de.westnordost.osmfeatures.MapEntry.tag;
 import static de.westnordost.osmfeatures.TestUtils.listOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -61,8 +60,15 @@ public class IDPresetsJsonParserTest {
         assertTrue(feature.getTerms().isEmpty());
         assertEquals(1.0f, feature.getMatchScore(), 0.001f);
         assertTrue(feature.isSearchable());
-        assertSame(feature.getAddTags(), feature.getTags());
-        assertSame(feature.getAddTags(), feature.getRemoveTags());
+        assertEquals(feature.getAddTags(), feature.getTags());
+        assertEquals(feature.getAddTags(), feature.getRemoveTags());
+    }
+
+    @Test public void load_features_unsupported_location_set()
+    {
+        List<BaseFeature> features = parse("one_preset_unsupported_location_set.json");
+        assertEquals(1, features.size());
+        assertEquals("some/ok", features.get(0).getId());
     }
 
     @Test public void load_features_no_wildcards()

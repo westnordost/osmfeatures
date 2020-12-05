@@ -1,0 +1,29 @@
+{
+  "some/invalid_include": {
+    "name": "test",
+    "tags": { "a": "b" },
+    "geometry": ["point"],
+    "locationSet": {
+      "include": ["de", "150"],
+      "exclude": ["da"]
+    }
+  },
+  "some/invalid_exclude": {
+    "name": "test",
+    "tags": { "a": "b" },
+    "geometry": ["point"],
+    "locationSet": {
+      "include": ["de"],
+      "exclude": ["150"]
+    }
+  },
+  "some/ok": {
+    "name": "test",
+    "tags": { "a": "b" },
+    "geometry": ["point"],
+    "locationSet": {
+      "include": ["001"],
+      "exclude": ["de"]
+    }
+  }
+}

@@ -263,18 +263,17 @@ public class FeatureDictionary
 
 	private boolean isFeatureMatchingParameters(Feature feature, GeometryType geometry, String countryCode)
 	{
-		return
-			(geometry == null || feature.getGeometry().contains(geometry)) &&
-			(
-				(
-					countryCode != null &&
-					feature.getIncludeCountryCodes().contains(countryCode) &&
-					!feature.getExcludeCountryCodes().contains(countryCode)
-				) || (
-					feature.getIncludeCountryCodes().isEmpty() &&
-					feature.getExcludeCountryCodes().isEmpty()
-				)
-			);
+		if (geometry != null && !feature.getGeometry().contains(geometry)) return false;
+		List<String> include = feature.getIncludeCountryCodes();
+		List<String> exclude = feature.getExcludeCountryCodes();
+		if (!include.isEmpty() || !exclude.isEmpty())
+		{
+			if (countryCode == null) return false;
+			if (!include.isEmpty() && !include.contains(countryCode)) return false;
+			if (exclude.contains(countryCode)) return false;
+
+		}
+		return true;
 	}
 
 	public class QueryByTagBuilder

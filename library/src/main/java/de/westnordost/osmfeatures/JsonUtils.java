@@ -19,36 +19,36 @@ class JsonUtils {
 
     public static <T> List<T> parseList(JSONArray array, Transformer<T> t) throws JSONException
     {
-        if(array == null) return Collections.emptyList();
+        if(array == null) return new ArrayList<>(0);
         List<T> result = new ArrayList<>(array.length());
         for (int i = 0; i < array.length(); i++)
         {
             T item = t.apply(array.get(i));
             if(item != null) result.add(item);
         }
-        return Collections.unmodifiableList(result);
+        return result;
     }
 
     public static List<String> parseCommaSeparatedList(String str, String remove)
     {
-        if(str == null || str.isEmpty()) return Collections.emptyList();
+        if(str == null || str.isEmpty()) return new ArrayList<>(0);
         String[] array = str.split("\\s*,\\s*");
         List<String> result = new ArrayList<>(array.length);
         Collections.addAll(result, array);
         result.remove(remove);
-        return Collections.unmodifiableList(result);
+        return result;
     }
 
     public static Map<String, String> parseStringMap(JSONObject map) throws JSONException
     {
-        if(map == null) return Collections.emptyMap();
+        if(map == null) return new HashMap<>(1);
         Map<String, String> result = new HashMap<>(map.length());
         for (Iterator<String> it = map.keys(); it.hasNext(); )
         {
             String key = it.next().intern();
             result.put(key, map.getString(key));
         }
-        return Collections.unmodifiableMap(result);
+        return result;
     }
 
     // this is only necessary because Android uses some old version of org.json where
