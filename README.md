@@ -6,13 +6,13 @@ Requires Java 8.
 
 ## Copyright and License
 
-© 2019-2020 Tobias Zwick. This library is released under the terms of the [Apache License Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt).
+© 2019-2020 Tobias Zwick. This library is released under the terms of the [Apache License Version 2.0](https://www.apache.org/licenses/LICENSE-2.0.txt).
 
 ## Installation
 
-Add [`de.westnordost:osmfeatures:2.0`](http://jcenter.bintray.com/de/westnordost/osmfeatures/2.0/) as a Maven dependency or download the jar from there.
+Add [`de.westnordost:osmfeatures:2.0`](https://jcenter.bintray.com/de/westnordost/osmfeatures/2.0/) as a Maven dependency or download the jar from there.
 
-For Android, use [`de.westnordost:osmfeatures-android:2.0`](http://jcenter.bintray.com/de/westnordost/osmfeatures-android/2.0/).
+For Android, use [`de.westnordost:osmfeatures-android:2.0`](https://jcenter.bintray.com/de/westnordost/osmfeatures-android/2.0/).
 
 It's in the JCenter repository, not Maven Central.
 
