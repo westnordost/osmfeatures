@@ -1,5 +1,6 @@
 package de.westnordost.osmfeatures;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -56,18 +57,10 @@ class IDPresetsJsonParser {
         List<String> includeCountryCodes;
         List<String> excludeCountryCodes;
         if (locationSet != null) {
-            includeCountryCodes = parseList(locationSet.optJSONArray("include"),
-                    item -> ((String)item).toUpperCase(Locale.US).intern());
-            includeCountryCodes.remove("001");
-            for (String cc : includeCountryCodes) {
-                // some unsupported code, such as "150" or "city_national_bank_fl.geojson"
-                if (cc.length() > 2) return null;
-            }
-            excludeCountryCodes = parseList(locationSet.optJSONArray("exclude"),
-                    item -> ((String)item).toUpperCase(Locale.US).intern());
-            for (String cc : excludeCountryCodes) {
-                if (cc.length() > 2) return null;
-            }
+            includeCountryCodes = parseCountryCodes(locationSet.optJSONArray("include"));
+            if (includeCountryCodes == null) return null;
+            excludeCountryCodes = parseCountryCodes(locationSet.optJSONArray("exclude"));
+            if (excludeCountryCodes == null) return null;
         } else {
             includeCountryCodes = new ArrayList<>(0);
             excludeCountryCodes = new ArrayList<>(0);
@@ -92,6 +85,24 @@ class IDPresetsJsonParser {
                 Collections.unmodifiableMap(addTags),
                 Collections.unmodifiableMap(removeTags)
         );
+    }
+
+    private static List<String> parseCountryCodes(JSONArray jsonList)
+    {
+        List<Object> list = parseList(jsonList, item -> item);
+        List<String> result = new ArrayList<>(list.size());
+        for (Object item : list)
+        {
+            // for example a lat,lon pair to denote a location with radius. Not supported.
+            if (!(item instanceof String)) return null;
+            String cc = ((String)item).toUpperCase(Locale.US).intern();
+            // don't need this, 001 stands for "whole world"
+            if (cc.equals("001")) continue;
+            // some unsupported code, such as "150" or "city_national_bank_fl.geojson"
+            if (cc.length() > 2) return null;
+            result.add(cc);
+        }
+        return result;
     }
 
     private static boolean anyKeyOrValueContainsWildcard(Map<String,String> map)

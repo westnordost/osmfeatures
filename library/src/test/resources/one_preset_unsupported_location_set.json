@@ -17,6 +17,24 @@
       "exclude": ["150"]
     }
   },
+  "another/invalid_exclude": {
+    "name": "test",
+    "tags": { "a": "b" },
+    "geometry": ["point"],
+    "locationSet": {
+      "include": ["de"],
+      "exclude": [[0.0,0.0]]
+    }
+  },
+  "another/invalid_include": {
+    "name": "test",
+    "tags": { "a": "b" },
+    "geometry": ["point"],
+    "locationSet": {
+      "include": [[0.0,0.0]],
+      "exclude": ["de"]
+    }
+  },
   "some/ok": {
     "name": "test",
     "tags": { "a": "b" },
