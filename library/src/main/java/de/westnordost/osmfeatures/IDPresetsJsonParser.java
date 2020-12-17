@@ -47,7 +47,7 @@ class IDPresetsJsonParser {
         List<GeometryType> geometry = parseList(p.getJSONArray("geometry"),
                 item -> GeometryType.valueOf(((String)item).toUpperCase(Locale.US)));
         boolean suggestion = p.optBoolean("suggestion", false);
-        String name = p.getString("name");
+        String name = p.optString("name");
         String icon = p.optString("icon");
         String imageURL = p.optString("imageURL");
         List<String> terms = parseList(p.optJSONArray("terms"), item -> (String)item);

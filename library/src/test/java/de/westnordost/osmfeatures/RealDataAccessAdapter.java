@@ -20,7 +20,7 @@ public class RealDataAccessAdapter implements IDFeatureCollection.FileAccessAdap
             return new URL("https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json").openStream();
         } else
             {
-            return new URL("https://raw.githubusercontent.com/openstreetmap/iD/develop/dist/locales/"+name).openStream();
+            return new URL("https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/translations/"+name).openStream();
         }
     }
 }

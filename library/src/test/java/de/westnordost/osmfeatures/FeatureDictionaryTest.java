@@ -449,7 +449,7 @@ public class FeatureDictionaryTest
 		assertEquals("Recording Studio", matches2.get(0).getName());
 
 		List<Feature> matches3 = dictionary
-				.byTerm("Chines")
+				.byTerm("Chinese Res")
 				.forLocale(Locale.ENGLISH)
 				.find();
 		assertEquals(1, matches3.size());

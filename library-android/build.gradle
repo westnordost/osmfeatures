@@ -4,7 +4,7 @@ plugins {
     id "maven-publish"
 }
 
-version = "2.0"
+version = "2.1"
 group "de.westnordost"
 
 repositories {
@@ -15,7 +15,7 @@ repositories {
 
 dependencies {
     //api (project(':library')) {
-    api ('de.westnordost:osmfeatures:2.0') {
+    api ('de.westnordost:osmfeatures:2.1') {
         // it's already included in Android
         exclude group: 'org.json', module: 'json'
     }

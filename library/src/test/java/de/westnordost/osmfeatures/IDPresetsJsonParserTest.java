@@ -53,7 +53,7 @@ public class IDPresetsJsonParserTest {
 
         assertTrue(feature.getIncludeCountryCodes().isEmpty());
         assertTrue(feature.getExcludeCountryCodes().isEmpty());
-        assertEquals("test",feature.getName());
+        assertEquals("", feature.getName());
         assertEquals("",feature.getIcon());
         assertEquals("",feature.getImageURL());
         assertFalse(feature.isSuggestion());
