@@ -10,9 +10,9 @@ Requires Java 8.
 
 ## Installation
 
-Add [`de.westnordost:osmfeatures:2.1`](http://jcenter.bintray.com/de/westnordost/osmfeatures/2.1/) as a Maven dependency or download the jar from there.
+Add [`de.westnordost:osmfeatures:2.1`](https://jcenter.bintray.com/de/westnordost/osmfeatures/2.1/) as a Maven dependency or download the jar from there.
 
-For Android, use [`de.westnordost:osmfeatures-android:2.1`](http://jcenter.bintray.com/de/westnordost/osmfeatures-android/2.1/).
+For Android, use [`de.westnordost:osmfeatures-android:2.1`](https://jcenter.bintray.com/de/westnordost/osmfeatures-android/2.1/).
 
 It's in the JCenter repository, not Maven Central.
 
