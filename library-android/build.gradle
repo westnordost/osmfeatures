@@ -1,6 +1,7 @@
 plugins {
     id "com.android.library"
     id "maven-publish"
+    id 'signing'
 }
 
 version = "2.1"
@@ -10,7 +11,12 @@ repositories {
     mavenLocal()
     mavenCentral()
     google()
-    jcenter()
+    jcenter {
+        content {
+            //  org.jetbrains.trove4j is only available in JCenter
+            includeGroup("org.jetbrains.trove4j")
+        }
+    }
 }
 
 dependencies {
@@ -54,7 +60,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 
 publishing {
     publications {
-        Library(MavenPublication) {
+        mavenJava(MavenPublication) {
             artifact("$buildDir/outputs/aar/library-android-release.aar")
             artifact sourcesJar
             artifact javadocJar
@@ -105,4 +111,8 @@ publishing {
             }
         }
     }
+}
+
+signing {
+    sign publishing.publications.mavenJava
 }

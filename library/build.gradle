@@ -1,6 +1,7 @@
 plugins {
     id "java-library"
     id "maven-publish"
+    id 'signing'
 }
 
 version = "2.1"
@@ -10,7 +11,6 @@ sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
 
 repositories {
-    mavenLocal()
     mavenCentral()
 }
 
@@ -31,7 +31,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 
 publishing {
     publications {
-        Library(MavenPublication) {
+        mavenJava(MavenPublication) {
             from components.java
             artifact sourcesJar
             artifact javadocJar
@@ -71,4 +71,8 @@ publishing {
             }
         }
     }
+}
+
+signing {
+    sign publishing.publications.mavenJava
 }
