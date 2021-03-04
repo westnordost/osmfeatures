@@ -2,9 +2,14 @@
 
 buildscript {
     repositories {
-        google()
-        jcenter()
         mavenCentral()
+        google()
+        jcenter {
+            content {
+                //  org.jetbrains.trove4j is only available in JCenter
+                includeGroup("org.jetbrains.trove4j")
+            }
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.1.2'
