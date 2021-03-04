@@ -1,5 +1,4 @@
 plugins {
-    id "com.jfrog.bintray" version "1.8.4"
     id "java-library"
     id "maven-publish"
 }
@@ -11,7 +10,8 @@ sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
 
 repositories {
-    jcenter()
+    mavenLocal()
+    mavenCentral()
 }
 
 dependencies {
@@ -27,26 +27,6 @@ task sourcesJar(type: Jar) {
 task javadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
     classifier = 'javadoc'
-}
-
-bintray {
-    user = bintray_user
-    key = bintray_api_key
-    publications = ['Library']
-    pkg {
-        repo = 'maven'
-        name = 'osmfeatures'
-        licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/westnordost/osmfeatures.git'
-        version {
-            name = project.version
-            released = new Date()
-            gpg {
-                sign = true
-                passphrase = bintray_passphrase
-            }
-        }
-    }
 }
 
 publishing {
@@ -78,6 +58,16 @@ publishing {
                         email = 'osm@westnordost.de'
                     }
                 }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "mavenCentral"
+            url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            credentials {
+                username = ossrhUsername
+                password = ossrhPassword
             }
         }
     }

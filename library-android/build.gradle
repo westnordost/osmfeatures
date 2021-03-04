@@ -1,5 +1,4 @@
 plugins {
-    id "com.jfrog.bintray" version "1.8.4"
     id "com.android.library"
     id "maven-publish"
 }
@@ -9,6 +8,7 @@ group "de.westnordost"
 
 repositories {
     mavenLocal()
+    mavenCentral()
     google()
     jcenter()
 }
@@ -52,26 +52,6 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
 }
 
-bintray {
-    user = bintray_user
-    key = bintray_api_key
-    publications = ['Library']
-    pkg {
-        repo = 'maven'
-        name = 'osmfeatures-android'
-        licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/westnordost/osmfeatures.git'
-        version {
-            name = project.version
-            released = new Date()
-            gpg {
-                sign = true
-                passphrase = bintray_passphrase
-            }
-        }
-    }
-}
-
 publishing {
     publications {
         Library(MavenPublication) {
@@ -112,6 +92,16 @@ publishing {
                         }
                     }
                 }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "mavenCentral"
+            url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            credentials {
+                username = ossrhUsername
+                password = ossrhPassword
             }
         }
     }
