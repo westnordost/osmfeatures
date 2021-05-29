@@ -58,6 +58,8 @@ static def bcp47LanguageTagToJavaLanguageTag(String bcp47) {
 }
 ```
 
+In StreetComplete (app that uses this library), there is [this gradle task written in Kotlin](https://github.com/streetcomplete/StreetComplete/blob/master/buildSrc/src/main/java/UpdatePresetsTask.kt) to do this.
+
 ### Initialize dictionary
 
 Point the dictionary to the directory where the data is located (see above). Use `FeatureDictionary` as a singleton.
