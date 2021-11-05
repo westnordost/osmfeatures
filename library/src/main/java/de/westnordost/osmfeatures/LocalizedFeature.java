@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+/** Data class associated with the Feature interface. Represents a localized feature.
+ *
+ *  I.e. the name and terms are specified in the given locale. */
 class LocalizedFeature implements Feature {
 
     private final BaseFeature p;

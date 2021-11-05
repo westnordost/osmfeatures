@@ -5,7 +5,7 @@ import java.util.Locale;
 import java.util.Map;
 
 /** Subset of a feature as defined in the iD editor
- *  https://github.com/ideditor/schema-builder#source-files
+ *  https://github.com/ideditor/schema-builder#preset-schema
  *  with only the fields helpful for the dictionary */
 public interface Feature {
     String getId();
@@ -29,7 +29,7 @@ public interface Feature {
     Locale getLocale();
 }
 
-// not included:
+// currently not included:
 // - fields
 // - moreFields
 // - replacement

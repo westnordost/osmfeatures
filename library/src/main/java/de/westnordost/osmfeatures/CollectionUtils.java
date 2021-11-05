@@ -8,6 +8,8 @@ class CollectionUtils {
 
     public interface CreateFn<K,V> { V create(K value); }
 
+    /** For the given map, get the value of the entry at the given key and if there is no
+     *  entry yet, create it using the given create function thread-safely */
     public static <K,V> V synchronizedGetOrCreate(Map<K,V> map, K key, CreateFn<K,V> createFn)
     {
         if (!map.containsKey(key))
