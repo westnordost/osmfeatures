@@ -7,11 +7,6 @@
   "another/brand": {
     "name": "Megamall",
     "tags": { "a": "b", "c": "d" },
-    "geometry": ["point"],
-  },
-  "some/id": {
-    "name": "test",
-    "tags": { "a": "b", "c": "d" },
     "geometry": ["point"]
   }
 }

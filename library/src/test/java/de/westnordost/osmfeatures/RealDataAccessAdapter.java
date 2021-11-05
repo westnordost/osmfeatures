@@ -6,7 +6,7 @@ import java.net.URL;
 
 import static de.westnordost.osmfeatures.TestUtils.listOf;
 
-public class RealDataAccessAdapter implements IDFeatureCollection.FileAccessAdapter
+public class RealDataAccessAdapter implements FileAccessAdapter
 {
     @Override public boolean exists(String name)
     {

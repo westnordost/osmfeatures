@@ -5,7 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-class FileSystemAccess implements IDFeatureCollection.FileAccessAdapter
+class FileSystemAccess implements FileAccessAdapter
 {
     private final File basePath;
 
