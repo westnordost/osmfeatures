@@ -45,7 +45,6 @@ class LocalizedFeature implements Feature {
     @Override public List<String> getExcludeCountryCodes() { return p.getExcludeCountryCodes(); }
     @Override public boolean isSearchable() { return p.isSearchable(); }
     @Override public double getMatchScore() { return p.getMatchScore(); }
-    @Override public boolean isSuggestion() { return p.isSuggestion(); }
     @Override public Map<String, String> getAddTags() { return p.getAddTags(); }
     @Override public Map<String, String> getRemoveTags() { return p.getRemoveTags(); }
     @Override public String getCanonicalName() { return canonicalName; }

@@ -13,7 +13,6 @@
       "exclude": ["it"]
     },
     "searchable": false,
-    "matchScore": 0.5,
-    "suggestion": true
+    "matchScore": 0.5
   }
 }

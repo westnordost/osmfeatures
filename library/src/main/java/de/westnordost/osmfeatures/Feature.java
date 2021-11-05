@@ -19,7 +19,6 @@ public interface Feature {
     List<String> getExcludeCountryCodes();
     boolean isSearchable();
     double getMatchScore();
-    boolean isSuggestion();
     Map<String,String> getAddTags();
     Map<String,String> getRemoveTags();
 
