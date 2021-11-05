@@ -4,11 +4,8 @@ plugins {
     id 'signing'
 }
 
-version = "2.1"
+version = "3.0"
 group "de.westnordost"
-
-sourceCompatibility = "1.8"
-targetCompatibility = "1.8"
 
 repositories {
     mavenCentral()
@@ -16,7 +13,7 @@ repositories {
 
 dependencies {
     implementation 'org.json:json:20180813'
-    testImplementation 'junit:junit:4.13.1'
+    testImplementation 'junit:junit:4.13.2'
 }
 
 task sourcesJar(type: Jar) {
@@ -75,4 +72,9 @@ publishing {
 
 signing {
     sign publishing.publications.mavenJava
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }

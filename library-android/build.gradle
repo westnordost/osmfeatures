@@ -4,24 +4,18 @@ plugins {
     id 'signing'
 }
 
-version = "2.1"
+version = "3.0"
 group "de.westnordost"
 
 repositories {
     mavenLocal()
     mavenCentral()
     google()
-    jcenter {
-        content {
-            //  org.jetbrains.trove4j is only available in JCenter
-            includeGroup("org.jetbrains.trove4j")
-        }
-    }
 }
 
 dependencies {
     //api (project(':library')) {
-    api ('de.westnordost:osmfeatures:2.1') {
+    api ('de.westnordost:osmfeatures:3.0') {
         // it's already included in Android
         exclude group: 'org.json', module: 'json'
     }
