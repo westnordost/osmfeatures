@@ -15,13 +15,13 @@ import static de.westnordost.osmfeatures.TestUtils.assertEqualsIgnoreOrder;
 import static de.westnordost.osmfeatures.TestUtils.listOf;
 import static org.junit.Assert.*;
 
-public class IDLocalizedFeatureCollectionTest
+public class IDFeatureCollectionTest
 {
 	@Test public void features_not_found_produces_runtime_exception()
 	{
 		try
 		{
-			new IDLocalizedFeatureCollection(new FileAccessAdapter()
+			new IDFeatureCollection(new FileAccessAdapter()
 			{
 				@Override public boolean exists(String name) { return false; }
 				@Override public InputStream open(String name) throws IOException { throw new FileNotFoundException(); }
@@ -32,7 +32,7 @@ public class IDLocalizedFeatureCollectionTest
 
 	@Test public void load_features_and_two_localizations()
 	{
-		IDLocalizedFeatureCollection c = new IDLocalizedFeatureCollection(new FileAccessAdapter()
+		IDFeatureCollection c = new IDFeatureCollection(new FileAccessAdapter()
 		{
 			@Override public boolean exists(String name)
 			{
@@ -87,13 +87,12 @@ public class IDLocalizedFeatureCollectionTest
 
 		assertEquals(Locale.ENGLISH, c.get("some/id", locales).getLocale());
 		assertEquals(Locale.GERMAN, c.get("another/id", locales).getLocale());
-		// one may expect null, but it is English, because all the default strings are English
-		assertEquals(Locale.ENGLISH, c.get("yet/another/id", locales).getLocale());
+		assertEquals(null, c.get("yet/another/id", locales).getLocale());
 	}
 
 	@Test public void load_features_and_merge_localizations()
 	{
-		IDLocalizedFeatureCollection c = new IDLocalizedFeatureCollection(new FileAccessAdapter()
+		IDFeatureCollection c = new IDFeatureCollection(new FileAccessAdapter()
 		{
 			@Override public boolean exists(String name)
 			{

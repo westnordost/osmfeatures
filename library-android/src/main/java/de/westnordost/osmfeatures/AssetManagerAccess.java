@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-class AssetManagerAccess implements IDFeatureCollection.FileAccessAdapter
+class AssetManagerAccess implements FileAccessAdapter
 {
     private final AssetManager assetManager;
     private final String basePath;

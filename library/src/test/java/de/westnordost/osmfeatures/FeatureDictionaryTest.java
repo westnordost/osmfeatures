@@ -2,6 +2,7 @@ package de.westnordost.osmfeatures;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -16,132 +17,262 @@ public class FeatureDictionaryTest
 {
 	private static final List<GeometryType> POINT = Collections.singletonList(GeometryType.POINT);
 
-	private final Feature bakery = feature(
+	private final Feature bakery = feature( // unlocalized shop=bakery
 			"shop/bakery",
 			mapOf(tag("shop","bakery")),
 			"Bäckerei",
-			listOf("Brot")
+			listOf("Brot"),
+			listOf(),
+			listOf(),
+			true,
+			1.0,
+			mapOf(),
+			false,
+			null
 	);
 
-	private final Feature ditsch = feature(
+	private final Feature panetteria = feature( // localized shop=bakery
+			"shop/bakery",
+			mapOf(tag("shop","bakery")),
+			"Panetteria",
+			listOf(),
+			listOf(),
+			listOf(),
+			true,
+			1.0,
+			mapOf(),
+			false,
+			Locale.ITALIAN
+	);
+
+	private final Feature ditsch = feature( // brand in DE for shop=bakery
 			"shop/bakery/Ditsch",
 			mapOf(tag("shop","bakery"), tag("name","Ditsch")),
 			"Ditsch",
+			listOf(),
+			listOf("DE"),
+			listOf(),
+			true,
+			1.0,
 			mapOf(tag("wikipedia","de:Brezelb%C3%A4ckerei_Ditsch"), tag("brand", "Ditsch")),
-			listOf("DE")
+			true,
+			null
 	);
 
-	private final Feature ditschRussian = feature(
+	private final Feature ditschRussian = feature( // brand in RU for shop=bakery
 			"shop/bakery/Дитсч",
 			mapOf(tag("shop","bakery"), tag("name","Ditsch")),
 			"Дитсч",
+			listOf(),
+			listOf("RU"),
+			listOf(),
+			true,
+			1.0,
 			mapOf(tag("wikipedia","de:Brezelb%C3%A4ckerei_Ditsch"), tag("brand", "Дитсч")),
-			listOf("RU")
+			true,
+			null
 	);
 
-	private final Feature ditschInternational = feature(
+	private final Feature ditschInternational = feature( // brand everywhere for shop=bakery
 			"shop/bakery/Ditsh",
 			mapOf(tag("shop","bakery"), tag("name","Ditsch")),
 			"Ditsh",
+			listOf(),
+			listOf(),
+			listOf(),
+			true,
+			1.0,
 			mapOf(tag("wikipedia","de:Brezelb%C3%A4ckerei_Ditsch")),
-			listOf()
+			true,
+			null
 	);
 
-	private final Feature car_dealer = feature(
+	private final Feature car_dealer = feature( // German localized  unspecific shop=car
 			"shop/car",
 			mapOf(tag("shop","car")),
 			"Autohändler",
-			listOf("auto")
+			listOf("auto"),
+			listOf(),
+			listOf(),
+			true,
+			1.0,
+			mapOf(),
+			false,
+			Locale.GERMAN
 	);
-	private final Feature second_hand_car_dealer = feature(
+	private final Feature second_hand_car_dealer = feature( // German localized shop=car with subtags
 			"shop/car/second_hand",
 			mapOf(tag("shop","car"), tag("second_hand", "only")),
 			"Gebrauchtwagenhändler",
-			listOf("auto")
+			listOf("auto"),
+			listOf(),
+			listOf(),
+			true,
+			1.0,
+			mapOf(),
+			false,
+			Locale.GERMAN
 	);
 
-	private final Feature scheisshaus = new BaseFeature(
+	private final Feature scheisshaus = feature( // unsearchable feature
 			"amenity/scheißhaus",
 			mapOf(tag("amenity","scheißhaus")),
-			POINT,
 			"Scheißhaus",
-			null, null,
 			listOf(),
 			listOf(),
 			listOf(),
-			false, // <- not searchable!
-			0f,
+			false, // <--- not searchable!
+			1.0,
 			mapOf(),
-			mapOf());
+			false,
+			null
+	);
 
-	private final Feature bank = feature(
+	private final Feature bank = feature( // unlocalized shop=bank (Bank)
 			"amenity/bank",
 			mapOf(tag("amenity","bank")),
 			"Bank",
-			listOf()
+			listOf(),
+			listOf(),
+			listOf(),
+			true,
+			1.0,
+			mapOf(),
+			false,
+			null
 	);
-	private final Feature bench = feature(
+	private final Feature bench = feature( // unlocalized amenity=bench (PARKbank)
 			"amenity/bench",
 			mapOf(tag("amenity","bench")),
 			"Parkbank",
 			listOf("Bank"),
-			5.0f
+			listOf(),
+			listOf(),
+			true,
+			5.0,
+			mapOf(),
+			false,
+			null
 	);
-	private final Feature casino = feature(
+	private final Feature casino = feature( // unlocalized amenity=casino (SPIELbank)
 			"amenity/casino",
 			mapOf(tag("amenity","casino")),
 			"Spielbank",
-			listOf("Kasino")
+			listOf("Kasino"),
+			listOf(),
+			listOf(),
+			true,
+			1.0,
+			mapOf(),
+			false,
+			null
 	);
-	private final Feature atm = feature(
+	private final Feature atm = feature( // unlocalized amenity=atm (BankOMAT)
 			"amenity/atm",
 			mapOf(tag("amenity","atm")),
 			"Bankomat",
-			listOf()
+			listOf(),
+			listOf(),
+			listOf(),
+			true,
+			1.0,
+			mapOf(),
+			false,
+			null
 	);
-	private final Feature stock_exchange = feature(
+	private final Feature stock_exchange = feature( // unlocalized amenity=stock_exchange (has "Banking" as term)
 			"amenity/stock_exchange",
 			mapOf(tag("amenity","stock_exchange")),
 			"Börse",
-			listOf("Banking")
+			listOf("Banking"),
+			listOf(),
+			listOf(),
+			true,
+			1.0,
+			mapOf(),
+			false,
+			null
 	);
-	private final Feature bank_of_america = feature(
+	private final Feature bank_of_america = feature( // Brand of a amenity=bank (has "Bank" in name)
 			"amenity/bank/Bank of America",
 			mapOf(tag("amenity","bank"), tag("name","Bank of America")),
 			"Bank of America",
-			listOf()
+			listOf(),
+			listOf(),
+			listOf(),
+			true,
+			1.0,
+			mapOf(),
+			true,
+			null
 	);
-	private final Feature bank_of_liechtenstein = feature(
+	private final Feature bank_of_liechtenstein = feature( // Brand of a amenity=bank (has "Bank" in name), but low matchScore
 			"amenity/bank/Bank of Liechtenstein",
 			mapOf(tag("amenity","bank"), tag("name","Bank of Liechtenstein")),
 			"Bank of Liechtenstein",
 			listOf(),
-			0.2f
+			listOf(),
+			listOf(),
+			true,
+			0.2,
+			mapOf(),
+			true,
+			null
 	);
-	private final Feature deutsche_bank = feature(
+	private final Feature deutsche_bank = feature( // Brand of a amenity=bank (does not start with "Bank" in name)
 			"amenity/bank/Deutsche Bank",
 			mapOf(tag("amenity","bank"), tag("name","Deutsche Bank")),
 			"Deutsche Bank",
-			listOf()
+			listOf(),
+			listOf(),
+			listOf(),
+			true,
+			1.0,
+			mapOf(),
+			true,
+			null
 	);
-	private final Feature baenk = feature(
+	private final Feature baenk = feature( // amenity=bänk, to see if diacritics match non-strictly ("a" finds "ä")
 			"amenity/bänk",
 			mapOf(tag("amenity","bänk")),
 			"Bänk",
-			listOf()
+			listOf(),
+			listOf(),
+			listOf(),
+			true,
+			1.0,
+			mapOf(),
+			false,
+			null
 	);
-	private final Feature bad_bank = feature(
+	private final Feature bad_bank = feature( // amenity=bank with subtags that has "Bank" in name but it is not hte first word
 			"amenity/bank/bad",
 			mapOf(tag("amenity","bank"), tag("goodity","bad")),
 			"Bad Bank",
-			listOf()
+			listOf(),
+			listOf(),
+			listOf(),
+			true,
+			1.0,
+			mapOf(),
+			false,
+			null
 	);
-	private final Feature miniature_train_shop = feature(
+	private final Feature miniature_train_shop = feature( // feature whose name consists of several words
 			"shop/miniature_train",
 			mapOf(tag("shop","miniature_train")),
 			"Miniature Train Shop",
-			listOf()
+			listOf(),
+			listOf(),
+			listOf(),
+			true,
+			1.0,
+			mapOf(),
+			false,
+			null
 	);
+
+	//region by tags
 
 	@Test public void find_no_entry_by_tags()
 	{
@@ -167,8 +298,8 @@ public class FeatureDictionaryTest
 	@Test public void find_entry_because_fallback_locale()
 	{
 		Map<String,String> tags = mapOf(tag("shop", "bakery"));
-		FeatureDictionary dictionary = dictionary(Locale.GERMAN, bakery);
-		List<Feature> matches = dictionary.byTags(tags).forLocale(Locale.ITALIAN, Locale.GERMAN).find();
+		FeatureDictionary dictionary = dictionary(bakery);
+		List<Feature> matches = dictionary.byTags(tags).forLocale(Locale.ITALIAN, null).find();
 		assertEquals(listOf(bakery), matches);
 	}
 
@@ -202,6 +333,15 @@ public class FeatureDictionaryTest
 		FeatureDictionary dictionary = dictionary(bakery, ditsch);
 		List<Feature> matches = dictionary.byTags(tags).find();
 		assertEquals(listOf(ditsch), matches);
+	}
+
+	@Test public void find_only_entries_with_given_locale()
+	{
+		Map<String,String> tags = mapOf(tag("shop", "bakery"));
+		FeatureDictionary dictionary = dictionary(bakery, panetteria);
+		assertEquals(listOf(panetteria), dictionary.byTags(tags).forLocale(Locale.ITALIAN).find());
+		assertEquals(listOf(), dictionary.byTags(tags).forLocale(Locale.ENGLISH).find());
+		assertEquals(listOf(bakery), dictionary.byTags(tags).forLocale((Locale) null).find());
 	}
 
 	@Test public void find_only_brands_finds_no_normal_entries()
@@ -248,7 +388,7 @@ public class FeatureDictionaryTest
 	{
 		Map<String,String> tags = mapOf(tag("shop", "car"));
 		FeatureDictionary dictionary = dictionary(car_dealer, second_hand_car_dealer);
-		List<Feature> matches = dictionary.byTags(tags).find();
+		List<Feature> matches = dictionary.byTags(tags).forLocale(Locale.GERMAN, null).find();
 		assertEquals(listOf(car_dealer), matches);
 	}
 
@@ -256,9 +396,13 @@ public class FeatureDictionaryTest
 	{
 		Map<String,String> tags = mapOf(tag("shop", "car"), tag("second_hand", "only"));
 		FeatureDictionary dictionary = dictionary(car_dealer, second_hand_car_dealer);
-		List<Feature> matches = dictionary.byTags(tags).find();
+		List<Feature> matches = dictionary.byTags(tags).forLocale(Locale.GERMAN, null).find();
 		assertEquals(listOf(second_hand_car_dealer), matches);
 	}
+
+	//endregion
+
+	//region by name
 
 	@Test public void find_no_entry_by_name()
 	{
@@ -288,14 +432,14 @@ public class FeatureDictionaryTest
 	@Test public void find_entry_by_name()
 	{
 		FeatureDictionary dictionary = dictionary(bakery);
-		List<Feature> matches = dictionary.byTerm("Bäckerei").find();
+		List<Feature> matches = dictionary.byTerm("Bäckerei").forLocale((Locale) null).find();
 		assertEquals(listOf(bakery), matches);
 	}
 
 	@Test public void find_entry_by_name_with_correct_geometry()
 	{
 		FeatureDictionary dictionary = dictionary(bakery);
-		List<Feature> matches = dictionary.byTerm("Bäckerei").forGeometry(GeometryType.POINT).find();
+		List<Feature> matches = dictionary.byTerm("Bäckerei").forLocale((Locale) null).forGeometry(GeometryType.POINT).find();
 		assertEquals(listOf(bakery), matches);
 	}
 
@@ -309,76 +453,76 @@ public class FeatureDictionaryTest
 	@Test public void find_entry_by_name_case_insensitive()
 	{
 		FeatureDictionary dictionary = dictionary(bakery);
-		List<Feature> matches = dictionary.byTerm("BÄCkErEI").find();
+		List<Feature> matches = dictionary.byTerm("BÄCkErEI").forLocale((Locale) null).find();
 		assertEquals(listOf(bakery), matches);
 	}
 
 	@Test public void find_entry_by_name_diacritics_insensitive()
 	{
 		FeatureDictionary dictionary = dictionary(bakery);
-		List<Feature> matches = dictionary.byTerm("Backérèi").find();
+		List<Feature> matches = dictionary.byTerm("Backérèi").forLocale((Locale) null).find();
 		assertEquals(listOf(bakery), matches);
 	}
 
 	@Test public void find_entry_by_term()
 	{
 		FeatureDictionary dictionary = dictionary(bakery);
-		List<Feature> matches = dictionary.byTerm("bro").find();
+		List<Feature> matches = dictionary.byTerm("bro").forLocale((Locale) null).find();
 		assertEquals(listOf(bakery), matches);
 	}
 
 	@Test public void find_entry_by_term_case_insensitive()
 	{
 		FeatureDictionary dictionary = dictionary(bakery);
-		List<Feature> matches = dictionary.byTerm("BRO").find();
+		List<Feature> matches = dictionary.byTerm("BRO").forLocale((Locale) null).find();
 		assertEquals(listOf(bakery), matches);
 	}
 
 	@Test public void find_entry_by_term_diacritics_insensitive()
 	{
 		FeatureDictionary dictionary = dictionary(bakery);
-		List<Feature> matches = dictionary.byTerm("bró").find();
+		List<Feature> matches = dictionary.byTerm("bró").forLocale((Locale) null).find();
 		assertEquals(listOf(bakery), matches);
 	}
 
 	@Test public void find_multiple_entries_by_term()
 	{
 		FeatureDictionary dictionary = dictionary(second_hand_car_dealer, car_dealer);
-		List<Feature> matches = dictionary.byTerm("auto").find();
+		List<Feature> matches = dictionary.byTerm("auto").forLocale(Locale.GERMAN).find();
 		assertEqualsIgnoreOrder(listOf(second_hand_car_dealer, car_dealer), matches);
 	}
 
 	@Test public void find_multiple_entries_by_name_but_respect_limit()
 	{
 		FeatureDictionary dictionary = dictionary(second_hand_car_dealer, car_dealer);
-		List<Feature> matches = dictionary.byTerm("auto").limit(1).find();
+		List<Feature> matches = dictionary.byTerm("auto").forLocale(Locale.GERMAN).limit(1).find();
 		assertEquals(1, matches.size());
 	}
 
 	@Test public void find_only_brands_by_name_finds_no_normal_entries()
 	{
 		FeatureDictionary dictionary = dictionary(bakery);
-		List<Feature> matches = dictionary.byTerm("Bäckerei").isSuggestion(true).find();
+		List<Feature> matches = dictionary.byTerm("Bäckerei").forLocale((Locale) null).isSuggestion(true).find();
 		assertEquals(0, matches.size());
 	}
 
 	@Test public void find_no_brands_by_name_finds_only_normal_entries()
 	{
 		FeatureDictionary dictionary = dictionary(bank, bank_of_america);
-		List<Feature> matches = dictionary.byTerm("Bank").isSuggestion(false).find();
+		List<Feature> matches = dictionary.byTerm("Bank").forLocale((Locale) null).isSuggestion(false).find();
 		assertEquals(listOf(bank), matches);
 	}
 
 	@Test public void find_no_entry_by_term_because_wrong_locale()
 	{
-		FeatureDictionary dictionary = dictionary(Locale.GERMAN, bakery);
+		FeatureDictionary dictionary = dictionary(bakery);
 		assertEquals(listOf(), dictionary.byTerm("Bäck").forLocale(Locale.ITALIAN).find());
 	}
 
 	@Test public void find_entry_by_term_because_fallback_locale()
 	{
-		FeatureDictionary dictionary = dictionary(Locale.GERMAN, bakery);
-		List<Feature> matches = dictionary.byTerm("Bäck").forLocale(Locale.ITALIAN, Locale.GERMAN).find();
+		FeatureDictionary dictionary = dictionary(bakery);
+		List<Feature> matches = dictionary.byTerm("Bäck").forLocale(Locale.ITALIAN, null).find();
 		assertEquals(listOf(bakery), matches);
 	}
 
@@ -394,21 +538,21 @@ public class FeatureDictionaryTest
 	@Test public void find_multi_word_feature()
 	{
 		FeatureDictionary dictionary = dictionary(miniature_train_shop);
-		assertEquals(listOf(miniature_train_shop), dictionary.byTerm("mini").find());
-		assertEquals(listOf(miniature_train_shop), dictionary.byTerm("train").find());
-		assertEquals(listOf(miniature_train_shop), dictionary.byTerm("shop").find());
-		assertEquals(listOf(miniature_train_shop), dictionary.byTerm("Miniature Trai").find());
-		assertTrue(dictionary.byTerm("Train Sho").find().isEmpty());
+		assertEquals(listOf(miniature_train_shop), dictionary.byTerm("mini").forLocale((Locale) null).find());
+		assertEquals(listOf(miniature_train_shop), dictionary.byTerm("train").forLocale((Locale) null).find());
+		assertEquals(listOf(miniature_train_shop), dictionary.byTerm("shop").forLocale((Locale) null).find());
+		assertEquals(listOf(miniature_train_shop), dictionary.byTerm("Miniature Trai").forLocale((Locale) null).find());
+		assertTrue(dictionary.byTerm("Train Sho").forLocale((Locale) null).find().isEmpty());
 	}
 
-
+	//endregion
 
 	@Test public void find_by_term_sorts_result_in_correct_order()
 	{
 		FeatureDictionary dictionary = dictionary(
 				casino, baenk, bad_bank, stock_exchange, bank_of_liechtenstein, bank, bench, atm,
 				bank_of_america, deutsche_bank);
-		List<Feature> matches = dictionary.byTerm("Bank").find();
+		List<Feature> matches = dictionary.byTerm("Bank").forLocale((Locale) null).find();
 		assertEquals(listOf(
 				bank,       // exact name matches
 				baenk,      // exact name matches (diacritics and case insensitive)
@@ -425,10 +569,9 @@ public class FeatureDictionaryTest
 
 	@Test public void some_tests_with_real_data()
 	{
-		FeatureCollection featureCollection = new IDLocalizedFeatureCollection(new RealDataAccessAdapter());
-		featureCollection.getAllSuggestions();
+		FeatureCollection featureCollection = new IDFeatureCollection(new LivePresetDataAccessAdapter());
 		featureCollection.getAll(listOf(Locale.ENGLISH));
-		FeatureDictionary dictionary = new FeatureDictionary(featureCollection);
+		FeatureDictionary dictionary = new FeatureDictionary(listOf(featureCollection), listOf());
 
 		List<Feature> matches = dictionary
 				.byTags(mapOf(tag("amenity", "studio")))
@@ -454,36 +597,47 @@ public class FeatureDictionaryTest
 
 	private static FeatureDictionary dictionary(Feature... entries)
 	{
-		return dictionary(Locale.getDefault(), entries);
-	}
-
-	private static FeatureDictionary dictionary(Locale locale, Feature... entries)
-	{
-		return new FeatureDictionary(new TestFeatureCollection(locale, entries));
-	}
-
-	private static Feature feature(
-			String id, Map<String, String> tags, String name, List<String> terms
-	) {
-		return new BaseFeature(id, tags, POINT, name, null, null, terms, listOf(), listOf(),
-				true, 1.0f, mapOf(), mapOf()
+		List<Feature> features = new ArrayList<>();
+		List<Feature> brandFeatures = new ArrayList<>();
+		for (Feature entry : entries) {
+			if (entry instanceof SuggestionFeature) {
+				brandFeatures.add(entry);
+			} else {
+				features.add(entry);
+			}
+		}
+		return new FeatureDictionary(
+				listOf(new TestFeatureCollection(features)),
+				listOf(new TestFeatureCollection(brandFeatures))
 		);
 	}
 
 	private static Feature feature(
-			String id, Map<String, String> tags, String name, List<String> terms, float matchScore
+			String id, Map<String, String> tags, String name, List<String> terms,
+			List<String> countryCodes, List<String> excludeCountryCodes, boolean searchable,
+			double matchScore, Map<String, String> addTags, boolean isSuggestion, Locale locale
 	) {
-		return new BaseFeature(id, tags, POINT, name, null, null, terms, listOf(), listOf(),
-				true, matchScore, mapOf(), mapOf()
-		);
+		if (isSuggestion) {
+			return new SuggestionFeature(
+					id, tags, POINT, name, null, null, terms, countryCodes,
+					excludeCountryCodes, searchable, matchScore, addTags, mapOf()
+			);
+		} else {
+			BaseFeature f = new BaseFeature(
+					id, tags, POINT, name, null, null, terms, countryCodes,
+					excludeCountryCodes, searchable, matchScore, addTags, mapOf()
+			);
+			if (locale != null) {
+				return new LocalizedFeature(f, locale, f.getName(), f.getTerms());
+			} else {
+				return f;
+			}
+		}
 	}
 
-	private static Feature feature(
-			String id, Map<String, String> tags, String name, Map<String, String> addTags,
-			List<String> countryCodes
-	) {
-		return new BaseFeature(id, tags, POINT, name, null, null, listOf(),
-				countryCodes, listOf(),true, 1.0, addTags, mapOf()
-		);
+	static class SuggestionFeature extends BaseFeature {
+		public SuggestionFeature(String id, Map<String, String> tags, List<GeometryType> geometry, String name, String icon, String imageURL, List<String> terms, List<String> includeCountryCodes, List<String> excludeCountryCodes, boolean searchable, double matchScore, Map<String, String> addTags, Map<String, String> removeTags) {
+			super(id, tags, geometry, name, icon, imageURL, terms, includeCountryCodes, excludeCountryCodes, searchable, matchScore, addTags, removeTags);
+		}
 	}
 }

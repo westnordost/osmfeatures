@@ -29,11 +29,11 @@ public class IDBaseFeatureCollectionTest {
                 if (name.equals("presets.json")) return getStream("with_brand_presets_min.json");
                 throw new IOException("File not found");
             }
-        }, true, "presets.json");
+        });
 
-        assertEqualsIgnoreOrder(listOf("Duckworths", "Megamall"), getNames(c.getAll()));
-        assertEquals("Duckworths", c.get("a/brand").getName());
-        assertEquals("Megamall", c.get("another/brand").getName());
+        assertEqualsIgnoreOrder(listOf("Duckworths", "Megamall"), getNames(c.getAll(listOf(Locale.ITALIAN))));
+        assertEquals("Duckworths", c.get("a/brand", listOf(Locale.ITALIAN)).getName());
+        assertEquals("Megamall", c.get("another/brand", listOf(Locale.ITALIAN)).getName());
     }
 
     private InputStream getStream(String file)

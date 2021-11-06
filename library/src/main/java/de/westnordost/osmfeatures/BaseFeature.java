@@ -70,4 +70,6 @@ class BaseFeature implements Feature
 	@Override public String getCanonicalName() { return canonicalName; }
 	@Override public List<String> getCanonicalTerms() { return canonicalTerms; }
 	@Override public Locale getLocale() { return null; }
+
+	@Override public String toString() { return getId(); }
 }

@@ -9,7 +9,7 @@ import static de.westnordost.osmfeatures.CollectionUtils.synchronizedGetOrCreate
 
 public class FeatureDictionary
 {
-	private final FeatureCollection featureCollection;
+	private final List<FeatureCollection> featureCollections;
 
 	private final FeatureTermIndex brandNameIndex;
 	private final FeatureTagsIndex brandTagsIndex;
@@ -19,17 +19,21 @@ public class FeatureDictionary
 	private final Map<List<Locale>, FeatureTermIndex> nameIndexes;
 	private final Map<List<Locale>, FeatureTermIndex> termsIndexes;
 
-	FeatureDictionary(FeatureCollection ...featureCollections)
+	FeatureDictionary(List<FeatureCollection> featureCollections, List<FeatureCollection> brandFeatureCollections)
 	{
-		this.featureCollection = new MultiFeatureCollection(featureCollections);
+		this.featureCollections = featureCollections;
+
 		tagsIndexes = new HashMap<>();
 		nameIndexes = new HashMap<>();
 		termsIndexes = new HashMap<>();
-		Collection<Feature> brandFeatures = featureCollection.getAllSuggestions();
+		Collection<Feature> brandFeatures = new ArrayList<>();
+		for (FeatureCollection brandFeatureCollection : brandFeatureCollections) {
+			brandFeatures.addAll(brandFeatureCollection.getAll(Arrays.asList((Locale) null)));
+		}
 		brandNameIndex = new FeatureTermIndex(brandFeatures, feature ->
 		{
 			if (!feature.isSearchable()) return Collections.emptyList();
-			return Collections.singletonList(feature.getCanonicalName());
+			return Arrays.asList(feature.getCanonicalName());
 		});
 		brandTagsIndex = new FeatureTagsIndex(brandFeatures);
 		// build indices for default locale
@@ -39,13 +43,21 @@ public class FeatureDictionary
 	}
 
 	/** Create a new FeatureDictionary which gets its data from the given directory. */
-	public static FeatureDictionary create(String ...basePaths)
-	{
-		IDFeatureCollection[] collections = new IDFeatureCollection[basePaths.length];
-		for (int i = 0; i < basePaths.length; i++) {
-			collections[i] = new IDFeatureCollection(new FileSystemAccess(new File(basePaths[i])));
-		}
-		return new FeatureDictionary(collections);
+	public static FeatureDictionary create(String presetsBasePath)	{
+		return create(presetsBasePath, null);
+	}
+
+	/** Create a new FeatureDictionary which gets its data from the given directory. Optionally,
+	 *  a path to brand presets can be specified. */
+	public static FeatureDictionary create(String presetsBasePath, String brandPresetsBasePath) {
+		FeatureCollection featureCollection =
+				new IDFeatureCollection(new FileSystemAccess(new File(presetsBasePath)));
+
+		FeatureCollection brandsFeatureCollection = brandPresetsBasePath != null
+				? new IDBaseFeatureCollection(new FileSystemAccess(new File(brandPresetsBasePath)))
+				: null;
+
+		return new FeatureDictionary(Arrays.asList(featureCollection), Arrays.asList(brandsFeatureCollection));
 	}
 
 	/** Find matches by a set of tags */
@@ -54,8 +66,12 @@ public class FeatureDictionary
 		return new QueryByTagBuilder(tags);
 	}
 
-	private List<Feature> get(Map<String, String> tags, GeometryType geometry, Boolean isSuggestion, List<Locale> locales)
-	{
+	private List<Feature> get(
+			Map<String, String> tags,
+			GeometryType geometry,
+			Boolean isSuggestion,
+			List<Locale> locales
+	) {
 		if(tags.isEmpty()) return Collections.emptyList();
 
 		List<Feature> foundFeatures = new ArrayList<>();
@@ -121,8 +137,14 @@ public class FeatureDictionary
 		return new QueryByTermBuilder(term);
 	}
 
-	private List<Feature> get(String search, GeometryType geometry, String countryCode, Boolean isSuggestion, int limit, List<Locale> locales)
-	{
+	private List<Feature> get(
+			String search,
+			GeometryType geometry,
+			String countryCode,
+			Boolean isSuggestion,
+			int limit,
+			List<Locale> locales
+	) {
 		String canonicalSearch = StringUtils.canonicalize(search);
 
 		Comparator<Feature> sortNames = (a, b) ->
@@ -204,7 +226,7 @@ public class FeatureDictionary
 
 	private FeatureTagsIndex createTagsIndex(List<Locale> locales)
 	{
-		return new FeatureTagsIndex(featureCollection.getAllLocalized(locales));
+		return new FeatureTagsIndex(getAllFeatures(locales));
 	}
 
 	private static Collection<String> getParentCategoryIds(String id)
@@ -234,7 +256,7 @@ public class FeatureDictionary
 
 	private FeatureTermIndex createNameIndex(List<Locale> locales)
 	{
-		return new FeatureTermIndex(featureCollection.getAllLocalized(locales), feature -> {
+		return new FeatureTermIndex(getAllFeatures(locales), feature -> {
 			if (!feature.isSearchable()) return Collections.emptyList();
 			String name = feature.getCanonicalName();
 			if (name.contains(" ")) {
@@ -255,7 +277,7 @@ public class FeatureDictionary
 
 	private FeatureTermIndex createTermsIndex(List<Locale> locales)
 	{
-		return new FeatureTermIndex(featureCollection.getAllLocalized(locales), feature -> {
+		return new FeatureTermIndex(getAllFeatures(locales), feature -> {
 			if (!feature.isSearchable()) return Collections.emptyList();
 			return feature.getCanonicalTerms();
 		});
@@ -271,9 +293,16 @@ public class FeatureDictionary
 			if (countryCode == null) return false;
 			if (!include.isEmpty() && !include.contains(countryCode)) return false;
 			if (exclude.contains(countryCode)) return false;
-
 		}
 		return true;
+	}
+
+	private List<Feature> getAllFeatures(List<Locale> locales) {
+		List<Feature> result = new ArrayList<>();
+		for (FeatureCollection featureCollection : featureCollections) {
+			result.addAll(featureCollection.getAll(locales));
+		}
+		return result;
 	}
 
 	public class QueryByTagBuilder
@@ -285,7 +314,7 @@ public class FeatureDictionary
 
 		private QueryByTagBuilder(Map<String, String> tags) { this.tags = tags; }
 
-		/** Sets for which geometry type to look. If not set or <tt>null</tt>, any will match. */
+		/** Sets for which geometry type to look. If not set or <code>null</code>, any will match. */
 		public QueryByTagBuilder forGeometry(GeometryType geometryType)
 		{
 			this.geometryType = geometryType;
@@ -319,7 +348,7 @@ public class FeatureDictionary
 
 		/** Returns a list of dictionary entries that match or an empty list if nothing is
 		 *  found. <br>In rare cases, a set of tags may match multiple primary features, such as for
-		 *  tag combinations like <tt>shop=deli</tt> + <tt>amenity=cafe</tt>, so, this is why
+		 *  tag combinations like <code>shop=deli</code> + <code>amenity=cafe</code>, so, this is why
 		 *  it is a list. */
 		public List<Feature> find()
 		{
@@ -338,7 +367,7 @@ public class FeatureDictionary
 
 		private QueryByTermBuilder(String term) { this.term = term; }
 
-		/** Sets for which geometry type to look. If not set or <tt>null</tt>, any will match. */
+		/** Sets for which geometry type to look. If not set or <code>null</code>, any will match. */
 		public QueryByTermBuilder forGeometry(GeometryType geometryType)
 		{
 			this.geometryType = geometryType;

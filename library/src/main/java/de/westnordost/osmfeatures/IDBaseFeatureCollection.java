@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 
 /** Non-localized feature collection sourcing from (NSI) iD presets defined in JSON.
  *
@@ -14,16 +15,13 @@ import java.util.List;
  *  there is a json with the given name which includes all the features. */
 public class IDBaseFeatureCollection implements FeatureCollection
 {
+    private static final String FEATURES_FILE = "presets.json";
+
     private final FileAccessAdapter fileAccess;
 
     private final LinkedHashMap<String, Feature> featuresById = new LinkedHashMap<>();
 
-    private final String featuresFileName;
-    private final boolean isSuggestions;
-
-    IDBaseFeatureCollection(FileAccessAdapter fileAccess, boolean isSuggestions, String featuresFileName) {
-        this.featuresFileName = featuresFileName;
-        this.isSuggestions = isSuggestions;
+    IDBaseFeatureCollection(FileAccessAdapter fileAccess) {
         this.fileAccess = fileAccess;
         List<BaseFeature> features = loadFeatures();
         for (BaseFeature feature : features) {
@@ -33,7 +31,7 @@ public class IDBaseFeatureCollection implements FeatureCollection
 
     private List<BaseFeature> loadFeatures()
     {
-        try(InputStream is = fileAccess.open(featuresFileName))
+        try(InputStream is = fileAccess.open(FEATURES_FILE))
         {
             return new IDPresetsJsonParser().parse(is);
         }
@@ -43,15 +41,11 @@ public class IDBaseFeatureCollection implements FeatureCollection
         }
     }
 
-    @Override public Collection<Feature> getAll() {
+    @Override public Collection<Feature> getAll(List<Locale> locales) {
         return featuresById.values();
     }
 
-    @Override public Feature get(String id) {
+    @Override public Feature get(String id, List<Locale> locales) {
         return featuresById.get(id);
-    }
-
-    @Override public Boolean isSuggestions() {
-        return isSuggestions;
     }
 }

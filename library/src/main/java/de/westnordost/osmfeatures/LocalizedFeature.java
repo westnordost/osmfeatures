@@ -50,4 +50,6 @@ class LocalizedFeature implements Feature {
     @Override public String getCanonicalName() { return canonicalName; }
     @Override public List<String> getCanonicalTerms() { return canonicalTerms; }
     @Override public Locale getLocale() { return locale; }
+
+    @Override public String toString() { return getId(); }
 }
