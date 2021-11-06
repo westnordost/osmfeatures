@@ -6,13 +6,13 @@ Requires Java 8.
 
 ## Copyright and License
 
-© 2019-2020 Tobias Zwick. This library is released under the terms of the [Apache License Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt).
+© 2019-2021 Tobias Zwick. This library is released under the terms of the [Apache License Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt).
 
 ## Installation
 
-Add [`de.westnordost:osmfeatures:3.0`](https://maven-repository.com/artifact/de.westnordost/osmfeatures/3.0/) as a Maven dependency or download the jar from there.
+Add [`de.westnordost:osmfeatures:3.0`](https://mvnrepository.com/artifact/de.westnordost/osmfeatures/3.0/) as a Maven dependency or download the jar from there.
 
-For Android, use [`de.westnordost:osmfeatures-android:3.0`](https://maven-repository.com/artifact/de.westnordost/osmfeatures-android/3.0/).
+For Android, use [`de.westnordost:osmfeatures-android:3.0`](https://mvnrepository.com/artifact/de.westnordost/osmfeatures-android/3.0/).
 
 ## Usage
 
@@ -57,6 +57,8 @@ static def bcp47LanguageTagToJavaLanguageTag(String bcp47) {
     return result
 }
 ```
+
+In StreetComplete (app that uses this library), there is [this gradle task written in Kotlin](https://github.com/streetcomplete/StreetComplete/blob/master/buildSrc/src/main/java/UpdatePresetsTask.kt) to do this.
 
 ### Initialize dictionary
 
