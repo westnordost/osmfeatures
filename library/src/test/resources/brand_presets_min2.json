@@ -1,0 +1,7 @@
+{
+  "yet_another/brand": {
+    "name": "Talespin",
+    "tags": { "a": "b", "c": "d" },
+    "geometry": ["point"]
+  }
+}

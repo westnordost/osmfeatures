@@ -2,6 +2,8 @@ package de.westnordost.osmfeatures;
 
 import java.io.File;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static de.westnordost.osmfeatures.CollectionUtils.numberOfContainedEntriesInMap;
 import static de.westnordost.osmfeatures.CollectionUtils.removeIf;
@@ -9,37 +11,32 @@ import static de.westnordost.osmfeatures.CollectionUtils.synchronizedGetOrCreate
 
 public class FeatureDictionary
 {
-	private final List<FeatureCollection> featureCollections;
+	private static final Pattern VALID_COUNTRY_CODE_REGEX =  Pattern.compile("([A-Z]{2})(?:-([A-Z0-9]{1,3}))?");
 
-	private final FeatureTermIndex brandNameIndex;
-	private final FeatureTagsIndex brandTagsIndex;
+	private final LocalizedFeatureCollection featureCollection;
+	private final PerCountryFeatureCollection brandFeatureCollection;
+
+	private final Map<List<String>, FeatureTermIndex> brandNameIndexes;
+	private final Map<List<String>, FeatureTagsIndex> brandTagsIndexes;
 
 	private final Map<List<Locale>, FeatureTagsIndex> tagsIndexes;
-
 	private final Map<List<Locale>, FeatureTermIndex> nameIndexes;
 	private final Map<List<Locale>, FeatureTermIndex> termsIndexes;
 
-	FeatureDictionary(List<FeatureCollection> featureCollections, List<FeatureCollection> brandFeatureCollections)
+	FeatureDictionary(LocalizedFeatureCollection featureCollection, PerCountryFeatureCollection brandFeatureCollection)
 	{
-		this.featureCollections = featureCollections;
+		this.featureCollection = featureCollection;
+		this.brandFeatureCollection = brandFeatureCollection;
 
 		tagsIndexes = new HashMap<>();
 		nameIndexes = new HashMap<>();
 		termsIndexes = new HashMap<>();
-		Collection<Feature> brandFeatures = new ArrayList<>();
-		for (FeatureCollection brandFeatureCollection : brandFeatureCollections) {
-			brandFeatures.addAll(brandFeatureCollection.getAll(Arrays.asList((Locale) null)));
-		}
-		brandNameIndex = new FeatureTermIndex(brandFeatures, feature ->
-		{
-			if (!feature.isSearchable()) return Collections.emptyList();
-			return Arrays.asList(feature.getCanonicalName());
-		});
-		brandTagsIndex = new FeatureTagsIndex(brandFeatures);
+		brandNameIndexes = new HashMap<>();
+		brandTagsIndexes = new HashMap<>();
 		// build indices for default locale
 		getTagsIndex(Arrays.asList(Locale.getDefault(), null));
-		getNameIndex(Arrays.asList(Locale.getDefault()));
-		getTermsIndex(Arrays.asList(Locale.getDefault()));
+		getNameIndex(Collections.singletonList(Locale.getDefault()));
+		getTermsIndex(Collections.singletonList(Locale.getDefault()));
 	}
 
 	/** Create a new FeatureDictionary which gets its data from the given directory. */
@@ -50,15 +47,17 @@ public class FeatureDictionary
 	/** Create a new FeatureDictionary which gets its data from the given directory. Optionally,
 	 *  a path to brand presets can be specified. */
 	public static FeatureDictionary create(String presetsBasePath, String brandPresetsBasePath) {
-		FeatureCollection featureCollection =
-				new IDFeatureCollection(new FileSystemAccess(new File(presetsBasePath)));
+		LocalizedFeatureCollection featureCollection =
+				new IDLocalizedFeatureCollection(new FileSystemAccess(new File(presetsBasePath)));
 
-		FeatureCollection brandsFeatureCollection = brandPresetsBasePath != null
-				? new IDBaseFeatureCollection(new FileSystemAccess(new File(brandPresetsBasePath)))
+		PerCountryFeatureCollection brandsFeatureCollection = brandPresetsBasePath != null
+				? new IDBrandPresetsFeatureCollection(new FileSystemAccess(new File(brandPresetsBasePath)))
 				: null;
 
-		return new FeatureDictionary(Arrays.asList(featureCollection), Arrays.asList(brandsFeatureCollection));
+		return new FeatureDictionary(featureCollection, brandsFeatureCollection);
 	}
+
+	//region Query by tags
 
 	/** Find matches by a set of tags */
 	public QueryByTagBuilder byTags(Map<String, String> tags)
@@ -69,6 +68,7 @@ public class FeatureDictionary
 	private List<Feature> get(
 			Map<String, String> tags,
 			GeometryType geometry,
+			String countryCode,
 			Boolean isSuggestion,
 			List<Locale> locales
 	) {
@@ -82,10 +82,11 @@ public class FeatureDictionary
 		}
 		if (isSuggestion == null || isSuggestion)
 		{
-			foundFeatures.addAll(brandTagsIndex.getAll(tags));
+			List<String> countryCodes = dissectCountryCode(countryCode);
+			foundFeatures.addAll(getBrandTagsIndex(countryCodes).getAll(tags));
 		}
 
-		removeIf(foundFeatures, feature -> !(geometry == null || feature.getGeometry().contains(geometry)));
+		removeIf(foundFeatures, feature -> !isFeatureMatchingParameters(feature, geometry, countryCode));
 
 		if (foundFeatures.size() > 1)
 		{
@@ -130,6 +131,10 @@ public class FeatureDictionary
 
 		return foundFeatures;
 	}
+
+	//endregion
+
+	//region Query by term
 
 	/** Find matches by given search word */
 	public QueryByTermBuilder byTerm(String term)
@@ -187,7 +192,8 @@ public class FeatureDictionary
 		if (isSuggestion == null || isSuggestion)
 		{
 			// b. matches with brand names second
-			List<Feature> foundBrandFeatures = brandNameIndex.getAll(canonicalSearch);
+			List<String> countryCodes = dissectCountryCode(countryCode);
+			List<Feature> foundBrandFeatures = getBrandNameIndex(countryCodes).getAll(canonicalSearch);
 			removeIf(foundBrandFeatures, feature -> !isFeatureMatchingParameters(feature, geometry, countryCode));
 			Collections.sort(foundBrandFeatures, sortNames);
 
@@ -218,16 +224,9 @@ public class FeatureDictionary
 		return result.subList(0, Math.min(limit, result.size()));
 	}
 
-	/** lazily get or create tags index for given locale(s) */
-	private FeatureTagsIndex getTagsIndex(List<Locale> locales)
-	{
-		return synchronizedGetOrCreate(tagsIndexes, locales, this::createTagsIndex);
-	}
+	//endregion
 
-	private FeatureTagsIndex createTagsIndex(List<Locale> locales)
-	{
-		return new FeatureTagsIndex(getAllFeatures(locales));
-	}
+	//region Utility / Filter functions
 
 	private static Collection<String> getParentCategoryIds(String id)
 	{
@@ -248,6 +247,68 @@ public class FeatureDictionary
 		return id.substring(0, lastSlashIndex);
 	}
 
+	private static boolean isFeatureMatchingParameters(Feature feature, GeometryType geometry, String countryCode)
+	{
+		if (geometry != null && !feature.getGeometry().contains(geometry)) return false;
+		List<String> include = feature.getIncludeCountryCodes();
+		List<String> exclude = feature.getExcludeCountryCodes();
+		if (!include.isEmpty() || !exclude.isEmpty())
+		{
+			if (countryCode == null) return false;
+			if (!include.isEmpty() && !matchesAnyCountryCode(countryCode, include)) return false;
+			if (matchesAnyCountryCode(countryCode, exclude)) return false;
+		}
+		return true;
+	}
+
+	private static List<String> dissectCountryCode(String countryCode) {
+		List<String> result = new ArrayList<>();
+		// add default / international
+		result.add(null);
+		if (countryCode != null) {
+			Matcher matcher = VALID_COUNTRY_CODE_REGEX.matcher(countryCode);
+			if (matcher.matches()) {
+				// add ISO 3166-1 alpha2 (e.g. "US")
+				result.add(matcher.group(1));
+				if (matcher.groupCount() == 2 && matcher.group(2) != null) {
+					// add ISO 3166-2 (e.g. "US-NY")
+					result.add(countryCode);
+				}
+			}
+		}
+		return result;
+	}
+
+	private static boolean matchesAnyCountryCode(String showOnly, List<String> featureCountryCodes)
+	{
+		for (String featureCountryCode : featureCountryCodes) {
+			if (matchesCountryCode(showOnly, featureCountryCode)) return true;
+		}
+		return false;
+	}
+
+	private static boolean matchesCountryCode(String showOnly, String featureCountryCode)
+	{
+		return showOnly.equals(featureCountryCode)
+				// e.g. US-NY is in US
+				|| showOnly.substring(0,2).equals(featureCountryCode);
+	}
+
+	//endregion
+
+	//region Lazily get or create Indexes
+
+	/** lazily get or create tags index for given locale(s) */
+	private FeatureTagsIndex getTagsIndex(List<Locale> locales)
+	{
+		return synchronizedGetOrCreate(tagsIndexes, locales, this::createTagsIndex);
+	}
+
+	private FeatureTagsIndex createTagsIndex(List<Locale> locales)
+	{
+		return new FeatureTagsIndex(featureCollection.getAll(locales));
+	}
+
 	/** lazily get or create name index for given locale(s) */
 	private FeatureTermIndex getNameIndex(List<Locale> locales)
 	{
@@ -256,7 +317,7 @@ public class FeatureDictionary
 
 	private FeatureTermIndex createNameIndex(List<Locale> locales)
 	{
-		return new FeatureTermIndex(getAllFeatures(locales), feature -> {
+		return new FeatureTermIndex(featureCollection.getAll(locales), feature -> {
 			if (!feature.isSearchable()) return Collections.emptyList();
 			String name = feature.getCanonicalName();
 			if (name.contains(" ")) {
@@ -277,48 +338,48 @@ public class FeatureDictionary
 
 	private FeatureTermIndex createTermsIndex(List<Locale> locales)
 	{
-		return new FeatureTermIndex(getAllFeatures(locales), feature -> {
+		return new FeatureTermIndex(featureCollection.getAll(locales), feature -> {
 			if (!feature.isSearchable()) return Collections.emptyList();
 			return feature.getCanonicalTerms();
 		});
 	}
 
-	private boolean isFeatureMatchingParameters(Feature feature, GeometryType geometry, String countryCode)
+	/** lazily get or create brand name index for country */
+	private FeatureTermIndex getBrandNameIndex(List<String> countryCodes)
 	{
-		if (geometry != null && !feature.getGeometry().contains(geometry)) return false;
-		List<String> include = feature.getIncludeCountryCodes();
-		List<String> exclude = feature.getExcludeCountryCodes();
-		if (!include.isEmpty() || !exclude.isEmpty())
-		{
-			if (countryCode == null) return false;
-			if (!include.isEmpty() && !matchesAnyCountryCode(countryCode, include)) return false;
-			if (matchesAnyCountryCode(countryCode, exclude)) return false;
-		}
-		return true;
+		return synchronizedGetOrCreate(brandNameIndexes, countryCodes, this::createBrandNameIndex);
 	}
 
-	private boolean matchesAnyCountryCode(String showOnly, List<String> featureCountryCodes)
+	private FeatureTermIndex createBrandNameIndex(List<String> countryCodes)
 	{
-		for (String featureCountryCode : featureCountryCodes) {
-			if (matchesCountryCode(showOnly, featureCountryCode)) return true;
+		if (brandFeatureCollection == null) {
+			return new FeatureTermIndex(Collections.emptyList(), null);
 		}
-		return false;
+
+		return new FeatureTermIndex(brandFeatureCollection.getAll(countryCodes), feature -> {
+			if (!feature.isSearchable()) return Collections.emptyList();
+			return Collections.singletonList(feature.getCanonicalName());
+		});
 	}
 
-	private boolean matchesCountryCode(String showOnly, String featureCountryCode)
+	/** lazily get or create tags index for the given countries */
+	private FeatureTagsIndex getBrandTagsIndex(List<String> countryCodes)
 	{
-		return showOnly.equals(featureCountryCode)
-			// e.g. US-NY is in US
-			|| showOnly.substring(0,2).equals(featureCountryCode);
+		return synchronizedGetOrCreate(brandTagsIndexes, countryCodes, this::createBrandTagsIndex);
 	}
 
-	private List<Feature> getAllFeatures(List<Locale> locales) {
-		List<Feature> result = new ArrayList<>();
-		for (FeatureCollection featureCollection : featureCollections) {
-			result.addAll(featureCollection.getAll(locales));
+	private FeatureTagsIndex createBrandTagsIndex(List<String> countryCodes)
+	{
+		if (brandFeatureCollection == null) {
+			return new FeatureTagsIndex(Collections.emptyList());
 		}
-		return result;
+
+		return new FeatureTagsIndex(brandFeatureCollection.getAll(countryCodes));
 	}
+
+	//endregion
+
+	//region Query builders
 
 	public class QueryByTagBuilder
 	{
@@ -326,6 +387,7 @@ public class FeatureDictionary
 		private GeometryType geometryType = null;
 		private Locale[] locale = new Locale[]{Locale.getDefault(), null};
 		private Boolean suggestion = null;
+		private String countryCode = null;
 
 		private QueryByTagBuilder(Map<String, String> tags) { this.tags = tags; }
 
@@ -353,6 +415,15 @@ public class FeatureDictionary
 			return this;
 		}
 
+		/** the ISO 3166-1 alpha-2 country code (e.g. "US") or the ISO 3166-2 (e.g. "US-NY") of the
+		 *  country/state the element is in. If not specified, will only return matches that are not
+		 *  county-specific. */
+		public QueryByTagBuilder inCountry(String countryCode)
+		{
+			this.countryCode = countryCode;
+			return this;
+		}
+
 		/** Set whether to only include suggestions (=true) or to not include suggestions (=false).
 		 *  Suggestions are brands, like 7-Eleven. */
 		public QueryByTagBuilder isSuggestion(Boolean suggestion)
@@ -367,7 +438,7 @@ public class FeatureDictionary
 		 *  it is a list. */
 		public List<Feature> find()
 		{
-			return get(tags, geometryType, suggestion, Arrays.asList(locale));
+			return get(tags, geometryType, countryCode, suggestion, Arrays.asList(locale));
 		}
 	}
 
@@ -406,8 +477,9 @@ public class FeatureDictionary
 			return this;
 		}
 
-		/** the ISO 3166-1 alpha-2 country code of the country the element is in. If not specified,
-		 *  will only return matches that are not county-specific. */
+		/** the ISO 3166-1 alpha-2 country code (e.g. "US") or the ISO 3166-2 (e.g. "US-NY") of the
+		 *  country/state the element is in. If not specified, will only return matches that are not
+		 *  county-specific. */
 		public QueryByTermBuilder inCountry(String countryCode)
 		{
 			this.countryCode = countryCode;
@@ -438,4 +510,6 @@ public class FeatureDictionary
 			return get(term, geometryType, countryCode, suggestion, limit, Arrays.asList(locale));
 		}
 	}
+
+	//endregion
 }

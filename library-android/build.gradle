@@ -4,7 +4,7 @@ plugins {
     id 'signing'
 }
 
-version = "3.0"
+version = "4.0"
 group "de.westnordost"
 
 repositories {
@@ -15,18 +15,18 @@ repositories {
 
 dependencies {
     //api (project(':library')) {
-    api ('de.westnordost:osmfeatures:3.0') {
+    api ('de.westnordost:osmfeatures:4.0') {
         // it's already included in Android
         exclude group: 'org.json', module: 'json'
     }
 }
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 31
 
     defaultConfig {
         minSdkVersion 9
-        targetSdkVersion 29
+        targetSdkVersion 31
         versionCode 1
         versionName project.version
     }

@@ -331,7 +331,7 @@ public class FeatureDictionaryTest
 	{
 		Map<String,String> tags = mapOf(tag("shop", "bakery"), tag("name", "Ditsch"));
 		FeatureDictionary dictionary = dictionary(bakery, ditsch);
-		List<Feature> matches = dictionary.byTags(tags).find();
+		List<Feature> matches = dictionary.byTags(tags).inCountry("DE").find();
 		assertEquals(listOf(ditsch), matches);
 	}
 
@@ -358,14 +358,6 @@ public class FeatureDictionaryTest
 		FeatureDictionary dictionary = dictionary(bakery, ditsch);
 		List<Feature> matches = dictionary.byTags(tags).isSuggestion(false).find();
 		assertEquals(listOf(bakery), matches);
-	}
-
-	@Test public void find_multiple_brands_sorts_by_matching_add_tags()
-	{
-		Map<String,String> tags = mapOf(tag("shop", "bakery"), tag("name", "Ditsch"), tag("brand", "Ditsch"));
-		FeatureDictionary dictionary = dictionary(ditschRussian, ditsch);
-		List<Feature> matches = dictionary.byTags(tags).forLocale((Locale) null).find();
-		assertEquals(listOf(ditsch, ditschRussian), matches);
 	}
 
 	@Test public void find_multiple_brands_sorts_by_locale()
@@ -575,9 +567,9 @@ public class FeatureDictionaryTest
 
 	@Test public void some_tests_with_real_data()
 	{
-		FeatureCollection featureCollection = new IDFeatureCollection(new LivePresetDataAccessAdapter());
+		LocalizedFeatureCollection featureCollection = new IDLocalizedFeatureCollection(new LivePresetDataAccessAdapter());
 		featureCollection.getAll(listOf(Locale.ENGLISH));
-		FeatureDictionary dictionary = new FeatureDictionary(listOf(featureCollection), listOf());
+		FeatureDictionary dictionary = new FeatureDictionary(featureCollection, null);
 
 		List<Feature> matches = dictionary
 				.byTags(mapOf(tag("amenity", "studio")))
@@ -613,8 +605,8 @@ public class FeatureDictionaryTest
 			}
 		}
 		return new FeatureDictionary(
-				listOf(new TestFeatureCollection(features)),
-				listOf(new TestFeatureCollection(brandFeatures))
+				new TestLocalizedFeatureCollection(features),
+				new TestPerCountryFeatureCollection(brandFeatures)
 		);
 	}
 

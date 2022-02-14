@@ -15,13 +15,13 @@ import static de.westnordost.osmfeatures.TestUtils.assertEqualsIgnoreOrder;
 import static de.westnordost.osmfeatures.TestUtils.listOf;
 import static org.junit.Assert.*;
 
-public class IDFeatureCollectionTest
+public class IDLocalizedFeatureCollectionTest
 {
 	@Test public void features_not_found_produces_runtime_exception()
 	{
 		try
 		{
-			new IDFeatureCollection(new FileAccessAdapter()
+			new IDLocalizedFeatureCollection(new FileAccessAdapter()
 			{
 				@Override public boolean exists(String name) { return false; }
 				@Override public InputStream open(String name) throws IOException { throw new FileNotFoundException(); }
@@ -32,7 +32,7 @@ public class IDFeatureCollectionTest
 
 	@Test public void load_features_and_two_localizations()
 	{
-		IDFeatureCollection c = new IDFeatureCollection(new FileAccessAdapter()
+		IDLocalizedFeatureCollection c = new IDLocalizedFeatureCollection(new FileAccessAdapter()
 		{
 			@Override public boolean exists(String name)
 			{
@@ -92,7 +92,7 @@ public class IDFeatureCollectionTest
 
 	@Test public void load_features_and_merge_localizations()
 	{
-		IDFeatureCollection c = new IDFeatureCollection(new FileAccessAdapter()
+		IDLocalizedFeatureCollection c = new IDLocalizedFeatureCollection(new FileAccessAdapter()
 		{
 			@Override public boolean exists(String name)
 			{
@@ -126,8 +126,6 @@ public class IDFeatureCollectionTest
 		assertEquals("Gullideckel", c.get("another/id", austria).getName());
 		assertEquals("Brückle", c.get("yet/another/id", austria).getName());
 	}
-
-
 
 	private InputStream getStream(String file)
 	{

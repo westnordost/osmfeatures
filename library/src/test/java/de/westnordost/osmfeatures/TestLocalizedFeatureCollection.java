@@ -5,11 +5,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
-public class TestFeatureCollection implements FeatureCollection
+public class TestLocalizedFeatureCollection implements LocalizedFeatureCollection
 {
 	private final List<Feature> features;
 
-	public TestFeatureCollection(List<Feature> features)
+	public TestLocalizedFeatureCollection(List<Feature> features)
 	{
 		this.features = features;
 	}
