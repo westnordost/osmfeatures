@@ -97,8 +97,8 @@ class IDPresetsJsonParser {
             String cc = ((String)item).toUpperCase(Locale.US).intern();
             // don't need this, 001 stands for "whole world"
             if (cc.equals("001")) continue;
-            // some unsupported code, such as "150" or "city_national_bank_fl.geojson"
-            if (cc.length() > 2) return null;
+            // ISO-3166-2 codes are supported but not m49 code such as "150" or geojsons like "city_national_bank_fl.geojson"
+            if (!cc.matches("[A-Z]{2}(-[A-Z0-9]{1,3})?")) return null;
             result.add(cc);
         }
         return result;

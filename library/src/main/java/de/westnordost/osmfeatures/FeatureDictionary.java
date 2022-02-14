@@ -291,10 +291,25 @@ public class FeatureDictionary
 		if (!include.isEmpty() || !exclude.isEmpty())
 		{
 			if (countryCode == null) return false;
-			if (!include.isEmpty() && !include.contains(countryCode)) return false;
-			if (exclude.contains(countryCode)) return false;
+			if (!include.isEmpty() && !matchesAnyCountryCode(countryCode, include)) return false;
+			if (matchesAnyCountryCode(countryCode, exclude)) return false;
 		}
 		return true;
+	}
+
+	private boolean matchesAnyCountryCode(String showOnly, List<String> featureCountryCodes)
+	{
+		for (String featureCountryCode : featureCountryCodes) {
+			if (matchesCountryCode(showOnly, featureCountryCode)) return true;
+		}
+		return false;
+	}
+
+	private boolean matchesCountryCode(String showOnly, String featureCountryCode)
+	{
+		return showOnly.equals(featureCountryCode)
+			// e.g. US-NY is in US
+			|| showOnly.substring(0,2).equals(featureCountryCode);
 	}
 
 	private List<Feature> getAllFeatures(List<Locale> locales) {

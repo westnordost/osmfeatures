@@ -50,8 +50,8 @@ public class FeatureDictionaryTest
 			mapOf(tag("shop","bakery"), tag("name","Ditsch")),
 			"Ditsch",
 			listOf(),
-			listOf("DE"),
-			listOf(),
+			listOf("DE","AT"),
+			listOf("AT-9"),
 			true,
 			1.0,
 			mapOf(tag("wikipedia","de:Brezelb%C3%A4ckerei_Ditsch"), tag("brand", "Ditsch")),
@@ -64,7 +64,7 @@ public class FeatureDictionaryTest
 			mapOf(tag("shop","bakery"), tag("name","Ditsch")),
 			"Дитсч",
 			listOf(),
-			listOf("RU"),
+			listOf("RU","UA-43"),
 			listOf(),
 			true,
 			1.0,
@@ -418,9 +418,11 @@ public class FeatureDictionaryTest
 
 	@Test public void find_no_entry_by_name_because_wrong_country()
 	{
-		FeatureDictionary dictionary = dictionary(ditsch);
+		FeatureDictionary dictionary = dictionary(ditsch, ditschRussian);
 		assertEquals(listOf(), dictionary.byTerm("Ditsch").find());
-		assertEquals(listOf(), dictionary.byTerm("Ditsch").inCountry("AT").find());
+		assertEquals(listOf(), dictionary.byTerm("Ditsch").inCountry("FR").find()); // not in France
+		assertEquals(listOf(), dictionary.byTerm("Ditsch").inCountry("AT-9").find()); // in all of AT but not Vienna
+		assertEquals(listOf(), dictionary.byTerm("Дитсч").inCountry("UA").find()); // only on the Krim
 	}
 
 	@Test public void find_no_non_searchable_entry_by_name()
@@ -445,9 +447,13 @@ public class FeatureDictionaryTest
 
 	@Test public void find_entry_by_name_with_correct_country()
 	{
-		FeatureDictionary dictionary = dictionary(ditsch, bakery);
-		List<Feature> matches = dictionary.byTerm("Ditsch").inCountry("DE").find();
-		assertEquals(listOf(ditsch), matches);
+		FeatureDictionary dictionary = dictionary(ditsch, ditschRussian, bakery);
+		assertEquals(listOf(ditsch), dictionary.byTerm("Ditsch").inCountry("DE").find());
+		assertEquals(listOf(ditsch), dictionary.byTerm("Ditsch").inCountry("DE-TH").find());
+		assertEquals(listOf(ditsch), dictionary.byTerm("Ditsch").inCountry("AT").find());
+		assertEquals(listOf(ditsch), dictionary.byTerm("Ditsch").inCountry("AT-5").find());
+		assertEquals(listOf(ditschRussian), dictionary.byTerm("Дитсч").inCountry("UA-43").find());
+		assertEquals(listOf(ditschRussian), dictionary.byTerm("Дитсч").inCountry("RU-KHA").find());
 	}
 
 	@Test public void find_entry_by_name_case_insensitive()

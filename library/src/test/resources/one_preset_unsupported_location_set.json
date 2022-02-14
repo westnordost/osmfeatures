@@ -43,5 +43,14 @@
       "include": ["001"],
       "exclude": ["de"]
     }
+  },
+  "another/ok": {
+    "name": "test",
+    "tags": { "a": "b" },
+    "geometry": ["point"],
+    "locationSet": {
+      "include": ["de-hh","de"],
+      "exclude": ["de-sh"]
+    }
   }
 }
