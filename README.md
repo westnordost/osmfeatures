@@ -6,7 +6,7 @@ Requires Java 8.
 
 ## Copyright and License
 
-© 2019-2021 Tobias Zwick. This library is released under the terms of the [Apache License Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt).
+© 2019-2022 Tobias Zwick. This library is released under the terms of the [Apache License Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt).
 
 ## Installation
 
