@@ -39,7 +39,7 @@ task downloadPresets {
         def slurper = new JsonSlurper()
         slurper.parse(contentsUrl, "UTF-8").each {
             if(it.type == "file") {
-                def filename = it.name.substring(0, it.name.lastIndexOf("."))
+                def filename = it.name.substring(0, it.name.indexOf("."))
                 def javaLanguageTag = Locale.forLanguageTag(filename.replace('@','-')).toLanguageTag()
                 def translationsUrl = new URL(it.download_url)
                 new File("$targetDir/${javaLanguageTag}.json").withOutputStream { it << translationsUrl.openStream() }
