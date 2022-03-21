@@ -4,6 +4,7 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -73,16 +74,14 @@ class IDLocalizedFeatureCollection implements LocalizedFeatureCollection
 	{
 		LinkedHashMap<String, Feature> result = new LinkedHashMap<>();
 		ListIterator<Locale> it = locales.listIterator(locales.size());
-		while(it.hasPrevious())
+		while (it.hasPrevious())
 		{
 			Locale locale = it.previous();
 			if (locale != null)
 			{
-				Locale languageLocale = new Locale(locale.getLanguage());
-				putAllFeatures(result, getOrLoadLocalizedFeaturesList(languageLocale));
-				if (!locale.getCountry().isEmpty())
+				for (Locale localeComponent : getLocaleComponents(locale))
 				{
-					putAllFeatures(result, getOrLoadLocalizedFeaturesList(locale));
+					putAllFeatures(result, getOrLoadLocalizedFeaturesList(localeComponent));
 				}
 			} else {
 				putAllFeatures(result, featuresById.values());
@@ -99,9 +98,7 @@ class IDLocalizedFeatureCollection implements LocalizedFeatureCollection
 
 	private List<LocalizedFeature> loadLocalizedFeaturesList(Locale locale)
 	{
-		String lang = locale.getLanguage();
-		String country = locale.getCountry();
-		String filename = lang + (country.length() > 0 ? "-" + country : "") + ".json";
+		String filename = getLocalizationFilename(locale);
 		try
 		{
 			if (!fileAccess.exists(filename)) return Collections.emptyList();
@@ -111,6 +108,42 @@ class IDLocalizedFeatureCollection implements LocalizedFeatureCollection
 			}
 		}
 		catch (IOException | JSONException e) { throw new RuntimeException(e); }
+	}
+
+	private static String getLocalizationFilename(Locale locale)
+	{
+		/* not simply locale.toLanguageTag() because Locale may contain other stuff (variants etc)
+		   that are not supported */
+		String lang = locale.getLanguage();
+		String country = locale.getCountry();
+		String script = locale.getScript();
+
+		StringBuilder builder = new StringBuilder(lang);
+		if (!country.isEmpty()) builder.append("-").append(country);
+		if (!script.isEmpty()) builder.append("-").append(script);
+		builder.append(".json");
+		return builder.toString();
+	}
+
+	private static List<Locale> getLocaleComponents(Locale locale)
+	{
+		String lang = locale.getLanguage();
+		String country = locale.getCountry();
+		String script = locale.getScript();
+		List<Locale> result = new ArrayList<>();
+
+		result.add(new Locale(lang));
+
+		if (!country.isEmpty())
+			result.add(new Locale.Builder().setLanguage(lang).setRegion(country).build());
+
+		if (!script.isEmpty())
+			result.add(new Locale.Builder().setLanguage(lang).setScript(script).build());
+
+		if (!country.isEmpty() && !script.isEmpty())
+			result.add(new Locale.Builder().setLanguage(lang).setRegion(country).setScript(script).build());
+
+		return result;
 	}
 
 	private static void putAllFeatures(Map<String, Feature> map, Iterable<? extends Feature> features)

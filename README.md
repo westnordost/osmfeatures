@@ -39,22 +39,13 @@ task downloadPresets {
         def slurper = new JsonSlurper()
         slurper.parse(contentsUrl, "UTF-8").each {
             if(it.type == "file") {
-                def language = it.name.substring(0, it.name.lastIndexOf("."))
+                def filename = it.name.substring(0, it.name.lastIndexOf("."))
+                def javaLanguageTag = Locale.forLanguageTag(filename.replace('@','-')).toLanguageTag()
                 def translationsUrl = new URL(it.download_url)
-                def javaLanguage = bcp47LanguageTagToJavaLanguageTag(language)
-                new File("$targetDir/${javaLanguage}.json").withOutputStream { it << translationsUrl.openStream() }
+                new File("$targetDir/${javaLanguageTag}.json").withOutputStream { it << translationsUrl.openStream() }
             }
         }
     }
-}
-
-// Java (and thus also Android) uses some old iso (language) codes. F.e. id -> in etc.
-// so the localized files also need to use the old iso codes
-static def bcp47LanguageTagToJavaLanguageTag(String bcp47) {
-    def locale = Locale.forLanguageTag(bcp47)
-    def result = locale.language
-    if (!locale.country.isEmpty()) result += "-" + locale.country
-    return result
 }
 ```
 
