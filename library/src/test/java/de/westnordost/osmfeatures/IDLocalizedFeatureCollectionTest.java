@@ -96,7 +96,7 @@ public class IDLocalizedFeatureCollectionTest
 		{
 			@Override public boolean exists(String name)
 			{
-				return Arrays.asList("presets.json", "de-AT.json", "de.json", "de-Cyrl.json", "de-AT-Cyrl.json").contains(name);
+				return Arrays.asList("presets.json", "de-AT.json", "de.json", "de-Cyrl.json", "de-Cyrl-AT.json").contains(name);
 			}
 
 			@Override public InputStream open(String name) throws IOException
@@ -104,7 +104,7 @@ public class IDLocalizedFeatureCollectionTest
 				if (name.equals("presets.json")) return getStream("some_presets_min.json");
 				if (name.equals("de-AT.json")) return getStream("localizations_de-AT.json");
 				if (name.equals("de.json")) return getStream("localizations_de.json");
-				if (name.equals("de-AT-Cyrl.json")) return getStream("localizations_de-AT-Cyrl.json");
+				if (name.equals("de-Cyrl-AT.json")) return getStream("localizations_de-Cyrl-AT.json");
 				if (name.equals("de-Cyrl.json")) return getStream("localizations_de-Cyrl.json");
 				throw new IOException("File not found");
 			}

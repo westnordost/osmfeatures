@@ -119,8 +119,8 @@ class IDLocalizedFeatureCollection implements LocalizedFeatureCollection
 		String script = locale.getScript();
 
 		StringBuilder builder = new StringBuilder(lang);
-		if (!country.isEmpty()) builder.append("-").append(country);
 		if (!script.isEmpty()) builder.append("-").append(script);
+		if (!country.isEmpty()) builder.append("-").append(country);
 		builder.append(".json");
 		return builder.toString();
 	}
