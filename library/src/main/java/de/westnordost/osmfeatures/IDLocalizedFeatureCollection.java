@@ -112,17 +112,14 @@ class IDLocalizedFeatureCollection implements LocalizedFeatureCollection
 
 	private static String getLocalizationFilename(Locale locale)
 	{
-		/* not simply locale.toLanguageTag() because Locale may contain other stuff (variants etc)
-		   that are not supported */
-		String lang = locale.getLanguage();
-		String country = locale.getCountry();
-		String script = locale.getScript();
-
-		StringBuilder builder = new StringBuilder(lang);
-		if (!script.isEmpty()) builder.append("-").append(script);
-		if (!country.isEmpty()) builder.append("-").append(country);
-		builder.append(".json");
-		return builder.toString();
+		/* we only want language+country+script of the locale, not anything else. So we construct
+		   it anew here */
+		return new Locale.Builder()
+				.setLanguage(locale.getLanguage())
+				.setRegion(locale.getCountry())
+				.setScript(locale.getScript())
+				.build()
+				.toLanguageTag() + ".json";
 	}
 
 	private static List<Locale> getLocaleComponents(Locale locale)
