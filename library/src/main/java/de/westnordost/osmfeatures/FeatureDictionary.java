@@ -319,7 +319,7 @@ public class FeatureDictionary
 	{
 		return new FeatureTermIndex(featureCollection.getAll(locales), feature -> {
 			if (!feature.isSearchable()) return Collections.emptyList();
-			String name = feature.getCanonicalName();
+			String name = feature.getCanonicalName().replaceAll("\\(|\\)", "");
 			if (name.contains(" ")) {
 				List<String> names = new ArrayList<>(Arrays.asList(name.split(" ")));
 				names.add(name);
