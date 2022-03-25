@@ -87,10 +87,10 @@ public class FeatureDictionaryTest
 			null
 	);
 
-	private final Feature liquor_store = feature(
+	private final Feature liquor_store = feature( // English localized unspecific shop=alcohol
 			"shop/alcohol",
 			mapOf(tag("shop","alcohol")),
-			"Liquor Store",
+			"Off licence (Alcohol shop)",
 			listOf(),
 			listOf(),
 			listOf(),
@@ -98,7 +98,7 @@ public class FeatureDictionaryTest
 			1.0,
 			mapOf(),
 			true,
-			null
+			Locale.UK
 	);
 
 	private final Feature car_dealer = feature( // German localized  unspecific shop=car
@@ -487,7 +487,7 @@ public class FeatureDictionaryTest
 	@Test public void find_entry_by_term_brackets()
 	{
 		FeatureDictionary dictionary = dictionary(liquor_store);
-		List<Feature> matches = dictionary.byTerm("alcohol").forLocale(Locale.ENGLISH).find();
+		List<Feature> matches = dictionary.byTerm("Alcohol").forLocale(Locale.UK).find();
 		assertEquals(listOf(liquor_store), matches);
 	}
 
