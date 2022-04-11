@@ -87,6 +87,20 @@ public class FeatureDictionaryTest
 			null
 	);
 
+	private final Feature liquor_store = feature( // English localized unspecific shop=alcohol
+			"shop/alcohol",
+			mapOf(tag("shop","alcohol")),
+			"Off licence (Alcohol shop)",
+			listOf(),
+			listOf(),
+			listOf(),
+			true,
+			1.0,
+			mapOf(),
+			true,
+			Locale.UK
+	);
+
 	private final Feature car_dealer = feature( // German localized  unspecific shop=car
 			"shop/car",
 			mapOf(tag("shop","car")),
@@ -100,6 +114,7 @@ public class FeatureDictionaryTest
 			false,
 			Locale.GERMAN
 	);
+
 	private final Feature second_hand_car_dealer = feature( // German localized shop=car with subtags
 			"shop/car/second_hand",
 			mapOf(tag("shop","car"), tag("second_hand", "only")),
@@ -467,6 +482,13 @@ public class FeatureDictionaryTest
 		FeatureDictionary dictionary = dictionary(bakery);
 		List<Feature> matches = dictionary.byTerm("bro").forLocale((Locale) null).find();
 		assertEquals(listOf(bakery), matches);
+	}
+
+	@Test public void find_entry_by_term_brackets()
+	{
+		FeatureDictionary dictionary = dictionary(liquor_store);
+		List<Feature> matches = dictionary.byTerm("Alcohol").forLocale(Locale.UK).find();
+		assertEquals(listOf(liquor_store), matches);
 	}
 
 	@Test public void find_entry_by_term_case_insensitive()
