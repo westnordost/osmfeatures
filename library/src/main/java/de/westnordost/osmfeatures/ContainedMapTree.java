@@ -73,7 +73,6 @@ class ContainedMapTree<K,V>
         if (previousKeys.size() == maxDepth || maps.size() < minContainerSize)
             return new Node<>(null, maps);
 
-        HashMap<K, Map<V, Node<K,V>>> result = new HashMap<>();
         Set<Map<K,V>> unsortedMaps = new HashSet<>(maps);
 
         Map<K, List<Map<K,V>>> mapsByKey = getMapsByKey(maps, previousKeys);
@@ -81,6 +80,8 @@ class ContainedMapTree<K,V>
         /* the map should be categorized by frequent keys first and least frequent keys last. */
         List<Map.Entry<K, List<Map<K,V>>>> sortedByCountDesc = new ArrayList<>(mapsByKey.entrySet());
         Collections.sort(sortedByCountDesc, (a, b) -> b.getValue().size() - a.getValue().size());
+
+        HashMap<K, Map<V, Node<K,V>>> result = new HashMap<>(mapsByKey.size());
 
         for (Map.Entry<K, List<Map<K,V>>> keyToMaps : sortedByCountDesc)
         {
@@ -93,7 +94,7 @@ class ContainedMapTree<K,V>
 
             Map<V, List<Map<K,V>>> featuresByValue = getMapsByKeyValue(key, mapsForKey);
 
-            Map<V, Node<K,V>> valueNodes = new HashMap<>();
+            Map<V, Node<K,V>> valueNodes = new HashMap<>(featuresByValue.size());
             for (Map.Entry<V, List<Map<K,V>>> valueToFeatures : featuresByValue.entrySet())
             {
                 V value = valueToFeatures.getKey();
