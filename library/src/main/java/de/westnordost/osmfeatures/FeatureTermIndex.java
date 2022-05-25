@@ -24,7 +24,7 @@ class FeatureTermIndex
             Collection<String> strings = selector.getStrings(feature);
             for (String string : strings)
             {
-                if (!featureMap.containsKey(string)) featureMap.put(string, new ArrayList<>());
+                if (!featureMap.containsKey(string)) featureMap.put(string, new ArrayList<>(1));
                 featureMap.get(string).add(feature);
             }
         }
