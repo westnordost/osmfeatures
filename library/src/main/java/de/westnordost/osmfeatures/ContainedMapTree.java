@@ -105,7 +105,9 @@ class ContainedMapTree<K,V>
 
             result.put(key, valueNodes);
 
-            unsortedMaps.removeAll(mapsForKey);
+            for (Map<K, V> map : mapsForKey) {
+                unsortedMaps.remove(map);
+            }
         }
 
         return new Node<>(result, new ArrayList<>(unsortedMaps));
