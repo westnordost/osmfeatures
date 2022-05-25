@@ -2,6 +2,7 @@
   "presets": {
     "some/id": {
       "name": "bar",
+      "aliases": "one  \ntwo\r\n three",
       "terms": "a, b"
     }
   }

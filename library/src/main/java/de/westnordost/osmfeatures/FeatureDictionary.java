@@ -16,11 +16,11 @@ public class FeatureDictionary
 	private final LocalizedFeatureCollection featureCollection;
 	private final PerCountryFeatureCollection brandFeatureCollection;
 
-	private final Map<List<String>, FeatureTermIndex> brandNameIndexes;
+	private final Map<List<String>, FeatureTermIndex> brandNamesIndexes;
 	private final Map<List<String>, FeatureTagsIndex> brandTagsIndexes;
 
 	private final Map<List<Locale>, FeatureTagsIndex> tagsIndexes;
-	private final Map<List<Locale>, FeatureTermIndex> nameIndexes;
+	private final Map<List<Locale>, FeatureTermIndex> namesIndexes;
 	private final Map<List<Locale>, FeatureTermIndex> termsIndexes;
 
 	FeatureDictionary(LocalizedFeatureCollection featureCollection, PerCountryFeatureCollection brandFeatureCollection)
@@ -29,13 +29,13 @@ public class FeatureDictionary
 		this.brandFeatureCollection = brandFeatureCollection;
 
 		tagsIndexes = new HashMap<>();
-		nameIndexes = new HashMap<>();
+		namesIndexes = new HashMap<>();
 		termsIndexes = new HashMap<>();
-		brandNameIndexes = new HashMap<>();
+		brandNamesIndexes = new HashMap<>();
 		brandTagsIndexes = new HashMap<>();
 		// build indices for default locale
 		getTagsIndex(Arrays.asList(Locale.getDefault(), null));
-		getNameIndex(Collections.singletonList(Locale.getDefault()));
+		getNamesIndex(Collections.singletonList(Locale.getDefault()));
 		getTermsIndex(Collections.singletonList(Locale.getDefault()));
 	}
 
@@ -155,16 +155,22 @@ public class FeatureDictionary
 		Comparator<Feature> sortNames = (a, b) ->
 		{
 			// 1. exact matches first
-			int exactMatchOrder = (b.getName().equals(search)?1:0) - (a.getName().equals(search)?1:0);
+			int exactMatchOrder =
+				(CollectionUtils.find(b.getNames(), n -> n.equals(search)) != null ? 1 : 0)
+				- (CollectionUtils.find(a.getNames(), n -> n.equals(search)) != null ? 1 : 0);
 			if(exactMatchOrder != 0) return exactMatchOrder;
 
 			// 2. exact matches case and diacritics insensitive first
-			int cExactMatchOrder = (b.getCanonicalName().equals(canonicalSearch)?1:0) - (a.getCanonicalName().equals(canonicalSearch)?1:0);
+			int cExactMatchOrder =
+					(CollectionUtils.find(b.getCanonicalNames(), n -> n.equals(canonicalSearch)) != null ? 1 : 0)
+					- (CollectionUtils.find(a.getCanonicalNames(), n -> n.equals(canonicalSearch)) != null ? 1 : 0);
 			if(cExactMatchOrder != 0) return cExactMatchOrder;
 
-			// 3. earlier matches in string first
-			int indexOfOrder = a.getCanonicalName().indexOf(canonicalSearch) - b.getCanonicalName().indexOf(canonicalSearch);
-			if(indexOfOrder != 0) return indexOfOrder;
+			// 3. starts-with matches in string first
+			int startsWithOrder =
+					(CollectionUtils.find(b.getCanonicalNames(), n -> n.startsWith(canonicalSearch)) != null ? 1 : 0)
+					- (CollectionUtils.find(a.getCanonicalNames(), n -> n.startsWith(canonicalSearch)) != null ? 1 : 0);
+			if(startsWithOrder != 0) return startsWithOrder;
 
 			// 4. features with higher matchScore first
 			int matchScoreOrder = (int) (100 * b.getMatchScore() - 100 * a.getMatchScore());
@@ -179,7 +185,7 @@ public class FeatureDictionary
 		if (isSuggestion == null || !isSuggestion)
 		{
 			// a. matches with presets first
-			List<Feature> foundFeaturesByName = getNameIndex(locales).getAll(canonicalSearch);
+			List<Feature> foundFeaturesByName = getNamesIndex(locales).getAll(canonicalSearch);
 			removeIf(foundFeaturesByName, feature -> !isFeatureMatchingParameters(feature, geometry, countryCode));
 			Collections.sort(foundFeaturesByName, sortNames);
 
@@ -193,7 +199,7 @@ public class FeatureDictionary
 		{
 			// b. matches with brand names second
 			List<String> countryCodes = dissectCountryCode(countryCode);
-			List<Feature> foundBrandFeatures = getBrandNameIndex(countryCodes).getAll(canonicalSearch);
+			List<Feature> foundBrandFeatures = getBrandNamesIndex(countryCodes).getAll(canonicalSearch);
 			removeIf(foundBrandFeatures, feature -> !isFeatureMatchingParameters(feature, geometry, countryCode));
 			Collections.sort(foundBrandFeatures, sortNames);
 
@@ -309,24 +315,24 @@ public class FeatureDictionary
 		return new FeatureTagsIndex(featureCollection.getAll(locales));
 	}
 
-	/** lazily get or create name index for given locale(s) */
-	private FeatureTermIndex getNameIndex(List<Locale> locales)
+	/** lazily get or create names index for given locale(s) */
+	private FeatureTermIndex getNamesIndex(List<Locale> locales)
 	{
-		return synchronizedGetOrCreate(nameIndexes, locales, this::createNameIndex);
+		return synchronizedGetOrCreate(namesIndexes, locales, this::createNamesIndex);
 	}
 
-	private FeatureTermIndex createNameIndex(List<Locale> locales)
+	private FeatureTermIndex createNamesIndex(List<Locale> locales)
 	{
 		return new FeatureTermIndex(featureCollection.getAll(locales), feature -> {
 			if (!feature.isSearchable()) return Collections.emptyList();
-			String name = feature.getCanonicalName();
-			if (name.contains(" ")) {
-				List<String> names = new ArrayList<>(Arrays.asList(name.split(" ")));
-				names.add(name);
-				return names;
-			} else {
-				return Collections.singletonList(name);
+			List<String> names = feature.getCanonicalNames();
+			List<String> result = new ArrayList<>(names);
+			for (String name : names) {
+				if (name.contains(" ")) {
+					Collections.addAll(result, name.split(" "));
+				}
 			}
+			return result;
 		});
 	}
 
@@ -344,13 +350,13 @@ public class FeatureDictionary
 		});
 	}
 
-	/** lazily get or create brand name index for country */
-	private FeatureTermIndex getBrandNameIndex(List<String> countryCodes)
+	/** lazily get or create brand names index for country */
+	private FeatureTermIndex getBrandNamesIndex(List<String> countryCodes)
 	{
-		return synchronizedGetOrCreate(brandNameIndexes, countryCodes, this::createBrandNameIndex);
+		return synchronizedGetOrCreate(brandNamesIndexes, countryCodes, this::createBrandNamesIndex);
 	}
 
-	private FeatureTermIndex createBrandNameIndex(List<String> countryCodes)
+	private FeatureTermIndex createBrandNamesIndex(List<String> countryCodes)
 	{
 		if (brandFeatureCollection == null) {
 			return new FeatureTermIndex(Collections.emptyList(), null);
@@ -358,7 +364,7 @@ public class FeatureDictionary
 
 		return new FeatureTermIndex(brandFeatureCollection.getAll(countryCodes), feature -> {
 			if (!feature.isSearchable()) return Collections.emptyList();
-			return Collections.singletonList(feature.getCanonicalName());
+			return feature.getCanonicalNames();
 		});
 	}
 

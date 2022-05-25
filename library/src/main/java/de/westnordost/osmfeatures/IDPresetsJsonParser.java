@@ -50,6 +50,8 @@ class IDPresetsJsonParser {
         String name = p.optString("name");
         String icon = p.optString("icon");
         String imageURL = p.optString("imageURL");
+        List<String> names = parseList(p.optJSONArray("aliases"), item -> (String)item);
+        names.add(0, name);
         List<String> terms = parseList(p.optJSONArray("terms"), item -> (String)item);
 
         JSONObject locationSet = p.optJSONObject("locationSet");
@@ -76,7 +78,8 @@ class IDPresetsJsonParser {
                 id,
                 Collections.unmodifiableMap(tags),
                 Collections.unmodifiableList(geometry),
-                name, icon, imageURL,
+                icon, imageURL,
+                Collections.unmodifiableList(names),
                 Collections.unmodifiableList(terms),
                 Collections.unmodifiableList(includeCountryCodes),
                 Collections.unmodifiableList(excludeCountryCodes),

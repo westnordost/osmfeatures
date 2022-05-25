@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import java.util.Map;
 
-import static de.westnordost.osmfeatures.JsonUtils.parseCommaSeparatedList;
 import static de.westnordost.osmfeatures.JsonUtils.parseList;
 import static de.westnordost.osmfeatures.JsonUtils.parseStringMap;
 import static de.westnordost.osmfeatures.MapEntry.mapOf;
@@ -37,36 +36,6 @@ public class JsonUtilsTest
     {
         int[] array = new int[]{1,2,3};
         assertEquals(listOf(2,4,6), parseList(new JSONArray(array), i -> (int)i*2));
-    }
-
-    @Test public void parseCommaSeparatedList_with_null_string()
-    {
-        assertEquals(0, parseCommaSeparatedList(null, null).size());
-    }
-
-    @Test public void parseCommaSeparatedList_with_empty_string()
-    {
-        assertEquals(0, parseCommaSeparatedList("", null).size());
-    }
-
-    @Test public void parseCommaSeparatedList_with_one_string()
-    {
-        assertEquals(listOf("a"), parseCommaSeparatedList("a", null));
-    }
-
-    @Test public void parseCommaSeparatedList_with_more_strings()
-    {
-        assertEquals(listOf("a","b","c"), parseCommaSeparatedList("a, b ,c", null));
-    }
-
-    @Test public void parseCommaSeparatedList_with_remove_string()
-    {
-        assertEquals(listOf("b"), parseCommaSeparatedList("a,b", "a"));
-    }
-
-    @Test public void parseCommaSeparatedList_with_more_empty_strings()
-    {
-        assertEquals(listOf("","","a"), parseCommaSeparatedList(",,a,", null));
     }
 
     @Test public void parseStringMap_with_null_json_map()

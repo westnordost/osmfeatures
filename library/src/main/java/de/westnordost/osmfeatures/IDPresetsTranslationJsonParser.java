@@ -13,7 +13,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import static de.westnordost.osmfeatures.JsonUtils.createFromInputStream;
-import static de.westnordost.osmfeatures.JsonUtils.parseCommaSeparatedList;
 
 /** Parses a file from
  *  https://github.com/openstreetmap/id-tagging-schema/tree/main/dist/translations
@@ -46,9 +45,39 @@ class IDPresetsTranslationJsonParser {
     private LocalizedFeature parseFeature(BaseFeature feature, Locale locale, JSONObject localization)
     {
         if (feature == null) return null;
+
         String name = localization.optString("name");
         if(name == null || name.isEmpty()) return null;
-        List<String> terms = parseCommaSeparatedList(localization.optString("terms"), name);
-        return new LocalizedFeature(feature, locale, name, Collections.unmodifiableList(terms));
+
+        String[] namesArray = parseNewlineSeparatedList(localization.optString("aliases"));
+        List<String> names = new ArrayList<>(namesArray.length + 1);
+        Collections.addAll(names, namesArray);
+        names.remove(name);
+        names.add(0, name);
+
+        String[] termsArray = parseCommaSeparatedList(localization.optString("terms"));
+        List<String> terms = new ArrayList<>(termsArray.length);
+        Collections.addAll(terms, termsArray);
+        terms.removeAll(names);
+
+        return new LocalizedFeature(
+                feature,
+                locale,
+                Collections.unmodifiableList(names),
+                Collections.unmodifiableList(terms)
+        );
+    }
+
+
+    public static String[] parseCommaSeparatedList(String str)
+    {
+        if(str == null || str.isEmpty()) return new String[0];
+        return str.split("\\s*,+\\s*");
+    }
+
+    public static String[] parseNewlineSeparatedList(String str)
+    {
+        if(str == null || str.isEmpty()) return new String[0];
+        return str.split("\\s*[\\r\\n]+\\s*");
     }
 }

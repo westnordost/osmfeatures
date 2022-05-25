@@ -20,7 +20,7 @@ public class FeatureDictionaryTest
 	private final Feature bakery = feature( // unlocalized shop=bakery
 			"shop/bakery",
 			mapOf(tag("shop","bakery")),
-			"Bäckerei",
+			listOf("Bäckerei"),
 			listOf("Brot"),
 			listOf(),
 			listOf(),
@@ -34,7 +34,7 @@ public class FeatureDictionaryTest
 	private final Feature panetteria = feature( // localized shop=bakery
 			"shop/bakery",
 			mapOf(tag("shop","bakery")),
-			"Panetteria",
+			listOf("Panetteria"),
 			listOf(),
 			listOf(),
 			listOf(),
@@ -48,7 +48,7 @@ public class FeatureDictionaryTest
 	private final Feature ditsch = feature( // brand in DE for shop=bakery
 			"shop/bakery/Ditsch",
 			mapOf(tag("shop","bakery"), tag("name","Ditsch")),
-			"Ditsch",
+			listOf("Ditsch"),
 			listOf(),
 			listOf("DE","AT"),
 			listOf("AT-9"),
@@ -62,7 +62,7 @@ public class FeatureDictionaryTest
 	private final Feature ditschRussian = feature( // brand in RU for shop=bakery
 			"shop/bakery/Дитсч",
 			mapOf(tag("shop","bakery"), tag("name","Ditsch")),
-			"Дитсч",
+			listOf("Дитсч"),
 			listOf(),
 			listOf("RU","UA-43"),
 			listOf(),
@@ -76,7 +76,7 @@ public class FeatureDictionaryTest
 	private final Feature ditschInternational = feature( // brand everywhere for shop=bakery
 			"shop/bakery/Ditsh",
 			mapOf(tag("shop","bakery"), tag("name","Ditsch")),
-			"Ditsh",
+			listOf("Ditsh"),
 			listOf(),
 			listOf(),
 			listOf(),
@@ -90,7 +90,7 @@ public class FeatureDictionaryTest
 	private final Feature car_dealer = feature( // German localized  unspecific shop=car
 			"shop/car",
 			mapOf(tag("shop","car")),
-			"Autohändler",
+			listOf("Autohändler"),
 			listOf("auto"),
 			listOf(),
 			listOf(),
@@ -103,7 +103,7 @@ public class FeatureDictionaryTest
 	private final Feature second_hand_car_dealer = feature( // German localized shop=car with subtags
 			"shop/car/second_hand",
 			mapOf(tag("shop","car"), tag("second_hand", "only")),
-			"Gebrauchtwagenhändler",
+			listOf("Gebrauchtwagenhändler"),
 			listOf("auto"),
 			listOf(),
 			listOf(),
@@ -117,7 +117,7 @@ public class FeatureDictionaryTest
 	private final Feature scheisshaus = feature( // unsearchable feature
 			"amenity/scheißhaus",
 			mapOf(tag("amenity","scheißhaus")),
-			"Scheißhaus",
+			listOf("Scheißhaus"),
 			listOf(),
 			listOf(),
 			listOf(),
@@ -131,7 +131,7 @@ public class FeatureDictionaryTest
 	private final Feature bank = feature( // unlocalized shop=bank (Bank)
 			"amenity/bank",
 			mapOf(tag("amenity","bank")),
-			"Bank",
+			listOf("Bank"),
 			listOf(),
 			listOf(),
 			listOf(),
@@ -144,7 +144,7 @@ public class FeatureDictionaryTest
 	private final Feature bench = feature( // unlocalized amenity=bench (PARKbank)
 			"amenity/bench",
 			mapOf(tag("amenity","bench")),
-			"Parkbank",
+			listOf("Parkbank"),
 			listOf("Bank"),
 			listOf(),
 			listOf(),
@@ -157,7 +157,7 @@ public class FeatureDictionaryTest
 	private final Feature casino = feature( // unlocalized amenity=casino (SPIELbank)
 			"amenity/casino",
 			mapOf(tag("amenity","casino")),
-			"Spielbank",
+			listOf("Spielbank"),
 			listOf("Kasino"),
 			listOf(),
 			listOf(),
@@ -170,7 +170,7 @@ public class FeatureDictionaryTest
 	private final Feature atm = feature( // unlocalized amenity=atm (BankOMAT)
 			"amenity/atm",
 			mapOf(tag("amenity","atm")),
-			"Bankomat",
+			listOf("Bankomat"),
 			listOf(),
 			listOf(),
 			listOf(),
@@ -183,7 +183,7 @@ public class FeatureDictionaryTest
 	private final Feature stock_exchange = feature( // unlocalized amenity=stock_exchange (has "Banking" as term)
 			"amenity/stock_exchange",
 			mapOf(tag("amenity","stock_exchange")),
-			"Börse",
+			listOf("Börse"),
 			listOf("Banking"),
 			listOf(),
 			listOf(),
@@ -196,7 +196,7 @@ public class FeatureDictionaryTest
 	private final Feature bank_of_america = feature( // Brand of a amenity=bank (has "Bank" in name)
 			"amenity/bank/Bank of America",
 			mapOf(tag("amenity","bank"), tag("name","Bank of America")),
-			"Bank of America",
+			listOf("Bank of America"),
 			listOf(),
 			listOf(),
 			listOf(),
@@ -209,7 +209,7 @@ public class FeatureDictionaryTest
 	private final Feature bank_of_liechtenstein = feature( // Brand of a amenity=bank (has "Bank" in name), but low matchScore
 			"amenity/bank/Bank of Liechtenstein",
 			mapOf(tag("amenity","bank"), tag("name","Bank of Liechtenstein")),
-			"Bank of Liechtenstein",
+			listOf("Bank of Liechtenstein"),
 			listOf(),
 			listOf(),
 			listOf(),
@@ -222,7 +222,7 @@ public class FeatureDictionaryTest
 	private final Feature deutsche_bank = feature( // Brand of a amenity=bank (does not start with "Bank" in name)
 			"amenity/bank/Deutsche Bank",
 			mapOf(tag("amenity","bank"), tag("name","Deutsche Bank")),
-			"Deutsche Bank",
+			listOf("Deutsche Bank"),
 			listOf(),
 			listOf(),
 			listOf(),
@@ -235,7 +235,7 @@ public class FeatureDictionaryTest
 	private final Feature baenk = feature( // amenity=bänk, to see if diacritics match non-strictly ("a" finds "ä")
 			"amenity/bänk",
 			mapOf(tag("amenity","bänk")),
-			"Bänk",
+			listOf("Bänk"),
 			listOf(),
 			listOf(),
 			listOf(),
@@ -245,10 +245,23 @@ public class FeatureDictionaryTest
 			false,
 			null
 	);
-	private final Feature bad_bank = feature( // amenity=bank with subtags that has "Bank" in name but it is not hte first word
+	private final Feature bad_bank = feature( // amenity=bank with subtags that has "Bank" in name but it is not the first word
 			"amenity/bank/bad",
 			mapOf(tag("amenity","bank"), tag("goodity","bad")),
-			"Bad Bank",
+			listOf("Bad Bank"),
+			listOf(),
+			listOf(),
+			listOf(),
+			true,
+			1.0,
+			mapOf(),
+			false,
+			null
+	);
+	private final Feature thieves_guild = feature( // only has "bank" in an alias
+			"amenity/thieves_guild",
+			mapOf(tag("amenity","thieves_guild")),
+			listOf("Diebesgilde", "Bankräuberausbildungszentrum"),
 			listOf(),
 			listOf(),
 			listOf(),
@@ -261,7 +274,7 @@ public class FeatureDictionaryTest
 	private final Feature miniature_train_shop = feature( // feature whose name consists of several words
 			"shop/miniature_train",
 			mapOf(tag("shop","miniature_train")),
-			"Miniature Train Shop",
+			listOf("Miniature Train Shop"),
 			listOf(),
 			listOf(),
 			listOf(),
@@ -540,6 +553,7 @@ public class FeatureDictionaryTest
 		assertEquals(listOf(miniature_train_shop), dictionary.byTerm("train").forLocale((Locale) null).find());
 		assertEquals(listOf(miniature_train_shop), dictionary.byTerm("shop").forLocale((Locale) null).find());
 		assertEquals(listOf(miniature_train_shop), dictionary.byTerm("Miniature Trai").forLocale((Locale) null).find());
+		assertEquals(listOf(miniature_train_shop), dictionary.byTerm("Miniature Train Shop").forLocale((Locale) null).find());
 		assertTrue(dictionary.byTerm("Train Sho").forLocale((Locale) null).find().isEmpty());
 	}
 
@@ -549,19 +563,20 @@ public class FeatureDictionaryTest
 	{
 		FeatureDictionary dictionary = dictionary(
 				casino, baenk, bad_bank, stock_exchange, bank_of_liechtenstein, bank, bench, atm,
-				bank_of_america, deutsche_bank);
+				bank_of_america, deutsche_bank, thieves_guild);
 		List<Feature> matches = dictionary.byTerm("Bank").forLocale((Locale) null).find();
 		assertEquals(listOf(
-				bank,       // exact name matches
-				baenk,      // exact name matches (diacritics and case insensitive)
-				atm,        // starts-with name matches
-				bad_bank,   // starts-with-word name matches
+				bank,            // exact name matches
+				baenk,           // exact name matches (diacritics and case insensitive)
+				atm,             // starts-with name matches
+				thieves_guild,   // starts-with alias matches
+				bad_bank,        // starts-with-word name matches
 				bank_of_america,        // starts-with brand name matches
 				bank_of_liechtenstein,  // starts-with brand name matches - lower matchScore
 				bench,           // found word in terms - higher matchScore
 				stock_exchange   // found word in terms - lower matchScore
 				// casino,       // not included: "Spielbank" does not start with "bank"
-				// deutsche_bank // not included: "Deutsche Bank" does not start with "bank"
+				// deutsche_bank // not included: "Deutsche Bank" does not start with "bank" and is a brand
 		), matches);
 	}
 
@@ -611,22 +626,22 @@ public class FeatureDictionaryTest
 	}
 
 	private static Feature feature(
-			String id, Map<String, String> tags, String name, List<String> terms,
+			String id, Map<String, String> tags, List<String> names, List<String> terms,
 			List<String> countryCodes, List<String> excludeCountryCodes, boolean searchable,
 			double matchScore, Map<String, String> addTags, boolean isSuggestion, Locale locale
 	) {
 		if (isSuggestion) {
 			return new SuggestionFeature(
-					id, tags, POINT, name, null, null, terms, countryCodes,
+					id, tags, POINT, null, null, names, terms, countryCodes,
 					excludeCountryCodes, searchable, matchScore, addTags, mapOf()
 			);
 		} else {
 			BaseFeature f = new BaseFeature(
-					id, tags, POINT, name, null, null, terms, countryCodes,
+					id, tags, POINT, null, null, names, terms, countryCodes,
 					excludeCountryCodes, searchable, matchScore, addTags, mapOf()
 			);
 			if (locale != null) {
-				return new LocalizedFeature(f, locale, f.getName(), f.getTerms());
+				return new LocalizedFeature(f, locale, f.getNames(), f.getTerms());
 			} else {
 				return f;
 			}
@@ -634,8 +649,22 @@ public class FeatureDictionaryTest
 	}
 
 	static class SuggestionFeature extends BaseFeature {
-		public SuggestionFeature(String id, Map<String, String> tags, List<GeometryType> geometry, String name, String icon, String imageURL, List<String> terms, List<String> includeCountryCodes, List<String> excludeCountryCodes, boolean searchable, double matchScore, Map<String, String> addTags, Map<String, String> removeTags) {
-			super(id, tags, geometry, name, icon, imageURL, terms, includeCountryCodes, excludeCountryCodes, searchable, matchScore, addTags, removeTags);
+		public SuggestionFeature(
+				String id,
+				Map<String, String> tags,
+				List<GeometryType> geometry,
+				String icon,
+				String imageURL,
+				List<String> names,
+				List<String> terms,
+				List<String> includeCountryCodes,
+				List<String> excludeCountryCodes,
+				boolean searchable,
+				double matchScore,
+				Map<String, String> addTags,
+				Map<String, String> removeTags
+		) {
+			super(id, tags, geometry, icon, imageURL, names, terms, includeCountryCodes, excludeCountryCodes, searchable, matchScore, addTags, removeTags);
 		}
 	}
 }

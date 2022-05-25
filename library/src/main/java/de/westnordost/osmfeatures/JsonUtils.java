@@ -8,7 +8,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -26,16 +25,6 @@ class JsonUtils {
             T item = t.apply(array.get(i));
             if(item != null) result.add(item);
         }
-        return result;
-    }
-
-    public static List<String> parseCommaSeparatedList(String str, String remove)
-    {
-        if(str == null || str.isEmpty()) return new ArrayList<>(0);
-        String[] array = str.split("\\s*,\\s*");
-        List<String> result = new ArrayList<>(array.length);
-        Collections.addAll(result, array);
-        result.remove(remove);
         return result;
     }
 

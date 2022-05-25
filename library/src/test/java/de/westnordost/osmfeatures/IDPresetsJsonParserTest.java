@@ -31,6 +31,7 @@ public class IDPresetsJsonParserTest {
         assertEquals("foo", feature.getName());
         assertEquals("abc", feature.getIcon());
         assertEquals("someurl", feature.getImageURL());
+        assertEquals(listOf("foo", "one","two"), feature.getNames());
         assertEquals(listOf("1","2"), feature.getTerms());
         assertEquals(0.5f, feature.getMatchScore(), 0.001f);
         assertFalse(feature.isSearchable());
@@ -54,6 +55,7 @@ public class IDPresetsJsonParserTest {
         assertEquals("", feature.getName());
         assertEquals("",feature.getIcon());
         assertEquals("",feature.getImageURL());
+        assertEquals(1, feature.getNames().size());
         assertTrue(feature.getTerms().isEmpty());
         assertEquals(1.0f, feature.getMatchScore(), 0.001f);
         assertTrue(feature.isSearchable());

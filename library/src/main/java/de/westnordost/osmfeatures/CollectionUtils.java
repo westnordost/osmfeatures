@@ -59,4 +59,12 @@ class CollectionUtils {
         Iterator<T> it = list.iterator();
         while(it.hasNext()) if (predicate.fn(it.next())) it.remove();
     }
+
+    public static <T> T find(Collection<T> list, Predicate<T> predicate)
+    {
+        for (T item : list) {
+            if (predicate.fn(item)) return item;
+        }
+        return null;
+    }
 }

@@ -29,6 +29,7 @@ public class IDPresetsTranslationJsonParserTest {
         assertEquals(mapOf(tag("a","b"), tag("c","d")), feature.getTags());
         assertEquals(listOf(GeometryType.POINT), feature.getGeometry());
         assertEquals("bar", feature.getName());
+        assertEquals(listOf("bar", "one", "two", "three"), feature.getNames());
         assertEquals(listOf("a", "b"), feature.getTerms());
     }
 

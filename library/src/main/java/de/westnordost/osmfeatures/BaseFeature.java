@@ -12,9 +12,9 @@ class BaseFeature implements Feature
 	private final String id;
 	private final Map<String,String> tags;
 	private final List<GeometryType> geometry;
-	private final String name;
 	private final String icon;
 	private final String imageURL;
+	private final List<String> names;
 	private final List<String> terms;
 	private final List<String> includeCountryCodes;
 	private final List<String> excludeCountryCodes;
@@ -23,20 +23,22 @@ class BaseFeature implements Feature
 	private final Map<String,String> addTags;
 	private final Map<String,String> removeTags;
 
-	private final String canonicalName;
+	private final List<String> canonicalNames;
 	private final List<String> canonicalTerms;
 
-	public BaseFeature(String id, Map<String, String> tags, List<GeometryType> geometry, String name,
-					   String icon, String imageURL, List<String> terms, List<String> includeCountryCodes,
-					   List<String> excludeCountryCodes, boolean searchable, double matchScore,
-					   Map<String, String> addTags, Map<String, String> removeTags)
+	public BaseFeature(
+			String id, Map<String, String> tags, List<GeometryType> geometry,
+			String icon, String imageURL, List<String> names, List<String> terms,
+			List<String> includeCountryCodes, List<String> excludeCountryCodes,
+			boolean searchable, double matchScore,
+			Map<String, String> addTags, Map<String, String> removeTags)
 	{
 		this.id = id;
 		this.tags = tags;
 		this.geometry = geometry;
-		this.name = name;
 		this.icon = icon;
 		this.imageURL = imageURL;
+		this.names = names;
 		this.terms = terms;
 		this.includeCountryCodes = includeCountryCodes;
 		this.excludeCountryCodes = excludeCountryCodes;
@@ -45,7 +47,13 @@ class BaseFeature implements Feature
 		this.addTags = addTags;
 		this.removeTags = removeTags;
 
-		this.canonicalName = StringUtils.canonicalize(name);
+		List<String> canonicalNames = new ArrayList<>(names.size());
+		for (String name : names)
+		{
+			canonicalNames.add(StringUtils.canonicalize(name));
+		}
+		this.canonicalNames = Collections.unmodifiableList(canonicalNames);
+
 		List<String> canonicalTerms = new ArrayList<>(terms.size());
 		for (String term : terms)
 		{
@@ -57,9 +65,10 @@ class BaseFeature implements Feature
 	@Override public String getId() { return id; }
 	@Override public Map<String, String> getTags() { return tags; }
 	@Override public List<GeometryType> getGeometry() { return geometry; }
-	@Override public String getName() { return name; }
+	@Override public String getName() { return names.get(0); }
 	@Override public String getIcon() { return icon; }
 	@Override public String getImageURL() { return imageURL; }
+	@Override public List<String> getNames() { return names; }
 	@Override public List<String> getTerms() { return terms; }
 	@Override public List<String> getIncludeCountryCodes() { return includeCountryCodes; }
 	@Override public List<String> getExcludeCountryCodes() { return excludeCountryCodes; }
@@ -67,7 +76,7 @@ class BaseFeature implements Feature
 	@Override public double getMatchScore() { return matchScore; }
 	@Override public Map<String, String> getAddTags() { return addTags; }
 	@Override public Map<String, String> getRemoveTags() { return removeTags; }
-	@Override public String getCanonicalName() { return canonicalName; }
+	@Override public List<String> getCanonicalNames() { return canonicalNames; }
 	@Override public List<String> getCanonicalTerms() { return canonicalTerms; }
 	@Override public Locale getLocale() { return null; }
 

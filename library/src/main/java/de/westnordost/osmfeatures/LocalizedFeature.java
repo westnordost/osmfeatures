@@ -12,20 +12,26 @@ import java.util.Map;
 class LocalizedFeature implements Feature {
 
     private final BaseFeature p;
-    private final String name;
+    private final List<String> names;
     private final List<String> terms;
-    private final String canonicalName;
+    private final List<String> canonicalNames;
     private final List<String> canonicalTerms;
     private final Locale locale;
 
-    public LocalizedFeature(BaseFeature p, Locale locale, String name, List<String> terms)
+    public LocalizedFeature(BaseFeature p, Locale locale, List<String> names, List<String> terms)
     {
         this.p = p;
-        this.name = name;
+        this.names = names;
         this.terms = terms;
         this.locale = locale;
 
-        this.canonicalName = StringUtils.canonicalize(name);
+        List<String> canonicalNames = new ArrayList<>(names.size());
+        for (String name : names)
+        {
+            canonicalNames.add(StringUtils.canonicalize(name));
+        }
+        this.canonicalNames = Collections.unmodifiableList(canonicalNames);
+
         List<String> canonicalTerms = new ArrayList<>(terms.size());
         for (String term : terms)
         {
@@ -37,9 +43,10 @@ class LocalizedFeature implements Feature {
     @Override public String getId() { return p.getId(); }
     @Override public Map<String, String> getTags() { return p.getTags(); }
     @Override public List<GeometryType> getGeometry() { return p.getGeometry(); }
-    @Override public String getName() { return name; }
+    @Override public String getName() { return names.get(0); }
     @Override public String getIcon() { return p.getIcon(); }
     @Override public String getImageURL() { return p.getImageURL(); }
+    @Override public List<String> getNames() { return names; }
     @Override public List<String> getTerms() { return terms; }
     @Override public List<String> getIncludeCountryCodes() { return p.getIncludeCountryCodes(); }
     @Override public List<String> getExcludeCountryCodes() { return p.getExcludeCountryCodes(); }
@@ -47,7 +54,7 @@ class LocalizedFeature implements Feature {
     @Override public double getMatchScore() { return p.getMatchScore(); }
     @Override public Map<String, String> getAddTags() { return p.getAddTags(); }
     @Override public Map<String, String> getRemoveTags() { return p.getRemoveTags(); }
-    @Override public String getCanonicalName() { return canonicalName; }
+    @Override public List<String> getCanonicalNames() { return canonicalNames; }
     @Override public List<String> getCanonicalTerms() { return canonicalTerms; }
     @Override public Locale getLocale() { return locale; }
 

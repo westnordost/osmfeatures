@@ -14,6 +14,8 @@ public interface Feature {
     String getName();
     String getIcon();
     String getImageURL();
+    /** name + aliases */
+    List<String> getNames();
     List<String> getTerms();
     List<String> getIncludeCountryCodes();
     List<String> getExcludeCountryCodes();
@@ -21,8 +23,7 @@ public interface Feature {
     double getMatchScore();
     Map<String,String> getAddTags();
     Map<String,String> getRemoveTags();
-
-    String getCanonicalName();
+    List<String> getCanonicalNames();
     List<String> getCanonicalTerms();
 
     Locale getLocale();
