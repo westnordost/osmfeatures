@@ -12,14 +12,11 @@ class CollectionUtils {
      *  entry yet, create it using the given create function thread-safely */
     public static <K,V> V synchronizedGetOrCreate(Map<K,V> map, K key, CreateFn<K,V> createFn)
     {
-        if (!map.containsKey(key))
+        synchronized (map)
         {
-            synchronized (map)
+            if (!map.containsKey(key))
             {
-                if (!map.containsKey(key))
-                {
-                    map.put(key, createFn.create(key));
-                }
+                map.put(key, createFn.create(key));
             }
         }
         return map.get(key);
