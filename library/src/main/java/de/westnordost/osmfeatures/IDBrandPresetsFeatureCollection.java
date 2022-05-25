@@ -23,7 +23,7 @@ public class IDBrandPresetsFeatureCollection implements PerCountryFeatureCollect
 {
     private final FileAccessAdapter fileAccess;
 
-    private final HashMap<String, LinkedHashMap<String, Feature>> featuresByIdByCountryCode = new LinkedHashMap<>();
+    private final HashMap<String, LinkedHashMap<String, Feature>> featuresByIdByCountryCode = new LinkedHashMap<>(320);
 
     IDBrandPresetsFeatureCollection(FileAccessAdapter fileAccess) {
         this.fileAccess = fileAccess;
@@ -57,7 +57,7 @@ public class IDBrandPresetsFeatureCollection implements PerCountryFeatureCollect
     private LinkedHashMap<String, Feature> loadPerCountryFeatures(String countryCode)
     {
         List<BaseFeature> features = loadFeatures(countryCode);
-        LinkedHashMap<String, Feature> featuresById = new LinkedHashMap<>();
+        LinkedHashMap<String, Feature> featuresById = new LinkedHashMap<>(features.size());
         for (BaseFeature feature : features) {
             featuresById.put(feature.getId(), feature);
         }
