@@ -20,7 +20,7 @@ class FeatureTagsIndex
         for (Feature feature : features)
         {
             Map<String, String> map = feature.getTags();
-            if (!featureMap.containsKey(map)) featureMap.put(map, new ArrayList<>());
+            if (!featureMap.containsKey(map)) featureMap.put(map, new ArrayList<>(1));
             featureMap.get(map).add(feature);
         }
         tree = new ContainedMapTree<>(featureMap.keySet());
