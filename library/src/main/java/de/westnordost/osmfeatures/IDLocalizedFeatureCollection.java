@@ -27,7 +27,7 @@ class IDLocalizedFeatureCollection implements LocalizedFeatureCollection
 
 	private final FileAccessAdapter fileAccess;
 
-	private final LinkedHashMap<String, BaseFeature> featuresById = new LinkedHashMap<>();
+	private final LinkedHashMap<String, BaseFeature> featuresById;
 
 	private final Map<Locale, List<LocalizedFeature>> localizedFeaturesList = new HashMap<>();
 
@@ -37,6 +37,7 @@ class IDLocalizedFeatureCollection implements LocalizedFeatureCollection
 	{
 		this.fileAccess = fileAccess;
 		List<BaseFeature> features = loadFeatures();
+		featuresById = new LinkedHashMap<>(features.size());
 		for (BaseFeature feature : features) {
 			this.featuresById.put(feature.getId(), feature);
 		}
@@ -72,7 +73,7 @@ class IDLocalizedFeatureCollection implements LocalizedFeatureCollection
 
 	private LinkedHashMap<String, Feature> loadLocalizedFeatures(List<Locale> locales)
 	{
-		LinkedHashMap<String, Feature> result = new LinkedHashMap<>();
+		LinkedHashMap<String, Feature> result = new LinkedHashMap<>(featuresById.size());
 		ListIterator<Locale> it = locales.listIterator(locales.size());
 		while (it.hasPrevious())
 		{
@@ -127,7 +128,7 @@ class IDLocalizedFeatureCollection implements LocalizedFeatureCollection
 		String lang = locale.getLanguage();
 		String country = locale.getCountry();
 		String script = locale.getScript();
-		List<Locale> result = new ArrayList<>();
+		List<Locale> result = new ArrayList<>(4);
 
 		result.add(new Locale(lang));
 
