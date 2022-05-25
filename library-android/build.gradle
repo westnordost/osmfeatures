@@ -4,7 +4,7 @@ plugins {
     id 'signing'
 }
 
-version = "4.1"
+version = "5.0"
 group "de.westnordost"
 
 repositories {
@@ -15,7 +15,7 @@ repositories {
 
 dependencies {
     //api (project(':library')) {
-    api ('de.westnordost:osmfeatures:4.1') {
+    api ('de.westnordost:osmfeatures:5.0') {
         // it's already included in Android
         exclude group: 'org.json', module: 'json'
     }
