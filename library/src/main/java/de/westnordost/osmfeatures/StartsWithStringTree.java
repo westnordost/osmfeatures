@@ -55,9 +55,9 @@ class StartsWithStringTree
         if (currentDepth == maxDepth || strings.size() < minContainerSize)
             return new Node(null, strings);
 
-        HashMap<Character, Node> children = new HashMap<>();
-
         Map<Character, Collection<String>> stringsByCharacter = getStringsByCharacter(strings, currentDepth);
+        HashMap<Character, Node> children = new HashMap<>(stringsByCharacter.size());
+
         for (Map.Entry<Character, Collection<String>> entry : stringsByCharacter.entrySet()) {
             Character c = entry.getKey();
             if (c == null) continue;
