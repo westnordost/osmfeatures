@@ -329,7 +329,7 @@ public class FeatureDictionary
 			List<String> result = new ArrayList<>(names);
 			for (String name : names) {
 				if (name.contains(" ")) {
-					Collections.addAll(result, name.split(" "));
+					Collections.addAll(result, name.replaceAll("[()]", "").split(" "));
 				}
 			}
 			return result;
