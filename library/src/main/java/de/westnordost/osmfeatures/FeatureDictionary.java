@@ -57,6 +57,23 @@ public class FeatureDictionary
 		return new FeatureDictionary(featureCollection, brandsFeatureCollection);
 	}
 
+	//region Get by id
+
+	/** Find feature by id */
+	public QueryByIdBuilder byId(String id)
+	{
+		return new QueryByIdBuilder(id);
+	}
+
+	private Feature get(String id, List<Locale> locales, String countryCode)
+	{
+		Feature feature = featureCollection.get(id, locales);
+		if (feature != null) return feature;
+		return brandFeatureCollection.get(id, Collections.singletonList(countryCode));
+	}
+
+	//endregion
+
 	//region Query by tags
 
 	/** Find matches by a set of tags */
@@ -386,6 +403,48 @@ public class FeatureDictionary
 	//endregion
 
 	//region Query builders
+
+	public class QueryByIdBuilder
+	{
+		private final String id;
+		private Locale[] locale = new Locale[]{Locale.getDefault(), null};
+		private String countryCode = null;
+
+		private QueryByIdBuilder(String id) { this.id = id; }
+
+		/** <p>Sets the locale(s) in which to present the results.</p>
+		 *  <p>You can specify several locales in
+		 *  a row to each fall back to if a translation does not exist in the locale before that.
+		 *  For example <code>[new Locale("ca", "ES"), new Locale("es","ES")]</code> if you
+		 *  wanted results preferredly in Catalan, but Spanish is also fine.</p>
+		 *
+		 *  <p><code>null</code> means to include unlocalized results.</p>
+		 *
+		 *  <p>If nothing is specified, it defaults to <code>[Locale.getDefault(), null]</code>,
+		 *  i.e. unlocalized results are included by default.</p>
+		 *   */
+		public QueryByIdBuilder forLocale(Locale... locale)
+		{
+			this.locale = locale;
+			return this;
+		}
+
+		/** the ISO 3166-1 alpha-2 country code (e.g. "US") or the ISO 3166-2 (e.g. "US-NY") of the
+		 *  country/state the element is in. If not specified, will only return matches that are not
+		 *  county-specific. */
+		public QueryByIdBuilder inCountry(String countryCode)
+		{
+			this.countryCode = countryCode;
+			return this;
+		}
+
+		/** Returns the feature associated with the given id or <code>null</code> if it does not
+		 *  exist */
+		public Feature get()
+		{
+			return FeatureDictionary.this.get(id, Arrays.asList(locale), countryCode);
+		}
+	}
 
 	public class QueryByTagBuilder
 	{

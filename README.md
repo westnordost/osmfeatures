@@ -86,3 +86,13 @@ List<Feature> matches = dictionary
     .find();
 // result list will have matches with at least amenity=bank, but not amenity=bench because it is a point-feature
 ```
+
+### Find by id
+
+```java
+Feature feature = dictionary
+    .byId("amenity/bank")
+    .forLocale(Locale.GERMAN)        // show results in German
+    .inCountry("DE")                 // also include things (brands) that only exist in Germany
+    .get();
+```

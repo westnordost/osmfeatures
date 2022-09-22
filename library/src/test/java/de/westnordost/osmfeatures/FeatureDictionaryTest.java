@@ -583,6 +583,51 @@ public class FeatureDictionaryTest
 
 	//endregion
 
+	//region by id
+
+	@Test public void find_no_entry_by_id()
+	{
+		FeatureDictionary dictionary = dictionary(bakery);
+		assertNull(dictionary.byId("amenity/hospital").get());
+	}
+
+	@Test public void find_no_entry_by_id_because_unlocalized_results_are_excluded()
+	{
+		FeatureDictionary dictionary = dictionary(bakery);
+		assertNull(dictionary.byId("shop/bakery").forLocale(Locale.ITALIAN).get());
+	}
+
+	@Test public void find_entry_by_id()
+	{
+		FeatureDictionary dictionary = dictionary(bakery);
+		assertEquals(bakery, dictionary.byId("shop/bakery").get());
+		assertEquals(bakery, dictionary.byId("shop/bakery").forLocale(Locale.CHINESE, null).get());
+	}
+
+	@Test public void find_localized_entry_by_id()
+	{
+		FeatureDictionary dictionary = dictionary(panetteria);
+		assertEquals(panetteria, dictionary.byId("shop/bakery").forLocale(Locale.ITALIAN).get());
+		assertEquals(panetteria, dictionary.byId("shop/bakery").forLocale(Locale.ITALIAN, null).get());
+	}
+
+	@Test public void find_no_entry_by_id_because_wrong_country()
+	{
+		FeatureDictionary dictionary = dictionary(ditsch);
+		assertNull(dictionary.byId("shop/bakery/Ditsch").get());
+		assertNull(dictionary.byId("shop/bakery/Ditsch").inCountry("IT").get());
+		assertNull(dictionary.byId("shop/bakery/Ditsch").inCountry("AT-9").get());
+	}
+
+	@Test public void find_entry_by_id_in_country()
+	{
+		FeatureDictionary dictionary = dictionary(ditsch);
+		assertEquals(ditsch, dictionary.byId("shop/bakery/Ditsch").inCountry("AT").get());
+		assertEquals(ditsch, dictionary.byId("shop/bakery/Ditsch").inCountry("DE").get());
+	}
+
+	//endregion
+
 	@Test public void find_by_term_sorts_result_in_correct_order()
 	{
 		FeatureDictionary dictionary = dictionary(
