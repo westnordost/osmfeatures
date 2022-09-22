@@ -22,6 +22,7 @@ class BaseFeature implements Feature
 	private final double matchScore;
 	private final Map<String,String> addTags;
 	private final Map<String,String> removeTags;
+	private final boolean isSuggestion;
 
 	private final List<String> canonicalNames;
 	private final List<String> canonicalTerms;
@@ -30,7 +31,7 @@ class BaseFeature implements Feature
 			String id, Map<String, String> tags, List<GeometryType> geometry,
 			String icon, String imageURL, List<String> names, List<String> terms,
 			List<String> includeCountryCodes, List<String> excludeCountryCodes,
-			boolean searchable, double matchScore,
+			boolean searchable, double matchScore, boolean isSuggestion,
 			Map<String, String> addTags, Map<String, String> removeTags)
 	{
 		this.id = id;
@@ -44,6 +45,7 @@ class BaseFeature implements Feature
 		this.excludeCountryCodes = excludeCountryCodes;
 		this.searchable = searchable;
 		this.matchScore = matchScore;
+		this.isSuggestion = isSuggestion;
 		this.addTags = addTags;
 		this.removeTags = removeTags;
 
@@ -78,6 +80,7 @@ class BaseFeature implements Feature
 	@Override public Map<String, String> getRemoveTags() { return removeTags; }
 	@Override public List<String> getCanonicalNames() { return canonicalNames; }
 	@Override public List<String> getCanonicalTerms() { return canonicalTerms; }
+	@Override public boolean isSuggestion() { return isSuggestion; }
 	@Override public Locale getLocale() { return null; }
 
 	@Override public String toString() { return getId(); }

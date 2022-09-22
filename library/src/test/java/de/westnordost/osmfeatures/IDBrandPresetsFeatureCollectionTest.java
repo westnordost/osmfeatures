@@ -1,6 +1,7 @@
 package de.westnordost.osmfeatures;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static de.westnordost.osmfeatures.TestUtils.assertEqualsIgnoreOrder;
 import static de.westnordost.osmfeatures.TestUtils.listOf;
 
@@ -53,6 +54,7 @@ public class IDBrandPresetsFeatureCollectionTest {
 
         assertEqualsIgnoreOrder(listOf("Talespin"), getNames(c.getAll(listOf("DE"))));
         assertEquals("Talespin", c.get("yet_another/brand", listOf("DE")).getName());
+        assertTrue(c.get("yet_another/brand", listOf("DE")).isSuggestion());
     }
 
     private InputStream getStream(String file)

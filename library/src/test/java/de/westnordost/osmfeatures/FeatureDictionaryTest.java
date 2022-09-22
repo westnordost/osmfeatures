@@ -662,7 +662,7 @@ public class FeatureDictionaryTest
 		} else {
 			BaseFeature f = new BaseFeature(
 					id, tags, POINT, null, null, names, terms, countryCodes,
-					excludeCountryCodes, searchable, matchScore, addTags, mapOf()
+					excludeCountryCodes, searchable, matchScore, false, addTags, mapOf()
 			);
 			if (locale != null) {
 				return new LocalizedFeature(f, locale, f.getNames(), f.getTerms());
@@ -688,7 +688,7 @@ public class FeatureDictionaryTest
 				Map<String, String> addTags,
 				Map<String, String> removeTags
 		) {
-			super(id, tags, geometry, icon, imageURL, names, terms, includeCountryCodes, excludeCountryCodes, searchable, matchScore, addTags, removeTags);
+			super(id, tags, geometry, icon, imageURL, names, terms, includeCountryCodes, excludeCountryCodes, searchable, matchScore, true, addTags, removeTags);
 		}
 	}
 }

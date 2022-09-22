@@ -69,7 +69,7 @@ public class IDBrandPresetsFeatureCollection implements PerCountryFeatureCollect
         try {
             if (!fileAccess.exists(filename)) return Collections.emptyList();
             try (InputStream is = fileAccess.open(filename)) {
-                return new IDPresetsJsonParser().parse(is);
+                return new IDPresetsJsonParser(true).parse(is);
             }
         }
         catch (IOException | JSONException e) {

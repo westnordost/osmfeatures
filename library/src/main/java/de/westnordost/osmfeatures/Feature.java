@@ -25,6 +25,7 @@ public interface Feature {
     Map<String,String> getRemoveTags();
     List<String> getCanonicalNames();
     List<String> getCanonicalTerms();
+    boolean isSuggestion();
 
     Locale getLocale();
 }

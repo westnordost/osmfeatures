@@ -80,6 +80,7 @@ public class FeatureTermIndexTest
                 listOf(),
                 true,
                 1.0,
+                false,
                 mapOf(),
                 mapOf()
         );

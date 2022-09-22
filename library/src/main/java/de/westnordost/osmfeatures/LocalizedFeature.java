@@ -56,6 +56,7 @@ class LocalizedFeature implements Feature {
     @Override public Map<String, String> getRemoveTags() { return p.getRemoveTags(); }
     @Override public List<String> getCanonicalNames() { return canonicalNames; }
     @Override public List<String> getCanonicalTerms() { return canonicalTerms; }
+    @Override public boolean isSuggestion() { return p.isSuggestion(); }
     @Override public Locale getLocale() { return locale; }
 
     @Override public String toString() { return getId(); }

@@ -22,6 +22,15 @@ import static de.westnordost.osmfeatures.JsonUtils.parseStringMap;
  *  into map of id -> Feature. */
 class IDPresetsJsonParser {
 
+    private boolean isSuggestions = false;
+
+    public IDPresetsJsonParser() {}
+
+    public IDPresetsJsonParser(boolean isSuggestions)
+    {
+        this.isSuggestions = isSuggestions;
+    }
+
     public List<BaseFeature> parse(InputStream is) throws JSONException, IOException
     {
         JSONObject object = createFromInputStream(is);
@@ -83,7 +92,7 @@ class IDPresetsJsonParser {
                 Collections.unmodifiableList(terms),
                 Collections.unmodifiableList(includeCountryCodes),
                 Collections.unmodifiableList(excludeCountryCodes),
-                searchable, matchScore,
+                searchable, matchScore, isSuggestions,
                 Collections.unmodifiableMap(addTags),
                 Collections.unmodifiableMap(removeTags)
         );
