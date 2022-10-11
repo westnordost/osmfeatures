@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.HashMap;
 
 import static de.westnordost.osmfeatures.JsonUtils.createFromInputStream;
 
@@ -32,14 +33,32 @@ class IDPresetsTranslationJsonParser {
         if (presetsContainerObject == null) return Collections.emptyList();
         JSONObject presetsObject = presetsContainerObject.optJSONObject("presets");
         if (presetsObject == null) return Collections.emptyList();
-        List<LocalizedFeature> result = new ArrayList<>(presetsObject.length());
+        Map<String, LocalizedFeature> localizedFeatures = new HashMap<>(presetsObject.length());
         for (Iterator<String> it = presetsObject.keys(); it.hasNext(); )
         {
             String id = it.next().intern();
             LocalizedFeature f = parseFeature(baseFeatures.get(id), locale, presetsObject.getJSONObject(id));
-            if (f != null) result.add(f);
+            if (f != null) localizedFeatures.put(id, f);
         }
-        return result;
+        for (BaseFeature baseFeature : baseFeatures.values())
+        {
+            List<String> names = baseFeature.getNames();
+            if (names.size() < 1) continue;
+            String name = names.get(0);
+            boolean isPlaceholder = name.startsWith("{") && name.endsWith("}");
+            if (!isPlaceholder) continue;
+            String placeholderId = name.substring(1, name.length() - 1);
+            LocalizedFeature localizedFeature = localizedFeatures.get(placeholderId);
+            if (localizedFeature == null) continue;
+            localizedFeatures.put(baseFeature.getId(), new LocalizedFeature(
+                    baseFeature,
+                    locale,
+                    localizedFeature.getNames(),
+                    localizedFeature.getTerms()
+            ));
+        }
+
+        return new ArrayList<>(localizedFeatures.values());
     }
 
     private LocalizedFeature parseFeature(BaseFeature feature, Locale locale, JSONObject localization)
