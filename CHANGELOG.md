@@ -1,5 +1,10 @@
 # Changelog
 
+# 5.2
+
+- Add support placeholders for preset names (breaking change in [v5.0.0](https://github.com/ideditor/schema-builder/blob/main/CHANGELOG.md#510) of iD presets schema)
+- When searching by term, include results that match with the tag value at the bottom of the result list. (iD has the same behavior)
+
 ## 5.1
 
 - add property `boolean isSuggestion` to `Feature` to be able to tell if a feature is a brand feature or not
