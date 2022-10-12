@@ -47,6 +47,26 @@ public class IDPresetsTranslationJsonParserTest {
         assertTrue(feature.getTerms().isEmpty());
     }
 
+    @Test public void load_features_and_localization_with_placeholder_name()
+    {
+        List<LocalizedFeature> features = parse("one_preset_with_placeholder_name.json", "localizations.json");
+
+        Map<String, LocalizedFeature> featuresById = new HashMap<>();
+        for (LocalizedFeature feature : features) {
+            featuresById.put(feature.getId(), feature);
+        }
+
+        assertEquals(2, features.size());
+        Feature feature = featuresById.get("some/id-dingsdongs");
+
+        assertEquals("some/id-dingsdongs", feature.getId());
+        assertEquals(mapOf(tag("a","b"), tag("c","d")), feature.getTags());
+        assertEquals(listOf(GeometryType.POINT), feature.getGeometry());
+        assertEquals("bar", feature.getName());
+        assertEquals(listOf("bar", "one", "two", "three"), feature.getNames());
+        assertEquals(listOf("a", "b"), feature.getTerms());
+    }
+
     @Test public void parse_some_real_data() throws IOException
     {
         URL url = new URL("https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json");

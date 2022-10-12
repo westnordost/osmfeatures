@@ -1,0 +1,11 @@
+{
+  "some/id": {
+    "tags": { "a": "x", "c": "y" },
+    "geometry": ["point"]
+  },
+  "some/id-dingsdongs": {
+    "name": "{some/id}",
+    "tags": { "a": "b", "c": "d" },
+    "geometry": ["point"]
+  }
+}
