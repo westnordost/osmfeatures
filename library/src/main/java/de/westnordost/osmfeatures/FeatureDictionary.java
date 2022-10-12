@@ -22,6 +22,7 @@ public class FeatureDictionary
 	private final Map<List<Locale>, FeatureTagsIndex> tagsIndexes;
 	private final Map<List<Locale>, FeatureTermIndex> namesIndexes;
 	private final Map<List<Locale>, FeatureTermIndex> termsIndexes;
+	private final Map<List<Locale>, FeatureTermIndex> tagValuesIndexes;
 
 	FeatureDictionary(LocalizedFeatureCollection featureCollection, PerCountryFeatureCollection brandFeatureCollection)
 	{
@@ -31,6 +32,7 @@ public class FeatureDictionary
 		tagsIndexes = new HashMap<>();
 		namesIndexes = new HashMap<>();
 		termsIndexes = new HashMap<>();
+		tagValuesIndexes = new HashMap<>();
 		brandNamesIndexes = new HashMap<>();
 		brandTagsIndexes = new HashMap<>();
 		// build indices for default locale
@@ -210,7 +212,6 @@ public class FeatureDictionary
 
 			// if limit is reached, can return earlier (performance improvement)
 			if(limit > 0 && result.size() >= limit) return result.subList(0, Math.min(limit, result.size()));
-
 		}
 		if (isSuggestion == null || isSuggestion)
 		{
@@ -243,6 +244,22 @@ public class FeatureDictionary
 				return (int) (100 * b.getMatchScore() - 100 * a.getMatchScore());
 			});
 			result.addAll(foundFeaturesByTerm);
+
+			// if limit is reached, can return earlier (performance improvement)
+			if(limit > 0 && result.size() >= limit) return result.subList(0, Math.min(limit, result.size()));
+		}
+		if (isSuggestion == null || !isSuggestion)
+		{
+			// d. matches with tag values fourth
+			List<Feature> foundFeaturesByTagValue = getTagValuesIndex(locales).getAll(canonicalSearch);
+			removeIf(foundFeaturesByTagValue, feature -> !isFeatureMatchingParameters(feature, geometry, countryCode));
+
+			if (!foundFeaturesByTagValue.isEmpty())
+			{
+				final Set<Feature> alreadyFoundFeatures = new HashSet<>(result);
+				removeIf(foundFeaturesByTagValue, feature -> alreadyFoundFeatures.contains(feature));
+			}
+			result.addAll(foundFeaturesByTagValue);
 		}
 		return result.subList(0, Math.min(limit, result.size()));
 	}
@@ -364,6 +381,25 @@ public class FeatureDictionary
 		return new FeatureTermIndex(featureCollection.getAll(locales), feature -> {
 			if (!feature.isSearchable()) return Collections.emptyList();
 			return feature.getCanonicalTerms();
+		});
+	}
+
+	/** lazily get or create tag values index */
+	private FeatureTermIndex getTagValuesIndex(List<Locale> locales)
+	{
+		return synchronizedGetOrCreate(tagValuesIndexes, locales, this::createTagValuesIndex);
+	}
+
+	private FeatureTermIndex createTagValuesIndex(List<Locale> locales)
+	{
+		return new FeatureTermIndex(featureCollection.getAll(locales), feature -> {
+			if (!feature.isSearchable()) return Collections.emptyList();
+
+			List<String> result = new ArrayList<>(feature.getTags().size());
+			for (String tagValue : feature.getTags().values()) {
+				if (!tagValue.equals("*")) result.add(tagValue);
+			}
+			return result;
 		});
 	}
 

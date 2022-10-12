@@ -581,6 +581,13 @@ public class FeatureDictionaryTest
 		assertTrue(dictionary.byTerm("Train Sho").forLocale((Locale) null).find().isEmpty());
 	}
 
+	@Test public void find_entry_by_tag_value()
+	{
+		FeatureDictionary dictionary = dictionary(panetteria);
+		List<Feature> matches = dictionary.byTerm("bakery").forLocale(Locale.ITALIAN).find();
+		assertEquals(listOf(panetteria), matches);
+	}
+
 	//endregion
 
 	//region by id
