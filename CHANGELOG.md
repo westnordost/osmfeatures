@@ -1,5 +1,32 @@
 # Changelog
 
+## 5.1
+
+- add property `boolean isSuggestion` to `Feature` to be able to tell if a feature is a brand feature or not
+- add method to get a feature by its id to `FeatureDictionary`
+
+## 5.0
+
+Added support for aliases of presets. They are treated similarily as alternative names.
+
+## 4.1
+
+Added support for scripts.
+
+E.g. there can be localization of presets in "bg" (Bulgarian) and also "bg-Cyrl" (Bulgarian in Cryllic).
+
+## 4.0
+
+Brand features are becoming too big.
+
+So now, brand features are loaded lazily per-country. I.e. additionally to a `presets.json`, there can be `presets-US.json` (using ISO 3166-1 alpha2 codes) and even  `presets-US-NY.json` (ISO 3166-2) in the same directory, which will be loaded on demand. This functionality is used in StreetComplete.
+
+## 3.0
+
+Support for NSI brand names (v6.x). Pass the path to the NSI presets as second parameter to the `create` function.
+
+Note that the NSI presets are actually not on the root level of https://github.com/osmlab/name-suggestion-index/blob/main/dist/presets/nsi-id-presets.json but in the "presets" object. The library expects a presets.json to have all the presets at the root level.
+
 ## 2.0
 
 - dictionary now uses indices for both the lookup by tags and the lookup by term, which speeds up individual lookups somewhat.
