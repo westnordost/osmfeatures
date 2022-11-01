@@ -23,7 +23,7 @@ It actually uses the [preset data from iD](https://github.com/openstreetmap/id-t
 Just dump all the translations and the presets.json into the same directory.
 Do not forget to give attribution to iD since you are using their data.
 
-If you use gradle as your build tool, The easiest way to get this data is to put this task into your `build.gradle` and either execute this task manually from time to time or make the build process depend on it (by adding `preBuild.dependsOn(downloadPresets)`):
+If you use gradle as your build tool, the easiest way to get this data is to put this task into your `build.gradle` and either execute this task manually from time to time or make the build process depend on it (by adding `preBuild.dependsOn(downloadPresets)`):
 
 ```groovy
 import groovy.json.JsonSlurper
