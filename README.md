@@ -49,7 +49,7 @@ task downloadPresets {
 }
 ```
 
-In StreetComplete (app that uses this library), there is [this gradle task written in Kotlin](https://github.com/streetcomplete/StreetComplete/blob/master/buildSrc/src/main/java/UpdatePresetsTask.kt) to do this.
+In StreetComplete (app that uses this library), there is [UpdatePresetsTask.kt](https://github.com/streetcomplete/StreetComplete/blob/master/buildSrc/src/main/java/UpdatePresetsTask.kt) to do this. It's longer but it is maintained and takes care of some more edge cases. Also, take note of [UpdateNsiPresetsTask.kt](https://github.com/streetcomplete/StreetComplete/blob/master/buildSrc/src/main/java/UpdateNsiPresetsTask.kt) which fetches the [name suggestion index presets](https://github.com/osmlab/name-suggestion-index) (=brands).
 
 ### Initialize dictionary
 
@@ -60,18 +60,22 @@ FeatureDictionary dictionary = FeatureDictionary.create("path/to/data"));
 
 For Android, use
 ```java
-FeatureDictionary dictionary = AndroidFeatureDictionary.create("path/within/assets/folder/to/data"));
+FeatureDictionary dictionary = AndroidFeatureDictionary.create(assetManager, "path/within/assets/folder/to/data"));
 ```
+
+If brand features from the [name suggestion index](https://github.com/osmlab/name-suggestion-index) (see last paragraph in the previous "Get the data" section) should be included in the dictionary, you can specify the path to these presets as a further parameter. These will be loaded on-demand depending on for which countries you search for.
 
 ### Find matches by tags
 ```java
 List<Feature> matches = dictionary
     .byTags(Map.of("amenity", "bench"))  // look for features that have the given tags
     .forGeometry(GeometryType.POINT)     // limit the search to features that may be points
-    .forLocale(Locale.GERMAN)            // show results in German
+    .forLocale(Locale.GERMAN)            // show results in German only, don't fall back to English or unlocalized results
     .find();
 
-println(matches.get(0).getName()); // prints "Parkbank" (or something like this)
+// prints "Parkbank" (or something like this) or index out of bounds exception
+// if no preset for amenity=bench exists that is localized to German
+println(matches.get(0).getName()); 
 ```
 
 ### Find matches by search word
@@ -80,7 +84,8 @@ println(matches.get(0).getName()); // prints "Parkbank" (or something like this)
 List<Feature> matches = dictionary
     .byTerm("Bank")                  // look for features matching "Bank"
     .forGeometry(GeometryType.AREA)  // limit the search to features that may be areas
-    .forLocale(Locale.GERMAN)        // show results in German
+    .forLocale(Locale.GERMAN, null)  // show results in German or fall back to unlocalized results
+                                     // (brand features are usually not localized)
     .inCountry("DE")                 // also include things (brands) that only exist in Germany
     .limit(10)                       // return at most 10 entries
     .find();
@@ -92,7 +97,9 @@ List<Feature> matches = dictionary
 ```java
 Feature feature = dictionary
     .byId("amenity/bank")
-    .forLocale(Locale.GERMAN)        // show results in German
+    .forLocale(Locale.GERMAN,         // show results in German, otherwise fall back to English etc.
+               Locale.ENGLISH,
+               null)
     .inCountry("DE")                 // also include things (brands) that only exist in Germany
     .get();
 ```
