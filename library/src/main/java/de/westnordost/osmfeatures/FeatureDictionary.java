@@ -71,7 +71,8 @@ public class FeatureDictionary
 	{
 		Feature feature = featureCollection.get(id, locales);
 		if (feature != null) return feature;
-		return brandFeatureCollection.get(id, Collections.singletonList(countryCode));
+		List<String> countryCodes = dissectCountryCode(countryCode);
+		return brandFeatureCollection.get(id, countryCodes);
 	}
 
 	//endregion
