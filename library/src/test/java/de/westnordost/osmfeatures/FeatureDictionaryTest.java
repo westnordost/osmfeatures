@@ -723,7 +723,7 @@ public class FeatureDictionaryTest
 						tag("name", "Lush"),
 						tag("shop", "cosmetics")
 				),
-				false,
+				true,
 				null
 		);
 
