@@ -713,7 +713,7 @@ public class FeatureDictionaryTest
 				listOf(GeometryType.POINT, GeometryType.AREA),
 				listOf("Lush"),
 				listOf("lush"),
-				listOf("001"),
+				listOf(),
 				listOf(),
 				true,
 				2.0,
@@ -727,13 +727,30 @@ public class FeatureDictionaryTest
 				null
 		);
 
-		Feature match = dictionary(lush)
+		FeatureDictionary dictionary = dictionary(lush);
+
+		List<Feature> byTags = dictionary
+				.byTags(mapOf(tag("brand:wikidata","Q1585448"), tag("shop", "cosmetics")))
+				.forLocale(Locale.GERMAN, null)
+				.inCountry("DE")
+				.find();
+		assertEquals(1, byTags.size());
+		assertEquals(lush, byTags.get(0));
+
+		List<Feature> byTerm = dictionary
+				.byTerm("Lush")
+				.forLocale(Locale.GERMAN, null)
+				.inCountry("DE")
+				.find();
+		assertEquals(1, byTerm.size());
+		assertEquals(lush, byTerm.get(0));
+
+		Feature byId = dictionary
 				.byId("shop/cosmetics/lush-a08666")
 				.forLocale(Locale.GERMAN, null)
 				.inCountry("DE")
 				.get();
-
-		assertEquals(lush, match);
+		assertEquals(lush, byId);
 	}
 
 	private static FeatureDictionary dictionary(Feature... entries)
