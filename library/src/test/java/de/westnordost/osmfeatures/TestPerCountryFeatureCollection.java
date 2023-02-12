@@ -17,13 +17,11 @@ public class TestPerCountryFeatureCollection implements PerCountryFeatureCollect
 	public Collection<Feature> getAll(List<String> countryCodes) {
 		List<Feature> result = new ArrayList<>();
 		for (Feature feature : features) {
-			if (feature.getIncludeCountryCodes().isEmpty()) {
-				result.add(feature);
-				continue;
-			}
 			for (String countryCode : countryCodes) {
-				if (feature.getIncludeCountryCodes().contains(countryCode)) {
+				List<String> includeCountryCodes = feature.getIncludeCountryCodes();
+				if (includeCountryCodes.contains(countryCode) || countryCode == null && includeCountryCodes.isEmpty()) {
 					result.add(feature);
+					break;
 				}
 			}
 		}
@@ -34,9 +32,11 @@ public class TestPerCountryFeatureCollection implements PerCountryFeatureCollect
 	public Feature get(String id, List<String> countryCodes) {
 		for (Feature feature : features) {
 			if (!feature.getId().equals(id)) continue;
-			if (feature.getIncludeCountryCodes().isEmpty()) return feature;
 			for (String countryCode : countryCodes) {
-				if (feature.getIncludeCountryCodes().contains(countryCode)) return feature;
+				List<String> includeCountryCodes = feature.getIncludeCountryCodes();
+				if (includeCountryCodes.contains(countryCode) || countryCode == null && includeCountryCodes.isEmpty()) {
+					return feature;
+				}
 			}
 		}
 		return null;
