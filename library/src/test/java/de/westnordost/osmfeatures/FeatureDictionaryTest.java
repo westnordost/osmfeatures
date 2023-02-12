@@ -20,6 +20,7 @@ public class FeatureDictionaryTest
 	private final Feature bakery = feature( // unlocalized shop=bakery
 			"shop/bakery",
 			mapOf(tag("shop","bakery")),
+			POINT,
 			listOf("Bäckerei"),
 			listOf("Brot"),
 			listOf(),
@@ -34,6 +35,7 @@ public class FeatureDictionaryTest
 	private final Feature panetteria = feature( // localized shop=bakery
 			"shop/bakery",
 			mapOf(tag("shop","bakery")),
+			POINT,
 			listOf("Panetteria"),
 			listOf(),
 			listOf(),
@@ -48,6 +50,7 @@ public class FeatureDictionaryTest
 	private final Feature ditsch = feature( // brand in DE for shop=bakery
 			"shop/bakery/Ditsch",
 			mapOf(tag("shop","bakery"), tag("name","Ditsch")),
+			POINT,
 			listOf("Ditsch"),
 			listOf(),
 			listOf("DE","AT"),
@@ -62,6 +65,7 @@ public class FeatureDictionaryTest
 	private final Feature ditschRussian = feature( // brand in RU for shop=bakery
 			"shop/bakery/Дитсч",
 			mapOf(tag("shop","bakery"), tag("name","Ditsch")),
+			POINT,
 			listOf("Дитсч"),
 			listOf(),
 			listOf("RU","UA-43"),
@@ -76,6 +80,7 @@ public class FeatureDictionaryTest
 	private final Feature ditschInternational = feature( // brand everywhere for shop=bakery
 			"shop/bakery/Ditsh",
 			mapOf(tag("shop","bakery"), tag("name","Ditsch")),
+			POINT,
 			listOf("Ditsh"),
 			listOf(),
 			listOf(),
@@ -90,6 +95,7 @@ public class FeatureDictionaryTest
 	private final Feature liquor_store = feature( // English localized unspecific shop=alcohol
 			"shop/alcohol",
 			mapOf(tag("shop","alcohol")),
+			POINT,
 			listOf("Off licence (Alcohol shop)"),
 			listOf(),
 			listOf(),
@@ -104,6 +110,7 @@ public class FeatureDictionaryTest
 	private final Feature car_dealer = feature( // German localized  unspecific shop=car
 			"shop/car",
 			mapOf(tag("shop","car")),
+			POINT,
 			listOf("Autohändler"),
 			listOf("auto"),
 			listOf(),
@@ -118,6 +125,7 @@ public class FeatureDictionaryTest
 	private final Feature second_hand_car_dealer = feature( // German localized shop=car with subtags
 			"shop/car/second_hand",
 			mapOf(tag("shop","car"), tag("second_hand", "only")),
+			POINT,
 			listOf("Gebrauchtwagenhändler"),
 			listOf("auto"),
 			listOf(),
@@ -132,6 +140,7 @@ public class FeatureDictionaryTest
 	private final Feature scheisshaus = feature( // unsearchable feature
 			"amenity/scheißhaus",
 			mapOf(tag("amenity","scheißhaus")),
+			POINT,
 			listOf("Scheißhaus"),
 			listOf(),
 			listOf(),
@@ -146,6 +155,7 @@ public class FeatureDictionaryTest
 	private final Feature bank = feature( // unlocalized shop=bank (Bank)
 			"amenity/bank",
 			mapOf(tag("amenity","bank")),
+			POINT,
 			listOf("Bank"),
 			listOf(),
 			listOf(),
@@ -159,6 +169,7 @@ public class FeatureDictionaryTest
 	private final Feature bench = feature( // unlocalized amenity=bench (PARKbank)
 			"amenity/bench",
 			mapOf(tag("amenity","bench")),
+			POINT,
 			listOf("Parkbank"),
 			listOf("Bank"),
 			listOf(),
@@ -172,6 +183,7 @@ public class FeatureDictionaryTest
 	private final Feature casino = feature( // unlocalized amenity=casino (SPIELbank)
 			"amenity/casino",
 			mapOf(tag("amenity","casino")),
+			POINT,
 			listOf("Spielbank"),
 			listOf("Kasino"),
 			listOf(),
@@ -185,6 +197,7 @@ public class FeatureDictionaryTest
 	private final Feature atm = feature( // unlocalized amenity=atm (BankOMAT)
 			"amenity/atm",
 			mapOf(tag("amenity","atm")),
+			POINT,
 			listOf("Bankomat"),
 			listOf(),
 			listOf(),
@@ -198,6 +211,7 @@ public class FeatureDictionaryTest
 	private final Feature stock_exchange = feature( // unlocalized amenity=stock_exchange (has "Banking" as term)
 			"amenity/stock_exchange",
 			mapOf(tag("amenity","stock_exchange")),
+			POINT,
 			listOf("Börse"),
 			listOf("Banking"),
 			listOf(),
@@ -211,6 +225,7 @@ public class FeatureDictionaryTest
 	private final Feature bank_of_america = feature( // Brand of a amenity=bank (has "Bank" in name)
 			"amenity/bank/Bank of America",
 			mapOf(tag("amenity","bank"), tag("name","Bank of America")),
+			POINT,
 			listOf("Bank of America"),
 			listOf(),
 			listOf(),
@@ -224,6 +239,7 @@ public class FeatureDictionaryTest
 	private final Feature bank_of_liechtenstein = feature( // Brand of a amenity=bank (has "Bank" in name), but low matchScore
 			"amenity/bank/Bank of Liechtenstein",
 			mapOf(tag("amenity","bank"), tag("name","Bank of Liechtenstein")),
+			POINT,
 			listOf("Bank of Liechtenstein"),
 			listOf(),
 			listOf(),
@@ -237,6 +253,7 @@ public class FeatureDictionaryTest
 	private final Feature deutsche_bank = feature( // Brand of a amenity=bank (does not start with "Bank" in name)
 			"amenity/bank/Deutsche Bank",
 			mapOf(tag("amenity","bank"), tag("name","Deutsche Bank")),
+			POINT,
 			listOf("Deutsche Bank"),
 			listOf(),
 			listOf(),
@@ -250,6 +267,7 @@ public class FeatureDictionaryTest
 	private final Feature baenk = feature( // amenity=bänk, to see if diacritics match non-strictly ("a" finds "ä")
 			"amenity/bänk",
 			mapOf(tag("amenity","bänk")),
+			POINT,
 			listOf("Bänk"),
 			listOf(),
 			listOf(),
@@ -263,6 +281,7 @@ public class FeatureDictionaryTest
 	private final Feature bad_bank = feature( // amenity=bank with subtags that has "Bank" in name but it is not the first word
 			"amenity/bank/bad",
 			mapOf(tag("amenity","bank"), tag("goodity","bad")),
+			POINT,
 			listOf("Bad Bank"),
 			listOf(),
 			listOf(),
@@ -276,6 +295,7 @@ public class FeatureDictionaryTest
 	private final Feature thieves_guild = feature( // only has "bank" in an alias
 			"amenity/thieves_guild",
 			mapOf(tag("amenity","thieves_guild")),
+			POINT,
 			listOf("Diebesgilde", "Bankräuberausbildungszentrum"),
 			listOf(),
 			listOf(),
@@ -289,6 +309,7 @@ public class FeatureDictionaryTest
 	private final Feature miniature_train_shop = feature( // feature whose name consists of several words
 			"shop/miniature_train",
 			mapOf(tag("shop","miniature_train")),
+			POINT,
 			listOf("Miniature Train Shop"),
 			listOf(),
 			listOf(),
@@ -684,6 +705,37 @@ public class FeatureDictionaryTest
 		assertEquals("Chinese Restaurant", matches3.get(0).getName());
 	}
 
+	@Test public void issue19()
+	{
+		Feature lush = feature(
+				"shop/cosmetics/lush-a08666",
+				mapOf(tag("brand:wikidata","Q1585448"), tag("shop", "cosmetics")),
+				listOf(GeometryType.POINT, GeometryType.AREA),
+				listOf("Lush"),
+				listOf("lush"),
+				listOf("001"),
+				listOf(),
+				true,
+				2.0,
+				mapOf(
+						tag("brand", "Lush"),
+						tag("brand:wikidata", "Q1585448"),
+						tag("name", "Lush"),
+						tag("shop", "cosmetics")
+				),
+				false,
+				null
+		);
+
+		Feature match = dictionary(lush)
+				.byId("shop/cosmetics/lush-a08666")
+				.forLocale(Locale.GERMAN, null)
+				.inCountry("DE")
+				.get();
+
+		assertEquals(lush, match);
+	}
+
 	private static FeatureDictionary dictionary(Feature... entries)
 	{
 		List<Feature> features = new ArrayList<>();
@@ -702,18 +754,19 @@ public class FeatureDictionaryTest
 	}
 
 	private static Feature feature(
-			String id, Map<String, String> tags, List<String> names, List<String> terms,
-			List<String> countryCodes, List<String> excludeCountryCodes, boolean searchable,
-			double matchScore, Map<String, String> addTags, boolean isSuggestion, Locale locale
+			String id, Map<String, String> tags, List<GeometryType> geometries, List<String> names,
+			List<String> terms, List<String> countryCodes, List<String> excludeCountryCodes,
+			boolean searchable, double matchScore, Map<String, String> addTags,
+			boolean isSuggestion, Locale locale
 	) {
 		if (isSuggestion) {
 			return new SuggestionFeature(
-					id, tags, POINT, null, null, names, terms, countryCodes,
+					id, tags, geometries, null, null, names, terms, countryCodes,
 					excludeCountryCodes, searchable, matchScore, addTags, mapOf()
 			);
 		} else {
 			BaseFeature f = new BaseFeature(
-					id, tags, POINT, null, null, names, terms, countryCodes,
+					id, tags, geometries, null, null, names, terms, countryCodes,
 					excludeCountryCodes, searchable, matchScore, false, addTags, mapOf()
 			);
 			if (locale != null) {
