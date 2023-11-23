@@ -1,8 +1,5 @@
 package de.westnordost.osmfeatures
 
-import java.util.Locale
-
-
 interface Feature {
     val id: String
     val tags: Map<String, String>

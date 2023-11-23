@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import static de.westnordost.osmfeatures.MapEntry.mapOf;

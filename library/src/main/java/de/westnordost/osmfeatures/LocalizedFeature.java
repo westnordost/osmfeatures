@@ -3,7 +3,6 @@ package de.westnordost.osmfeatures;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /** Data class associated with the Feature interface. Represents a localized feature.

@@ -16,6 +16,7 @@ dependencies {
     implementation 'org.json:json:20180813'
     testImplementation 'junit:junit:4.13.2'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation "io.fluidsonic.locale:fluid-locale:0.13.0"
 }
 
 task sourcesJar(type: Jar) {

@@ -2,7 +2,6 @@ package de.westnordost.osmfeatures;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 
 /** A localized collection of features */
 public interface LocalizedFeatureCollection

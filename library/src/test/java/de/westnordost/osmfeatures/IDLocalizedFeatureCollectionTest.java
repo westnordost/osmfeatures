@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 
 import static de.westnordost.osmfeatures.TestUtils.assertEqualsIgnoreOrder;
 import static de.westnordost.osmfeatures.TestUtils.listOf;
@@ -87,7 +86,7 @@ public class IDLocalizedFeatureCollectionTest
 
 		assertEquals(Locale.ENGLISH, c.get("some/id", locales).getLocale());
 		assertEquals(Locale.GERMAN, c.get("another/id", locales).getLocale());
-		assertEquals(null, c.get("yet/another/id", locales).getLocale());
+        assertNull(c.get("yet/another/id", locales).getLocale());
 	}
 
 	@Test public void load_features_and_merge_localizations()

@@ -3,7 +3,6 @@ package de.westnordost.osmfeatures;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 
 public class TestLocalizedFeatureCollection implements LocalizedFeatureCollection
 {
