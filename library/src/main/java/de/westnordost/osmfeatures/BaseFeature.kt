@@ -1,29 +1,26 @@
 package de.westnordost.osmfeatures
 
-import java.util.*
-import java.util.stream.Collectors
-
 /** Data class associated with the Feature interface. Represents a non-localized feature.  */
 open class BaseFeature(
-        override val id: String, override val tags: Map<String, String>, geometry: List<GeometryType>?,
+        override val id: String, override val tags: Map<String, String>, geometry: List<GeometryType>,
         icon: String?, imageURL: String?, names: List<String>, terms: List<String>?,
         includeCountryCodes: List<String>, excludeCountryCodes: List<String>,
         searchable: Boolean, matchScore: Double, isSuggestion: Boolean,
         addTags: Map<String, String>, removeTags: Map<String, String>): Feature {
-        override val geometry: List<GeometryType>?
-        override val icon: String?
-        override val imageURL: String?
-        override val names: List<String>
-        override val terms: List<String>?
-        override val includeCountryCodes: List<String>
-        override val excludeCountryCodes: List<String>
-        override val isSearchable: Boolean
-        override val matchScore: Double
-        override val addTags: Map<String, String>
-        override val removeTags: Map<String, String>
-        override val isSuggestion: Boolean
-        override val canonicalNames: List<String>
-        override var canonicalTerms: List<String>? = null
+        final override var geometry: List<GeometryType>
+        final override val icon: String?
+        final override val imageURL: String?
+        final override val names: List<String>
+        final override val terms: List<String>?
+        final override val includeCountryCodes: List<String>
+        final override val excludeCountryCodes: List<String>
+        final override val isSearchable: Boolean
+        final override val matchScore: Double
+        final override val addTags: Map<String, String>
+        final override val removeTags: Map<String, String>
+        final override val isSuggestion: Boolean
+        final override val canonicalNames: List<String>
+        final override var canonicalTerms: List<String>? = null
 
         init {
                 this.geometry = geometry
@@ -38,9 +35,9 @@ open class BaseFeature(
                 this.isSuggestion = isSuggestion
                 this.addTags = addTags
                 this.removeTags = removeTags
-                this.canonicalNames = names.stream().map { name -> StringUtils.canonicalize(name)}.collect(Collectors.toList())
+                this.canonicalNames = names.map { name -> StringUtils.canonicalize(name)}
                 if (terms != null) {
-                        this.canonicalTerms = terms.stream().map { term -> StringUtils.canonicalize(term)}.collect(Collectors.toList())
+                        this.canonicalTerms = terms.map { term -> StringUtils.canonicalize(term)}
                 }
         }
 

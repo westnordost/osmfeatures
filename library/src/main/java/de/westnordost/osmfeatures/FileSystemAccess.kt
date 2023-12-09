@@ -1,23 +1,19 @@
-package de.westnordost.osmfeatures;
+package de.westnordost.osmfeatures
+import okio.FileHandle
+import okio.FileSystem
+import okio.Path.Companion.toPath
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-class FileSystemAccess implements FileAccessAdapter
-{
-    private final File basePath;
-
-    FileSystemAccess(File basePath)
-    {
-        if(!basePath.isDirectory()) throw new IllegalArgumentException("basePath must be a directory");
-        this.basePath = basePath;
+internal class FileSystemAccess(val basePath: String) : FileAccessAdapter {
+    private val fs = FileSystem.SYSTEM
+    init {
+        fs.metadataOrNull(basePath.toPath())?.let { require(it.isDirectory) { "basePath must be a directory" } }
     }
 
-    @Override public boolean exists(String name) { return new File(basePath, name).exists(); }
-    @Override public InputStream open(String name) throws IOException
-    {
-        return new FileInputStream(new File(basePath, name));
+    override fun exists(name: String): Boolean {
+
+        return fs.exists(("$basePath/$name").toPath())
+    }
+    override fun open(name: String): FileHandle {
+        return fs.openReadOnly(("$basePath/$name".toPath()))
     }
 }

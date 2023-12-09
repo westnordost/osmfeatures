@@ -1,49 +1,38 @@
-package de.westnordost.osmfeatures;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+package de.westnordost.osmfeatures
 
 /** Index that makes finding Features whose name/term/... starts with a given string very efficient.
  *
- *  Based on the StartsWithStringTree data structure, see that class. */
-class FeatureTermIndex
-{
-    private final Map<String, List<Feature>> featureMap;
-    private final StartsWithStringTree tree;
+ * Based on the StartsWithStringTree data structure, see that class.  */
+internal class FeatureTermIndex(features: Collection<Feature?>?, selector: Selector?) {
+    private val featureMap: MutableMap<String, MutableList<Feature>>
+    private val tree: StartsWithStringTree
 
-    public FeatureTermIndex(Iterable<Feature> features, Selector selector)
-    {
-        featureMap = new HashMap<>();
-        for (Feature feature : features)
-        {
-            Collection<String> strings = selector.getStrings(feature);
-            for (String string : strings)
-            {
-                if (!featureMap.containsKey(string)) featureMap.put(string, new ArrayList<>(1));
-                featureMap.get(string).add(feature);
+    init {
+        featureMap = HashMap()
+        if (features != null) {
+            for (feature in features) {
+                val strings: Collection<String> = selector!!.getStrings(feature)
+                for (string in strings) {
+                    if (!featureMap.containsKey(string)) featureMap[string] = ArrayList(1)
+                    if (feature != null) {
+                        featureMap[string]!!.add(feature)
+                    }
+                }
             }
         }
-        tree = new StartsWithStringTree(featureMap.keySet());
+        tree = StartsWithStringTree(featureMap.keys)
     }
 
-    public List<Feature> getAll(String startsWith)
-    {
-        Set<Feature> result = new HashSet<>();
-        for (String string : tree.getAll(startsWith))
-        {
-            List<Feature> fs = featureMap.get(string);
-            if (fs != null) result.addAll(fs);
+    fun getAll(startsWith: String?): List<Feature> {
+        val result: MutableSet<Feature> = HashSet()
+        for (string in tree.getAll(startsWith)) {
+            val fs: List<Feature>? = featureMap[string]
+            if (fs != null) result.addAll(fs)
         }
-        return new ArrayList<>(result);
+        return ArrayList(result)
     }
 
-    public interface Selector
-    {
-        List<String> getStrings(Feature feature);
+    fun interface Selector {
+        fun getStrings(feature: Feature?): List<String>
     }
 }

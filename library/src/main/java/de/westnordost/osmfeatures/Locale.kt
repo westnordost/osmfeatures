@@ -4,10 +4,10 @@ import io.fluidsonic.locale.LanguageTag
 
 class Locale(
 
-        val language: String,
-        val region: String = "",
-        val script: String = "",
-        val variant: String? = null) {
+    val language: String,
+    private val region: String?,
+    val script: String?,
+    val variant: String? = null) {
         companion object {
 
 
@@ -26,11 +26,8 @@ class Locale(
             @JvmField
             val CHINESE: Locale = Locale("zh")
 
-            const val SEP = "-"
-            const val PRIVATEUSE = "x"
-
-            @kotlin.jvm.JvmStatic
-            val default: Locale = ENGLISH
+            @JvmStatic
+            val default: Locale? = null
             fun toTitleString(s: String): String {
                 var len: Int
                 if (s.length.also { len = it } == 0) {
@@ -68,17 +65,13 @@ class Locale(
 
 
     val country : String
-        get() = this.region
+        get() = this.region.orEmpty()
 
     private var languageTag : String? = null
 
-    constructor(lang: String) : this(lang,"", "", null) {
+    constructor(lang: String) : this(lang,"", "", null)
 
-    }
-
-    constructor(lang: String, region: String) : this(lang, region, "", null) {
-
-    }
+    constructor(lang: String, region: String) : this(lang, region, "", null)
 
     fun toLanguageTag(): String {
         val lTag: String? = this.languageTag
@@ -87,56 +80,9 @@ class Locale(
         }
 
         this.languageTag = LanguageTag.forLanguage(language, script, region).toString()
-        return this.languageTag!!
-//        val buf = StringBuilder()
-//
-//        var subtag = tag.language
-//        if (subtag.isNotEmpty()) {
-//            buf.append(subtag.lowercase())
-//        }
-//
-//        subtag = tag.script
-//        if (subtag.isNotEmpty()) {
-//            buf.append(SEP)
-//            buf.append(toTitleString(subtag))
-//        }
-//
-//        subtag = tag.region
-//        if (subtag.isNotEmpty()) {
-//            buf.append(SEP)
-//            buf.append(subtag.uppercase())
-//        }
-//
-//        var subtags = tag.variants
-//        for (s in subtags) {
-//            buf.append(SEP)
-//            // preserve casing
-//            buf.append(s)
-//        }
-//
-//        subtags = tag.getExtensions()
-//        for (s in subtags) {
-//            buf.append(SEP)
-//            buf.append(subtag.lowercase())
-//        }
-//
-//        subtag = tag.privateuse
-//        if (subtag.isNotEmpty()) {
-//            if (buf.isNotEmpty()) {
-//                buf.append(SEP)
-//            }
-//            buf.append(PRIVATEUSE).append(SEP)
-//            // preserve casing
-//            buf.append(subtag)
-//        }
-//
-//        val langTag = buf.toString()
-//        synchronized(this) {
-//            if (this.languageTag == null) {
-//                this.languageTag = langTag
-//            }
-//        }
-//        return langTag
+        this.languageTag?.let{ return it}
+        throw NullPointerException("LanguageTag could not be parsed")
+
     }
 
 
@@ -147,24 +93,25 @@ class Locale(
             return this
         }
 
-        private var region: String = ""
+        private var region: String? = null
 
-        fun setRegion(region: String) : Builder {
-            this.region = region
+        fun setRegion(region: String?) : Builder {
+            this.region = region.orEmpty()
             return this
         }
 
-        private var script: String = ""
-        fun setScript(script: String) : Builder {
-            this.script = script
+        private var script: String? = null
+        fun setScript(script: String?) : Builder {
+
+            this.script = script.orEmpty()
             return this
         }
 
         fun build(): Locale {
-            if(language == null) {
-                throw NullPointerException("Builder language is null")
+            language?.let {
+                return Locale(it, region, script)
             }
-            return Locale(language!!, region, script)
+            throw IllegalArgumentException("Language should not be empty")
         }
 
     }

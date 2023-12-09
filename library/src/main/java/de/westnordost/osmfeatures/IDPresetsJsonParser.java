@@ -18,7 +18,7 @@ import static de.westnordost.osmfeatures.JsonUtils.parseList;
 import static de.westnordost.osmfeatures.JsonUtils.parseStringMap;
 
 /** Parses this file
- *  https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json
+ *  <a href="https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json">...</a>
  *  into map of id -> Feature. */
 class IDPresetsJsonParser {
 
@@ -55,7 +55,10 @@ class IDPresetsJsonParser {
         if(tags.isEmpty()) return null;
 
         List<GeometryType> geometry = parseList(p.getJSONArray("geometry"),
-                item -> GeometryType.valueOf(((String)item).toUpperCase(Locale.US)));
+                item -> {
+                    assert item != null;
+                    return GeometryType.valueOf(((String)item).toUpperCase(Locale.US));
+                });
         String name = p.optString("name");
         String icon = p.optString("icon");
         String imageURL = p.optString("imageURL");

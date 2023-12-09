@@ -2,6 +2,7 @@ package de.westnordost.osmfeatures;
 
 import static de.westnordost.osmfeatures.CollectionUtils.synchronizedGetOrCreate;
 
+import okio.FileHandle;
 import org.json.JSONException;
 
 import java.io.IOException;
@@ -68,7 +69,7 @@ public class IDBrandPresetsFeatureCollection implements PerCountryFeatureCollect
         String filename = getPresetsFileName(countryCode);
         try {
             if (!fileAccess.exists(filename)) return Collections.emptyList();
-            try (InputStream is = fileAccess.open(filename)) {
+            try (FileHandle is = fileAccess.open(filename)) {
                 return new IDPresetsJsonParser(true).parse(is);
             }
         }

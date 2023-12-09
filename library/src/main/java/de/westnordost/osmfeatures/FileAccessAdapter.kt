@@ -1,10 +1,9 @@
-package de.westnordost.osmfeatures;
+package de.westnordost.osmfeatures
 
-import java.io.IOException;
-import java.io.InputStream;
+import okio.FileHandle
 
-interface FileAccessAdapter
-{
-    boolean exists(String name) throws IOException;
-    InputStream open(String name) throws IOException;
+internal interface FileAccessAdapter {
+
+    fun exists(name: String): Boolean
+    fun open(name: String): FileHandle
 }

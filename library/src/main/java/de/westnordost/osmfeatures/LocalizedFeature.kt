@@ -1,62 +1,58 @@
-package de.westnordost.osmfeatures;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
+package de.westnordost.osmfeatures
 /** Data class associated with the Feature interface. Represents a localized feature.
  *
- *  I.e. the name and terms are specified in the given locale. */
-class LocalizedFeature implements Feature {
+ * I.e. the name and terms are specified in the given locale.  */
+internal class LocalizedFeature(
+    private val p: BaseFeature,
+    override val locale: Locale,
+    override val names: List<String>,
+    override val terms: List<String>
+) :
+    Feature {
+    override val canonicalNames: List<String>
+    override val canonicalTerms: List<String>
 
-    private final BaseFeature p;
-    private final List<String> names;
-    private final List<String> terms;
-    private final List<String> canonicalNames;
-    private final List<String> canonicalTerms;
-    private final Locale locale;
-
-    public LocalizedFeature(BaseFeature p, Locale locale, List<String> names, List<String> terms)
-    {
-        this.p = p;
-        this.names = names;
-        this.terms = terms;
-        this.locale = locale;
-
-        List<String> canonicalNames = new ArrayList<>(names.size());
-        for (String name : names)
-        {
-            canonicalNames.add(StringUtils.canonicalize(name));
+    init {
+        val canonicalNames: MutableList<String> = ArrayList(names.size)
+        for (name in names) {
+            canonicalNames.add(StringUtils.canonicalize(name))
         }
-        this.canonicalNames = Collections.unmodifiableList(canonicalNames);
-
-        List<String> canonicalTerms = new ArrayList<>(terms.size());
-        for (String term : terms)
-        {
-            canonicalTerms.add(StringUtils.canonicalize(term));
+        this.canonicalNames = canonicalNames.toList()
+        val canonicalTerms: MutableList<String> = ArrayList(terms.size)
+        for (term in terms) {
+            canonicalTerms.add(StringUtils.canonicalize(term))
         }
-        this.canonicalTerms = Collections.unmodifiableList(canonicalTerms);
+        this.canonicalTerms = canonicalTerms.toList()
     }
 
-    @Override public String getId() { return p.getId(); }
-    @Override public Map<String, String> getTags() { return p.getTags(); }
-    @Override public List<GeometryType> getGeometry() { return p.getGeometry(); }
-    @Override public String getName() { return names.get(0); }
-    @Override public String getIcon() { return p.getIcon(); }
-    @Override public String getImageURL() { return p.getImageURL(); }
-    @Override public List<String> getNames() { return names; }
-    @Override public List<String> getTerms() { return terms; }
-    @Override public List<String> getIncludeCountryCodes() { return p.getIncludeCountryCodes(); }
-    @Override public List<String> getExcludeCountryCodes() { return p.getExcludeCountryCodes(); }
-    @Override public boolean isSearchable() { return p.isSearchable(); }
-    @Override public double getMatchScore() { return p.getMatchScore(); }
-    @Override public Map<String, String> getAddTags() { return p.getAddTags(); }
-    @Override public Map<String, String> getRemoveTags() { return p.getRemoveTags(); }
-    @Override public List<String> getCanonicalNames() { return canonicalNames; }
-    @Override public List<String> getCanonicalTerms() { return canonicalTerms; }
-    @Override public boolean isSuggestion() { return p.isSuggestion(); }
-    @Override public Locale getLocale() { return locale; }
+    override val id: String
+        get() = p.id
+    override val tags: Map<String, String>
+        get() = p.tags
+    override val geometry: List<GeometryType>
+        get() = p.geometry
+    override val name: String
+        get() = names[0]
+    override val icon: String?
+        get() = p.icon
+    override val imageURL: String?
+        get() = p.imageURL
+    override val includeCountryCodes: List<String>
+        get() = p.includeCountryCodes
+    override val excludeCountryCodes: List<String>
+        get() = p.excludeCountryCodes
+    override val isSearchable: Boolean
+        get() = p.isSearchable
+    override val matchScore: Double
+        get() = p.matchScore
+    override val addTags: Map<String, String>
+        get() = p.addTags
+    override val removeTags: Map<String, String>
+        get() = p.removeTags
+    override val isSuggestion: Boolean
+        get() = p.isSuggestion
 
-    @Override public String toString() { return getId(); }
+    override fun toString(): String {
+        return id
+    }
 }

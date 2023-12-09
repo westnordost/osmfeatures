@@ -1,8 +1,8 @@
 package de.westnordost.osmfeatures;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 
 class CollectionUtils {
 
@@ -12,7 +12,7 @@ class CollectionUtils {
      *  entry yet, create it using the given create function thread-safely */
     public static <K,V> V synchronizedGetOrCreate(Map<K,V> map, K key, CreateFn<K,V> createFn)
     {
-        synchronized (map)
+        synchronized(map)
         {
             if (!map.containsKey(key))
             {
@@ -48,7 +48,7 @@ class CollectionUtils {
     {
         V mapValue = map.get(entry.getKey());
         V value = entry.getValue();
-        return mapValue == value || value != null && value.equals(mapValue);
+        return Objects.equals(value, mapValue);
     }
 
     public interface Predicate<T> { boolean fn(T v); }
@@ -56,8 +56,7 @@ class CollectionUtils {
     /** Backport of Collection.removeIf */
     public static <T> void removeIf(Collection<T> list, Predicate<T> predicate)
     {
-        Iterator<T> it = list.iterator();
-        while(it.hasNext()) if (predicate.fn(it.next())) it.remove();
+        list.removeIf(predicate::fn);
     }
 
     public static <T> T find(Collection<T> list, Predicate<T> predicate)
