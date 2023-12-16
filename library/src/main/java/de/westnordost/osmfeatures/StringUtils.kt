@@ -1,6 +1,5 @@
 package de.westnordost.osmfeatures
 
-import java.text.Normalizer
 import java.util.regex.Pattern
 
 import kotlin.text.Regex

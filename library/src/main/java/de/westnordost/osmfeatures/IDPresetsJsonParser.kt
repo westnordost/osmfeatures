@@ -1,130 +1,111 @@
-package de.westnordost.osmfeatures;
+package de.westnordost.osmfeatures
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-import static de.westnordost.osmfeatures.JsonUtils.createFromInputStream;
-import static de.westnordost.osmfeatures.JsonUtils.parseList;
-import static de.westnordost.osmfeatures.JsonUtils.parseStringMap;
+import de.westnordost.osmfeatures.JsonUtils.parseList
+import de.westnordost.osmfeatures.JsonUtils.parseStringMap
+import kotlinx.serialization.json.*
+import okio.FileHandle
+import okio.Buffer
+import okio.Source
+import okio.buffer
+import java.net.URL
 
 /** Parses this file
- *  <a href="https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json">...</a>
- *  into map of id -> Feature. */
+ * [...](https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json)
+ * into map of id -> Feature.  */
 class IDPresetsJsonParser {
+    private var isSuggestion = false
 
-    private boolean isSuggestions = false;
+    constructor()
 
-    public IDPresetsJsonParser() {}
+    constructor(isSuggestion: Boolean) {
+        this.isSuggestion = isSuggestion
+    }
+    fun parse(source: Source): List<BaseFeature> {
+        val sink = Buffer()
+        source.buffer().readAll(sink)
 
-    public IDPresetsJsonParser(boolean isSuggestions)
-    {
-        this.isSuggestions = isSuggestions;
+        val decodedObject = Json.decodeFromString<JsonObject>(sink.readUtf8())
+        return decodedObject.mapNotNull { (key, value) ->  parseFeature(key, value.jsonObject)}
     }
 
-    public List<BaseFeature> parse(InputStream is) throws JSONException, IOException
-    {
-        JSONObject object = createFromInputStream(is);
-        List<BaseFeature> result = new ArrayList<>();
-        for (Iterator<String> it = object.keys(); it.hasNext(); )
-        {
-            String id = it.next().intern();
-            BaseFeature f = parseFeature(id, object.getJSONObject(id));
-            if (f != null) result.add(f);
-        }
-        return result;
-    }
-
-    private BaseFeature parseFeature(String id, JSONObject p)
-    {
-        Map<String,String> tags = parseStringMap(p.getJSONObject("tags"));
+    private fun parseFeature(id: String, p: JsonObject): BaseFeature? {
+        val tags = parseStringMap(p["tags"]?.jsonObject)
         // drop features with * in key or value of tags (for now), because they never describe
         // a concrete thing, but some category of things.
         // TODO maybe drop this limitation
-        if(anyKeyOrValueContainsWildcard(tags)) return null;
+        if (anyKeyOrValueContainsWildcard(tags)) return null
         // also dropping features with empty tags (generic point, line, relation)
-        if(tags.isEmpty()) return null;
+        if (tags.isEmpty()) return null
 
-        List<GeometryType> geometry = parseList(p.getJSONArray("geometry"),
-                item -> {
-                    assert item != null;
-                    return GeometryType.valueOf(((String)item).toUpperCase(Locale.US));
-                });
-        String name = p.optString("name");
-        String icon = p.optString("icon");
-        String imageURL = p.optString("imageURL");
-        List<String> names = parseList(p.optJSONArray("aliases"), item -> (String)item);
-        names.add(0, name);
-        List<String> terms = parseList(p.optJSONArray("terms"), item -> (String)item);
+        val geometry = parseList(
+            p["geometry"]?.jsonArray,
+            JsonUtils.Transformer { item -> GeometryType.valueOf(((item as JsonPrimitive).content).uppercase())
+            })
 
-        JSONObject locationSet = p.optJSONObject("locationSet");
-        List<String> includeCountryCodes;
-        List<String> excludeCountryCodes;
+        val name = p["name"]?.jsonPrimitive.toString()
+        val icon = p["icon"]?.jsonPrimitive.toString()
+        val imageURL = p["imageURL"]?.jsonPrimitive.toString()
+        val names = parseList(p["aliases"]?.jsonArray,
+            JsonUtils.Transformer { item -> item as String }).toMutableList()
+        names.add(0, name)
+        val terms = parseList(p["terms"]?.jsonArray,
+            JsonUtils.Transformer { item: Any? -> item as String })
+
+        val locationSet = p["locationSet"]?.jsonObject
+        val includeCountryCodes: List<String>?
+        val excludeCountryCodes: List<String>?
         if (locationSet != null) {
-            includeCountryCodes = parseCountryCodes(locationSet.optJSONArray("include"));
-            if (includeCountryCodes == null) return null;
-            excludeCountryCodes = parseCountryCodes(locationSet.optJSONArray("exclude"));
-            if (excludeCountryCodes == null) return null;
+            includeCountryCodes = parseCountryCodes(locationSet["include"]?.jsonArray)
+            if (includeCountryCodes == null) return null
+            excludeCountryCodes = parseCountryCodes(locationSet["exclude"]?.jsonArray)
+            if (excludeCountryCodes == null) return null
         } else {
-            includeCountryCodes = new ArrayList<>(0);
-            excludeCountryCodes = new ArrayList<>(0);
+            includeCountryCodes = ArrayList(0)
+            excludeCountryCodes = ArrayList(0)
         }
 
-        boolean searchable = p.optBoolean("searchable", true);
-        double matchScore = p.optDouble("matchScore", 1.0);
-        Map<String,String> addTags =
-                p.has("addTags") ? parseStringMap(p.optJSONObject("addTags")) : tags;
-        Map<String,String> removeTags =
-                p.has("removeTags") ? parseStringMap(p.optJSONObject("removeTags")) : addTags;
+        val searchable = p["searchable"]?.jsonPrimitive?.booleanOrNull?: true
+        val matchScore = p["matchScore"]?.jsonPrimitive?.doubleOrNull?: 1.0
+        val addTags = p["addTags"]?.let { parseStringMap(it.jsonObject)}?: tags
+        val removeTags = p["removeTags"]?.let { parseStringMap(it.jsonObject)}?: addTags
 
-        return new BaseFeature(
-                id,
-                Collections.unmodifiableMap(tags),
-                Collections.unmodifiableList(geometry),
-                icon, imageURL,
-                Collections.unmodifiableList(names),
-                Collections.unmodifiableList(terms),
-                Collections.unmodifiableList(includeCountryCodes),
-                Collections.unmodifiableList(excludeCountryCodes),
-                searchable, matchScore, isSuggestions,
-                Collections.unmodifiableMap(addTags),
-                Collections.unmodifiableMap(removeTags)
-        );
+        return BaseFeature(
+            id,
+            tags,
+            geometry,
+            icon, imageURL,
+            names,
+            terms,
+            includeCountryCodes,
+            excludeCountryCodes,
+            searchable, matchScore, isSuggestion,
+            addTags,
+            removeTags
+        )
     }
 
-    private static List<String> parseCountryCodes(JSONArray jsonList)
-    {
-        List<Object> list = parseList(jsonList, item -> item);
-        List<String> result = new ArrayList<>(list.size());
-        for (Object item : list)
-        {
-            // for example a lat,lon pair to denote a location with radius. Not supported.
-            if (!(item instanceof String)) return null;
-            String cc = ((String)item).toUpperCase(Locale.US).intern();
-            // don't need this, 001 stands for "whole world"
-            if (cc.equals("001")) continue;
-            // ISO-3166-2 codes are supported but not m49 code such as "150" or geojsons like "city_national_bank_fl.geojson"
-            if (!cc.matches("[A-Z]{2}(-[A-Z0-9]{1,3})?")) return null;
-            result.add(cc);
+    companion object {
+        private fun parseCountryCodes(jsonList: JsonArray?): List<String>? {
+            val list = parseList(jsonList,
+                JsonUtils.Transformer { item: Any? -> item })
+            val result: MutableList<String> = ArrayList(list.size)
+            for (item in list) {
+                // for example a lat,lon pair to denote a location with radius. Not supported.
+                if (item !is String) return null
+                val cc = item.uppercase().intern()
+                // don't need this, 001 stands for "whole world"
+                if (cc == "001") continue
+                // ISO-3166-2 codes are supported but not m49 code such as "150" or geojsons like "city_national_bank_fl.geojson"
+                if (!cc.matches("[A-Z]{2}(-[A-Z0-9]{1,3})?".toRegex())) return null
+                result.add(cc)
+            }
+            return result
         }
-        return result;
-    }
 
-    private static boolean anyKeyOrValueContainsWildcard(Map<String,String> map)
-    {
-        for (Map.Entry<String, String> e : map.entrySet())
-        {
-            if(e.getKey().contains("*") || e.getValue().contains("*")) return true;
+        private fun anyKeyOrValueContainsWildcard(map: Map<String, String>): Boolean {
+            return map.any { (key, value) ->  key.contains("*") || value.contains("*")}
         }
-        return false;
     }
 }
+
+

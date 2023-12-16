@@ -1,53 +1,36 @@
 package de.westnordost.osmfeatures
 
-import org.json.JSONArray
-import org.json.JSONException
-import org.json.JSONObject
-import java.io.ByteArrayOutputStream
-import java.io.IOException
-import java.io.InputStream
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import okio.Buffer
+import okio.Source
+import okio.buffer
 internal object JsonUtils {
-    @Throws(JSONException::class)
+
     @JvmStatic
-    fun <T> parseList(array: JSONArray?, t: Transformer<T>): List<T> {
-        if (array == null) return ArrayList(0)
-        val result: MutableList<T> = ArrayList(array.length())
-        for (i in 0 until array.length()) {
-            val item: T? = t.apply(array[i])
-            if (item != null) result.add(item)
-        }
-        return result
+    fun <T> parseList(array: JsonArray?, t: Transformer<T>): List<T> {
+        return array?.mapNotNull { item -> t.apply(item) }.orEmpty()
     }
 
-    @Throws(JSONException::class)
     @JvmStatic
-    fun parseStringMap(map: JSONObject?): Map<String, String> {
+    fun parseStringMap(map: JsonObject?): Map<String, String> {
         if (map == null) return HashMap(1)
-        val result: MutableMap<String, String> = HashMap(map.length())
-        val it = map.keys()
-        while (it.hasNext()) {
-            val key = it.next().intern()
-            result[key] = map.getString(key)
-        }
-        return result
+        return map.map { (key, value) -> key.intern() to value.jsonPrimitive.toString()}.toMap().toMutableMap()
     }
 
     // this is only necessary because Android uses some old version of org.json where
     // new JSONObject(new JSONTokener(inputStream)) is not defined...
-    @Throws(IOException::class)
     @JvmStatic
-    fun createFromInputStream(inputStream: InputStream): JSONObject {
-        val result = ByteArrayOutputStream()
-        val buffer = ByteArray(1024)
-        var length: Int
-        while (inputStream.read(buffer).also { length = it } != -1) {
-            result.write(buffer, 0, length)
-        }
-        val jsonString = result.toString("UTF-8")
-        return JSONObject(jsonString)
+    fun createFromSource(source: Source): JsonObject {
+        val sink = Buffer()
+        source.buffer().readAll(sink)
+
+        return Json.decodeFromString<JsonObject>(sink.readUtf8())
     }
 
-    interface Transformer<T> {
+    fun interface Transformer<T> {
         fun apply(item: Any?): T
     }
 }

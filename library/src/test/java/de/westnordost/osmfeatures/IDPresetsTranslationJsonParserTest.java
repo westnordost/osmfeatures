@@ -1,9 +1,13 @@
 package de.westnordost.osmfeatures;
 
+import okio.Okio;
+import okio.Source;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
@@ -66,10 +70,9 @@ public class IDPresetsTranslationJsonParserTest {
         assertEquals(listOf("a", "b"), feature.getTerms());
     }
 
-    @Test public void parse_some_real_data() throws IOException
-    {
+    @Test public void parse_some_real_data() throws IOException, URISyntaxException {
         URL url = new URL("https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json");
-        List<BaseFeature> features = new IDPresetsJsonParser().parse(url.openStream());
+        List<BaseFeature> features = new IDPresetsJsonParser().parse(Okio.source(url.openConnection().getInputStream()));
         Map<String, BaseFeature> featureMap = new HashMap<>();
         for (BaseFeature feature : features)
         {
@@ -77,7 +80,7 @@ public class IDPresetsTranslationJsonParserTest {
         }
 
         URL rawTranslationsURL = new URL("https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/translations/de.json");
-        List<LocalizedFeature> translatedFeatures = new IDPresetsTranslationJsonParser().parse(rawTranslationsURL.openStream(), Locale.GERMAN, featureMap);
+        List<LocalizedFeature> translatedFeatures = new IDPresetsTranslationJsonParser().parse(Okio.source(rawTranslationsURL.openStream()), Locale.GERMAN, featureMap);
 
         // should not crash etc
         assertTrue(translatedFeatures.size() > 1000);
@@ -87,21 +90,20 @@ public class IDPresetsTranslationJsonParserTest {
     {
         try
         {
-            List<BaseFeature> baseFeatures = new IDPresetsJsonParser().parse(getStream(presetsFile));
+            List<BaseFeature> baseFeatures = new IDPresetsJsonParser().parse(getSource(presetsFile));
             Map<String, BaseFeature> featureMap = new HashMap<>();
             for (BaseFeature feature : baseFeatures)
             {
                 featureMap.put(feature.getId(), feature);
             }
-            return new IDPresetsTranslationJsonParser().parse(getStream(translationsFile), Locale.ENGLISH, featureMap);
+            return new IDPresetsTranslationJsonParser().parse(getSource(translationsFile), Locale.ENGLISH, featureMap);
         } catch (IOException e)
         {
             throw new RuntimeException();
         }
     }
 
-    private InputStream getStream(String file)
-    {
-        return getClass().getClassLoader().getResourceAsStream(file);
+    private Source getSource(String file) throws FileNotFoundException {
+        return Okio.source(new File(file));
     }
 }

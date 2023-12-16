@@ -1,10 +1,14 @@
 package de.westnordost.osmfeatures;
 
+import okio.FileHandle;
+import okio.FileSystem;
+import okio.Path;
+import okio.Source;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,7 +27,7 @@ public class IDLocalizedFeatureCollectionTest
 			new IDLocalizedFeatureCollection(new FileAccessAdapter()
 			{
 				@Override public boolean exists(String name) { return false; }
-				@Override public InputStream open(String name) throws IOException { throw new FileNotFoundException(); }
+				@Override public Source open(String name) throws IOException { throw new FileNotFoundException(); }
 			});
 			fail();
 		} catch (RuntimeException ignored) { }
@@ -38,11 +42,11 @@ public class IDLocalizedFeatureCollectionTest
 				return Arrays.asList("presets.json", "en.json", "de.json").contains(name);
 			}
 
-			@Override public InputStream open(String name) throws IOException
+			@Override public Source open(String name) throws IOException
 			{
-				if (name.equals("presets.json")) return getStream("some_presets_min.json");
-				if (name.equals("en.json")) return getStream("localizations_en.json");
-				if (name.equals("de.json")) return getStream("localizations_de.json");
+				if (name.equals("presets.json")) return getSource("some_presets_min.json");
+				if (name.equals("en.json")) return getSource("localizations_en.json");
+				if (name.equals("de.json")) return getSource("localizations_de.json");
 				throw new IOException("File not found");
 			}
 		});
@@ -98,13 +102,13 @@ public class IDLocalizedFeatureCollectionTest
 				return Arrays.asList("presets.json", "de-AT.json", "de.json", "de-Cyrl.json", "de-Cyrl-AT.json").contains(name);
 			}
 
-			@Override public InputStream open(String name) throws IOException
+			@Override public Source open(String name) throws IOException
 			{
-				if (name.equals("presets.json")) return getStream("some_presets_min.json");
-				if (name.equals("de-AT.json")) return getStream("localizations_de-AT.json");
-				if (name.equals("de.json")) return getStream("localizations_de.json");
-				if (name.equals("de-Cyrl-AT.json")) return getStream("localizations_de-Cyrl-AT.json");
-				if (name.equals("de-Cyrl.json")) return getStream("localizations_de-Cyrl.json");
+				if (name.equals("presets.json")) return getSource("some_presets_min.json");
+				if (name.equals("de-AT.json")) return getSource("localizations_de-AT.json");
+				if (name.equals("de.json")) return getSource("localizations_de.json");
+				if (name.equals("de-Cyrl-AT.json")) return getSource("localizations_de-Cyrl-AT.json");
+				if (name.equals("de-Cyrl.json")) return getSource("localizations_de-Cyrl.json");
 				throw new IOException("File not found");
 			}
 		});
@@ -135,9 +139,8 @@ public class IDLocalizedFeatureCollectionTest
 		assertEquals("бацкхусл", c.get("some/id", cryllicAustria).getName());
 	}
 
-	private InputStream getStream(String file)
-	{
-		return getClass().getClassLoader().getResourceAsStream(file);
+	private Source getSource(String file) throws IOException {
+		return FileSystem.SYSTEM.source(Path.get(getClass().getClassLoader().getResource(file).getFile()));
 	}
 
 	private static Collection<String> getNames(Collection<Feature> features)

@@ -2,8 +2,9 @@ package de.westnordost.osmfeatures
 import okio.FileHandle
 import okio.FileSystem
 import okio.Path.Companion.toPath
+import okio.Source
 
-internal class FileSystemAccess(val basePath: String) : FileAccessAdapter {
+class FileSystemAccess(private val basePath: String) : FileAccessAdapter {
     private val fs = FileSystem.SYSTEM
     init {
         fs.metadataOrNull(basePath.toPath())?.let { require(it.isDirectory) { "basePath must be a directory" } }
@@ -13,7 +14,7 @@ internal class FileSystemAccess(val basePath: String) : FileAccessAdapter {
 
         return fs.exists(("$basePath/$name").toPath())
     }
-    override fun open(name: String): FileHandle {
-        return fs.openReadOnly(("$basePath/$name".toPath()))
+    override fun open(name: String): Source {
+        return fs.source(("$basePath/$name".toPath()))
     }
 }

@@ -5,10 +5,14 @@ import static org.junit.Assert.assertTrue;
 import static de.westnordost.osmfeatures.TestUtils.assertEqualsIgnoreOrder;
 import static de.westnordost.osmfeatures.TestUtils.listOf;
 
+import okio.FileHandle;
+import okio.FileSystem;
+import okio.Path;
+import okio.Source;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -24,10 +28,9 @@ public class IDBrandPresetsFeatureCollectionTest {
                 return name.equals("presets.json");
             }
 
-            @Override public InputStream open(String name) throws IOException
-            {
-                if (name.equals("presets.json")) return getStream("brand_presets_min.json");
-                throw new IOException("File not found");
+            @Override public Source open(String name) throws IOException {
+                if (name.equals("presets.json")) return getSource("brand_presets_min.json");
+                throw new IOException("wrong file name");
             }
         });
 
@@ -45,9 +48,8 @@ public class IDBrandPresetsFeatureCollectionTest {
                 return name.equals("presets-DE.json");
             }
 
-            @Override public InputStream open(String name) throws IOException
-            {
-                if (name.equals("presets-DE.json")) return getStream("brand_presets_min2.json");
+            @Override public Source open(String name) throws IOException {
+                if (name.equals("presets-DE.json")) return getSource("brand_presets_min2.json");
                 throw new IOException("File not found");
             }
         });
@@ -57,9 +59,8 @@ public class IDBrandPresetsFeatureCollectionTest {
         assertTrue(c.get("yet_another/brand", listOf("DE")).isSuggestion());
     }
 
-    private InputStream getStream(String file)
-    {
-        return getClass().getClassLoader().getResourceAsStream(file);
+    private Source getSource(String file) throws IOException {
+        return FileSystem.SYSTEM.source(Path.get(getClass().getClassLoader().getResource(file).getFile()));
     }
 
     private static Collection<String> getNames(Collection<Feature> features)

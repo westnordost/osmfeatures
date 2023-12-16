@@ -1,9 +1,13 @@
 package de.westnordost.osmfeatures
 
 import okio.FileHandle
+import okio.IOException
+import okio.Source
+import kotlin.jvm.Throws
 
-internal interface FileAccessAdapter {
+interface FileAccessAdapter {
 
     fun exists(name: String): Boolean
-    fun open(name: String): FileHandle
+    @Throws(IOException::class)
+    fun open(name: String): Source
 }

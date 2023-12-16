@@ -1,5 +1,10 @@
 package de.westnordost.osmfeatures
 
+import okio.BufferedSource
+import okio.FileSystem
+import okio.Okio
+import okio.Path
+import okio.Path.Companion.toPath
 import org.json.JSONException
 import java.io.IOException
 
@@ -9,7 +14,7 @@ import java.io.IOException
  * The base path is defined via the given FileAccessAdapter. In the base path, it is expected that
  * there is a presets.json which includes all the features. The translations are expected to be
  * located in the same directory named like e.g. de.json, pt-BR.json etc.  */
-internal class IDLocalizedFeatureCollection(private val fileAccess: FileAccessAdapter) : LocalizedFeatureCollection {
+class IDLocalizedFeatureCollection(private val fileAccess: FileAccessAdapter) : LocalizedFeatureCollection {
     private val featuresById: LinkedHashMap<String, BaseFeature>
     private val localizedFeaturesList: Map<Locale, List<LocalizedFeature>> = HashMap()
     private val localizedFeatures: Map<List<Locale?>, LinkedHashMap<String, Feature>> = HashMap()
@@ -23,14 +28,8 @@ internal class IDLocalizedFeatureCollection(private val fileAccess: FileAccessAd
     }
 
     private fun loadFeatures(): List<BaseFeature> {
-        try {
-            fileAccess.open(FEATURES_FILE).use { `is` ->
-                return IDPresetsJsonParser().parse(`is`)
-            }
-        } catch (e: IOException) {
-            throw RuntimeException(e)
-        } catch (e: JSONException) {
-            throw RuntimeException(e)
+        fileAccess.open(FEATURES_FILE).use { fileHandle ->
+            return IDPresetsJsonParser().parse(fileHandle)
         }
     }
     private fun getOrLoadLocalizedFeatures(locales: List<Locale?>): LinkedHashMap<String, Feature> {
@@ -71,15 +70,11 @@ internal class IDLocalizedFeatureCollection(private val fileAccess: FileAccessAd
 
     private fun loadLocalizedFeaturesList(locale: Locale): List<LocalizedFeature> {
         val filename = getLocalizationFilename(locale)
-        try {
-            if (!fileAccess.exists(filename)) return emptyList()
-            fileAccess.open(filename).use { `is` ->
-                return IDPresetsTranslationJsonParser().parse(`is`, locale, featuresById)
-            }
-        } catch (e: IOException) {
-            throw RuntimeException(e)
-        } catch (e: JSONException) {
-            throw RuntimeException(e)
+        if (!fileAccess.exists(filename)) return emptyList()
+
+        FileSystem.SYSTEM.
+        openReadOnly(filename.toPath()).use { fileHandle ->
+            return IDPresetsTranslationJsonParser().parse(fileHandle.source(), locale, featuresById.toMap())
         }
     }
 

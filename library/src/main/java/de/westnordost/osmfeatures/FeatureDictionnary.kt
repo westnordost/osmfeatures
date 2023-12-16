@@ -8,20 +8,14 @@ class FeatureDictionary internal constructor(
     private val featureCollection: LocalizedFeatureCollection,
     private val brandFeatureCollection: PerCountryFeatureCollection?
 ) {
-    private val brandNamesIndexes: Map<List<String?>, FeatureTermIndex>
-    private val brandTagsIndexes: Map<List<String?>, FeatureTagsIndex>
-    private val tagsIndexes: Map<List<Locale?>, FeatureTagsIndex>
-    private val namesIndexes: Map<List<Locale?>, FeatureTermIndex>
-    private val termsIndexes: Map<List<Locale?>, FeatureTermIndex>
-    private val tagValuesIndexes: Map<List<Locale?>, FeatureTermIndex>
+    private val brandNamesIndexes: Map<List<String?>, FeatureTermIndex> = HashMap()
+    private val brandTagsIndexes: Map<List<String?>, FeatureTagsIndex> = HashMap()
+    private val tagsIndexes: Map<List<Locale?>, FeatureTagsIndex> = HashMap()
+    private val namesIndexes: Map<List<Locale?>, FeatureTermIndex> = HashMap()
+    private val termsIndexes: Map<List<Locale?>, FeatureTermIndex> = HashMap()
+    private val tagValuesIndexes: Map<List<Locale?>, FeatureTermIndex> = HashMap()
 
     init {
-        tagsIndexes = HashMap()
-        namesIndexes = HashMap()
-        termsIndexes = HashMap()
-        tagValuesIndexes = HashMap()
-        brandNamesIndexes = HashMap()
-        brandTagsIndexes = HashMap()
         // build indices for default locale
         getTagsIndex(listOf(default, null))
         getNamesIndex(listOf(default))

@@ -6,8 +6,7 @@ class Locale(
 
     val language: String,
     private val region: String?,
-    val script: String?,
-    val variant: String? = null) {
+    val script: String?) {
         companion object {
 
 
@@ -15,6 +14,8 @@ class Locale(
             val ENGLISH: Locale = Locale("en")
             @JvmField
             val UK: Locale = Locale("en","UK")
+            @JvmField
+            val US: Locale = Locale("en","US")
             @JvmField
             val FRENCH: Locale = Locale("fr")
             @JvmField
@@ -69,9 +70,9 @@ class Locale(
 
     private var languageTag : String? = null
 
-    constructor(lang: String) : this(lang,"", "", null)
+    constructor(lang: String) : this(lang,"", "")
 
-    constructor(lang: String, region: String) : this(lang, region, "", null)
+    constructor(lang: String, region: String) : this(lang, region, "")
 
     fun toLanguageTag(): String {
         val lTag: String? = this.languageTag

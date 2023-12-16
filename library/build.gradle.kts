@@ -3,6 +3,7 @@ plugins {
     id("maven-publish")
     id("signing")
     id("org.jetbrains.kotlin.jvm") version "1.9.0"
+    kotlin("plugin.serialization") version "1.9.21"
 }
 
 repositories {
@@ -15,6 +16,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("io.fluidsonic.locale:fluid-locale:0.13.0")
     implementation("com.squareup.okio:okio:3.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
 }
 
 tasks {
