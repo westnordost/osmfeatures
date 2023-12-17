@@ -1,17 +1,14 @@
 package de.westnordost.osmfeatures
 
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.*
 import okio.Buffer
 import okio.Source
 import okio.buffer
 internal object JsonUtils {
 
     @JvmStatic
-    fun <T> parseList(array: JsonArray?, t: Transformer<T>): List<T> {
-        return array?.mapNotNull { item -> t.apply(item) }.orEmpty()
+    fun <T> parseList(array: JsonArray?, t: (JsonElement) -> T): List<T> {
+        return array?.mapNotNull { item -> t(item) }.orEmpty()
     }
 
     @JvmStatic
@@ -28,9 +25,5 @@ internal object JsonUtils {
         source.buffer().readAll(sink)
 
         return Json.decodeFromString<JsonObject>(sink.readUtf8())
-    }
-
-    fun interface Transformer<T> {
-        fun apply(item: Any?): T
     }
 }

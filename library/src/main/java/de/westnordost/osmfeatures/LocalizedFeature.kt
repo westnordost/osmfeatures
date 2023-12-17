@@ -4,7 +4,7 @@ package de.westnordost.osmfeatures
  * I.e. the name and terms are specified in the given locale.  */
 class LocalizedFeature(
     private val p: BaseFeature,
-    override val locale: Locale,
+    override val locale: Locale?,
     override val names: List<String>,
     override val terms: List<String>
 ) :

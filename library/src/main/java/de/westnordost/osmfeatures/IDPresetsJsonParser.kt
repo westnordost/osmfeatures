@@ -3,11 +3,9 @@ package de.westnordost.osmfeatures
 import de.westnordost.osmfeatures.JsonUtils.parseList
 import de.westnordost.osmfeatures.JsonUtils.parseStringMap
 import kotlinx.serialization.json.*
-import okio.FileHandle
 import okio.Buffer
 import okio.Source
 import okio.buffer
-import java.net.URL
 
 /** Parses this file
  * [...](https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json)
@@ -38,20 +36,18 @@ class IDPresetsJsonParser {
         if (tags.isEmpty()) return null
 
         val geometry = parseList(
-            p["geometry"]?.jsonArray,
-            JsonUtils.Transformer { item -> GeometryType.valueOf(((item as JsonPrimitive).content).uppercase())
-            })
+            p["geometry"]?.jsonArray
+        ) { GeometryType.valueOf(((it as JsonPrimitive).content).uppercase())
+        }
 
         val name = p["name"]?.jsonPrimitive?.content
         val icon = p["icon"]?.jsonPrimitive?.content
         val imageURL = p["imageURL"]?.jsonPrimitive?.content
-        val names = parseList(p["aliases"]?.jsonArray,
-            JsonUtils.Transformer { item -> item as String }).toMutableList()
+        val names = parseList(p["aliases"]?.jsonArray) { it.jsonPrimitive.content }.toMutableList()
         if(name != null) {
             names.add(0, name)
         }
-        val terms = parseList(p["terms"]?.jsonArray,
-            JsonUtils.Transformer { item: Any? -> item as String })
+        val terms = parseList(p["terms"]?.jsonArray) { it.jsonPrimitive.content }
 
         val locationSet = p["locationSet"]?.jsonObject
         val includeCountryCodes: List<String>?
@@ -72,28 +68,29 @@ class IDPresetsJsonParser {
         val removeTags = p["removeTags"]?.let { parseStringMap(it.jsonObject)}?: addTags
 
         return BaseFeature(
-            id,
-            tags,
-            geometry,
-            icon, imageURL,
-            names,
-            terms,
-            includeCountryCodes,
-            excludeCountryCodes,
-            searchable, matchScore, isSuggestion,
-            addTags,
-            removeTags
+                id,
+                tags,
+                geometry,
+                icon, imageURL,
+                names,
+                terms,
+                includeCountryCodes,
+                excludeCountryCodes,
+                searchable, matchScore, isSuggestion,
+                addTags,
+                removeTags
         )
     }
 
     companion object {
         private fun parseCountryCodes(jsonList: JsonArray?): List<String>? {
-            val list = parseList(jsonList,
-                JsonUtils.Transformer { item: Any? -> item })
+            if(jsonList?.any { it is JsonArray } == true) {
+                return null
+            }
+            val list = parseList(jsonList) { it.jsonPrimitive.content }
             val result: MutableList<String> = ArrayList(list.size)
             for (item in list) {
                 // for example a lat,lon pair to denote a location with radius. Not supported.
-                if (item !is String) return null
                 val cc = item.uppercase().intern()
                 // don't need this, 001 stands for "whole world"
                 if (cc == "001") continue

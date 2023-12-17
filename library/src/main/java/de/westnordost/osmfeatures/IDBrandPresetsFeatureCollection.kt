@@ -1,7 +1,5 @@
 package de.westnordost.osmfeatures
 
-import org.json.JSONException
-
 /** Non-localized feature collection sourcing from (NSI) iD presets defined in JSON.
  *
  * The base path is defined via the given FileAccessAdapter. In the base path, it is expected that
@@ -19,20 +17,20 @@ class IDBrandPresetsFeatureCollection internal constructor(private val fileAcces
     override fun getAll(countryCodes: List<String?>): Collection<Feature> {
         val result: MutableMap<String, Feature> = HashMap()
         for (cc in countryCodes) {
-            result.putAll(getOrLoadPerCountryFeatures(cc))
+            getOrLoadPerCountryFeatures(cc)?.let { result.putAll(it) }
         }
         return result.values
     }
 
     override fun get(id: String, countryCodes: List<String?>): Feature? {
         for (countryCode in countryCodes) {
-            val result = getOrLoadPerCountryFeatures(countryCode)[id]
+            val result = getOrLoadPerCountryFeatures(countryCode)?.get(id)
             if (result != null) return result
         }
         return null
     }
 
-    private fun getOrLoadPerCountryFeatures(countryCode: String?): LinkedHashMap<String, Feature> {
+    private fun getOrLoadPerCountryFeatures(countryCode: String?): java.util.LinkedHashMap<String, Feature>? {
         return CollectionUtils.synchronizedGetOrCreate(
             featuresByIdByCountryCode, countryCode
         ) { countryCode: String? ->

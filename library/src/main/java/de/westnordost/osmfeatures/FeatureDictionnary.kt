@@ -31,7 +31,10 @@ class FeatureDictionary internal constructor(
         val feature = featureCollection[id, locales]
         if (feature != null) return feature
         val countryCodes = dissectCountryCode(countryCode)
-        return brandFeatureCollection?.let {  it[id, countryCodes]}
+        brandFeatureCollection?.let {
+            return brandFeatureCollection[id, countryCodes]
+        }
+        throw NullPointerException("brandFeatureCollection is null")
     }
     //endregion
     //region Query by tags
@@ -48,17 +51,15 @@ class FeatureDictionary internal constructor(
         locales: List<Locale?>
     ): List<Feature> {
         if (tags.isEmpty()) return emptyList()
-        val foundFeatures: MutableList<Feature> = ArrayList()
+        val foundFeatures: MutableList<Feature> = mutableListOf()
         if (isSuggestion == null || !isSuggestion) {
-            foundFeatures.addAll(getTagsIndex(locales).getAll(tags))
+            foundFeatures.addAll(getTagsIndex(locales)?.getAll(tags).orEmpty())
         }
         if (isSuggestion == null || isSuggestion) {
             val countryCodes = dissectCountryCode(countryCode)
-            foundFeatures.addAll(getBrandTagsIndex(countryCodes).getAll(tags))
+            foundFeatures.addAll(getBrandTagsIndex(countryCodes)?.getAll(tags).orEmpty())
         }
-        CollectionUtils.removeIf(
-            foundFeatures
-        ) { feature: Feature ->
+        foundFeatures.removeIf { feature: Feature ->
             !isFeatureMatchingParameters(
                 feature,
                 geometry,
@@ -73,16 +74,14 @@ class FeatureDictionary internal constructor(
                 removeIds.addAll(getParentCategoryIds(feature.id))
             }
             if (removeIds.isNotEmpty()) {
-                CollectionUtils.removeIf(
-                    foundFeatures
-                ) { feature: Feature ->
+                foundFeatures.removeIf{ feature: Feature ->
                     removeIds.contains(
                         feature.id
                     )
                 }
             }
         }
-        foundFeatures.sortWith( object: Comparator<Feature>{
+        return foundFeatures.sortedWith(object : Comparator<Feature> {
             override fun compare(a: Feature, b: Feature): Int {
                 // 1. features with more matching tags first
                 val tagOrder: Int = b.tags.size - a.tags.size
@@ -113,8 +112,8 @@ class FeatureDictionary internal constructor(
                     ))
                 if (numberOfMatchedAddTags != 0) return numberOfMatchedAddTags
                 return (100 * b.matchScore - 100 * a.matchScore).toInt()
-            }})
-        return foundFeatures
+            }
+        })
     }
     //endregion
     //region Query by term
@@ -130,46 +129,34 @@ class FeatureDictionary internal constructor(
         isSuggestion: Boolean?,
         limit: Int,
         locales: List<Locale?>
-    ): List<Feature> {
+    ): MutableList<Feature> {
         val canonicalSearch = StringUtils.canonicalize(search)
         val sortNames = Comparator { a: Feature, b: Feature ->
             // 1. exact matches first
             val exactMatchOrder =
-                ((if (CollectionUtils.find(
-                        b.names
-                    ) { n: String? -> n == search } != null
+                ((if (b.names.find { n: String? -> n == search } != null
                 ) 1 else 0)
-                        - if (CollectionUtils.find(
-                        a.names
-                    ) { n: String? -> n == search } != null
+                        - if (a.names.find { n: String? -> n == search } != null
                 ) 1 else 0)
             if (exactMatchOrder != 0) return@Comparator exactMatchOrder
 
             // 2. exact matches case and diacritics insensitive first
             val cExactMatchOrder =
-                ((if (CollectionUtils.find(
-                        b.canonicalNames
-                    ) { n: String? -> n == canonicalSearch } != null
+                ((if (b.canonicalNames.find { n: String? -> n == canonicalSearch } != null
                 ) 1 else 0)
-                        - if (CollectionUtils.find(
-                        a.canonicalNames
-                    ) { n: String? -> n == canonicalSearch } != null
+                        - if (a.canonicalNames.find { n: String? -> n == canonicalSearch } != null
                 ) 1 else 0)
             if (cExactMatchOrder != 0) return@Comparator cExactMatchOrder
 
             // 3. starts-with matches in string first
             val startsWithOrder =
-                ((if (CollectionUtils.find(
-                        b.canonicalNames
-                    ) { n: String? ->
+                ((if (b.canonicalNames.find { n: String? ->
                         n!!.startsWith(
                             canonicalSearch
                         )
                     } != null
                 ) 1 else 0)
-                        - if (CollectionUtils.find(
-                        a.canonicalNames
-                    ) { n: String? ->
+                        - if (a.canonicalNames.find { n: String? ->
                         n!!.startsWith(
                             canonicalSearch
                         )
@@ -185,18 +172,16 @@ class FeatureDictionary internal constructor(
         val result: MutableList<Feature> = ArrayList()
         if (isSuggestion == null || !isSuggestion) {
             // a. matches with presets first
-            val foundFeaturesByName = getNamesIndex(locales).getAll(canonicalSearch)
-            CollectionUtils.removeIf(
-                foundFeaturesByName
-            ) { feature: Feature ->
+            val foundFeaturesByName: MutableList<Feature> =
+                getNamesIndex(locales)?.getAll(canonicalSearch).orEmpty().toMutableList()
+            foundFeaturesByName.removeIf { feature: Feature ->
                 !isFeatureMatchingParameters(
                     feature,
                     geometry,
                     countryCode
                 )
             }
-            foundFeaturesByName.sortedWith(sortNames)
-            result.addAll(foundFeaturesByName)
+            result.addAll(foundFeaturesByName.sortedWith(sortNames))
 
             // if limit is reached, can return earlier (performance improvement)
             if (limit > 0 && result.size >= limit) return result.subList(
@@ -207,18 +192,16 @@ class FeatureDictionary internal constructor(
         if (isSuggestion == null || isSuggestion) {
             // b. matches with brand names second
             val countryCodes = dissectCountryCode(countryCode)
-            val foundBrandFeatures = getBrandNamesIndex(countryCodes).getAll(canonicalSearch)
-            CollectionUtils.removeIf(
-                foundBrandFeatures
-            ) { feature: Feature ->
+            val foundBrandFeatures = getBrandNamesIndex(countryCodes)?.getAll(canonicalSearch).orEmpty().toMutableList()
+            foundBrandFeatures.removeIf{ feature: Feature ->
                 !isFeatureMatchingParameters(
                     feature,
                     geometry,
                     countryCode
                 )
             }
-            foundBrandFeatures.sortedWith(sortNames)
-            result.addAll(foundBrandFeatures)
+
+            result.addAll(foundBrandFeatures.sortedWith(sortNames))
 
             // if limit is reached, can return earlier (performance improvement)
             if (limit > 0 && result.size >= limit) return result.subList(
@@ -228,10 +211,8 @@ class FeatureDictionary internal constructor(
         }
         if (isSuggestion == null || !isSuggestion) {
             // c. matches with terms third
-            val foundFeaturesByTerm = getTermsIndex(locales).getAll(canonicalSearch)
-            CollectionUtils.removeIf(
-                foundFeaturesByTerm
-            ) { feature: Feature ->
+            val foundFeaturesByTerm = getTermsIndex(locales)?.getAll(canonicalSearch).orEmpty().toMutableList()
+            foundFeaturesByTerm.removeIf { feature: Feature ->
                 !isFeatureMatchingParameters(
                     feature,
                     geometry,
@@ -240,16 +221,14 @@ class FeatureDictionary internal constructor(
             }
             if (foundFeaturesByTerm.isNotEmpty()) {
                 val alreadyFoundFeatures: Set<Feature> = HashSet(result)
-                CollectionUtils.removeIf(
-                    foundFeaturesByTerm
-                ) { feature: Feature ->
+                foundFeaturesByTerm.removeIf { feature: Feature ->
                     alreadyFoundFeatures.contains(
                         feature
                     )
                 }
+
             }
-            foundFeaturesByTerm.sortedWith { a: Feature, b: Feature -> (100 * b.matchScore - 100 * a.matchScore).toInt() }
-            result.addAll(foundFeaturesByTerm)
+            result.addAll(foundFeaturesByTerm.sortedWith { a: Feature, b: Feature -> (100 * b.matchScore - 100 * a.matchScore).toInt() })
 
             // if limit is reached, can return earlier (performance improvement)
             if (limit > 0 && result.size >= limit) return result.subList(
@@ -259,10 +238,8 @@ class FeatureDictionary internal constructor(
         }
         if (isSuggestion == null || !isSuggestion) {
             // d. matches with tag values fourth
-            val foundFeaturesByTagValue = getTagValuesIndex(locales).getAll(canonicalSearch)
-            CollectionUtils.removeIf(
-                foundFeaturesByTagValue
-            ) { feature: Feature ->
+            val foundFeaturesByTagValue = getTagValuesIndex(locales)?.getAll(canonicalSearch).orEmpty().toMutableList()
+            foundFeaturesByTagValue.removeIf { feature: Feature ->
                 !isFeatureMatchingParameters(
                     feature,
                     geometry,
@@ -271,398 +248,366 @@ class FeatureDictionary internal constructor(
             }
             if (foundFeaturesByTagValue.isNotEmpty()) {
                 val alreadyFoundFeatures: Set<Feature> = HashSet(result)
-                CollectionUtils.removeIf(
-                    foundFeaturesByTagValue
-                ) { feature: Feature ->
+                foundFeaturesByTagValue.removeIf { feature: Feature ->
                     alreadyFoundFeatures.contains(
                         feature
                     )
                 }
+                result.addAll(foundFeaturesByTagValue)
             }
-            result.addAll(foundFeaturesByTagValue)
         }
-        return result.subList(0, min(limit.toDouble(), result.size.toDouble()).toInt())
+            return result.subList(0, min(limit.toDouble(), result.size.toDouble()).toInt())
+
     }
-    //endregion
-    //region Lazily get or create Indexes
-    /** lazily get or create tags index for given locale(s)  */
-    private fun getTagsIndex(locales: List<Locale?>): FeatureTagsIndex {
-        return CollectionUtils.synchronizedGetOrCreate(
-            tagsIndexes, locales
-        ) { locales ->
-            createTagsIndex(
-                locales
-            )
+        //endregion
+        //region Lazily get or create Indexes
+        /** lazily get or create tags index for given locale(s)  */
+        private fun getTagsIndex(locales: List<Locale?>): FeatureTagsIndex? {
+            return CollectionUtils.synchronizedGetOrCreate(tagsIndexes.toMutableMap(), locales, ::createTagsIndex)
         }
-    }
 
-    private fun createTagsIndex(locales: List<Locale?>): FeatureTagsIndex {
-        return FeatureTagsIndex(featureCollection.getAll(locales))
-    }
-
-    /** lazily get or create names index for given locale(s)  */
-    private fun getNamesIndex(locales: List<Locale?>): FeatureTermIndex {
-        return CollectionUtils.synchronizedGetOrCreate(
-            namesIndexes, locales
-        ) { locales ->
-            createNamesIndex(
-                locales
-            )
+        private fun createTagsIndex(locales: List<Locale?>): FeatureTagsIndex {
+            return FeatureTagsIndex(featureCollection.getAll(locales))
         }
-    }
 
-    private fun createNamesIndex(locales: List<Locale?>): FeatureTermIndex {
-        return FeatureTermIndex(featureCollection.getAll(locales), FeatureTermIndex.Selector { feature: Feature? ->
-            if (feature != null) {
+        /** lazily get or create names index for given locale(s)  */
+        private fun getNamesIndex(locales: List<Locale?>): FeatureTermIndex? {
+            return CollectionUtils.synchronizedGetOrCreate(namesIndexes.toMutableMap(), locales, ::createNamesIndex)
+        }
+
+        private fun createNamesIndex(locales: List<Locale?>): FeatureTermIndex {
+            val features = featureCollection.getAll(locales)
+            return FeatureTermIndex(features, FeatureTermIndex.Selector { feature: Feature ->
                 if (!feature.isSearchable) return@Selector emptyList<String>()
-            }
-            val names: List<String> = feature?.canonicalNames ?: emptyList()
-            val result = ArrayList(names)
-            for (name in names) {
-                if (name.contains(" ")) {
-                    result.addAll(
-                        name.replace("[()]".toRegex(), "").split(" ".toRegex()).dropLastWhile { it.isEmpty() }
-                            .toTypedArray().toList())
+                val names: List<String> = feature.canonicalNames
+                val result = ArrayList(names)
+                try {
+                    for (name in names) {
+                        if (name.contains(" ")) {
+                            result.addAll(
+                                name.replace("[()]", "").split(" ")
+                            )
+                        }
+                    }
                 }
-            }
-            result
-        })
-    }
+                catch (e: Exception) {
+                    println(e)
+                }
 
-    /** lazily get or create terms index for given locale(s)  */
-    private fun getTermsIndex(locales: List<Locale?>): FeatureTermIndex {
-        return CollectionUtils.synchronizedGetOrCreate(
-            termsIndexes, locales
-        ) { locales ->
-            createTermsIndex(
-                locales
+                result
+            })
+        }
+
+        /** lazily get or create terms index for given locale(s)  */
+        private fun getTermsIndex(locales: List<Locale?>): FeatureTermIndex? {
+            return CollectionUtils.synchronizedGetOrCreate(termsIndexes.toMutableMap(), locales, ::createTermsIndex)
+        }
+
+        private fun createTermsIndex(locales: List<Locale?>): FeatureTermIndex {
+            return FeatureTermIndex(featureCollection.getAll(locales), FeatureTermIndex.Selector { feature: Feature ->
+                if (!feature.isSearchable) return@Selector emptyList<String>()
+                feature.canonicalTerms.orEmpty()
+            })
+        }
+
+        /** lazily get or create tag values index  */
+        private fun getTagValuesIndex(locales: List<Locale?>): FeatureTermIndex? {
+            return CollectionUtils.synchronizedGetOrCreate(
+                tagValuesIndexes.toMutableMap(),
+                locales,
+                ::createTagValuesIndex
             )
         }
-    }
 
-    private fun createTermsIndex(locales: List<Locale?>): FeatureTermIndex {
-        return FeatureTermIndex(featureCollection.getAll(locales), FeatureTermIndex.Selector { feature: Feature? ->
-            if (feature != null) {
+        private fun createTagValuesIndex(locales: List<Locale?>): FeatureTermIndex {
+            return FeatureTermIndex(featureCollection.getAll(locales), FeatureTermIndex.Selector { feature: Feature ->
                 if (!feature.isSearchable) return@Selector emptyList<String>()
-            }
-            feature?.canonicalTerms.orEmpty()
-        })
-    }
 
-    /** lazily get or create tag values index  */
-    private fun getTagValuesIndex(locales: List<Locale?>): FeatureTermIndex {
-        return CollectionUtils.synchronizedGetOrCreate(
-            tagValuesIndexes, locales
-        ) { locales ->
-            createTagValuesIndex(
-                locales
-            )
-        }
-    }
-
-    private fun createTagValuesIndex(locales: List<Locale?>): FeatureTermIndex {
-        return FeatureTermIndex(featureCollection.getAll(locales), FeatureTermIndex.Selector { feature: Feature? ->
-            if (feature != null) {
-                if (!feature.isSearchable) return@Selector emptyList<String>()
-            }
-            val result: ArrayList<String>? =
-                feature?.tags?.let { ArrayList(it.size) }
-            if (feature != null) {
+                val result: ArrayList<String> = ArrayList(feature.tags.size)
                 for (tagValue in feature.tags.values) {
-                    if (tagValue != "*") result?.add(tagValue)
+                    if (tagValue != "*") result.add(tagValue)
                 }
-            }
-            return@Selector result!!
-        })
-    }
+                return@Selector result
+            })
+        }
 
-    /** lazily get or create brand names index for country  */
-    private fun getBrandNamesIndex(countryCodes: List<String?>): FeatureTermIndex {
-        return CollectionUtils.synchronizedGetOrCreate(
-            brandNamesIndexes, countryCodes
-        ) { countryCodes ->
-            createBrandNamesIndex(
-                countryCodes
+        /** lazily get or create brand names index for country  */
+        private fun getBrandNamesIndex(countryCodes: List<String?>): FeatureTermIndex? {
+            return CollectionUtils.synchronizedGetOrCreate(
+                brandNamesIndexes.toMutableMap(),
+                countryCodes,
+                ::createBrandNamesIndex
             )
         }
-    }
 
-    private fun createBrandNamesIndex(countryCodes: List<String?>): FeatureTermIndex {
-        return if (brandFeatureCollection == null) {
-            FeatureTermIndex(emptyList<Feature>(), null)
-        } else FeatureTermIndex(
-            brandFeatureCollection.getAll(countryCodes)
-        ) {
-            if (it?.isSearchable == true) emptyList() else it?.canonicalNames.orEmpty()
+        private fun createBrandNamesIndex(countryCodes: List<String?>): FeatureTermIndex {
+            return if (brandFeatureCollection == null) {
+                FeatureTermIndex(emptyList(), null)
+            } else FeatureTermIndex(
+                brandFeatureCollection.getAll(countryCodes)
+            ) {
+                if (!it.isSearchable) emptyList() else it.canonicalNames
+            }
         }
-    }
 
-    /** lazily get or create tags index for the given countries  */
-    private fun getBrandTagsIndex(countryCodes: List<String?>): FeatureTagsIndex {
-        return CollectionUtils.synchronizedGetOrCreate(
-            brandTagsIndexes, countryCodes
-        ) { countryCodes ->
-            createBrandTagsIndex(
-                countryCodes
+        /** lazily get or create tags index for the given countries  */
+        private fun getBrandTagsIndex(countryCodes: List<String?>): FeatureTagsIndex? {
+            return CollectionUtils.synchronizedGetOrCreate(
+                brandTagsIndexes.toMutableMap(),
+                countryCodes,
+                ::createBrandTagsIndex
             )
         }
-    }
 
-    private fun createBrandTagsIndex(countryCodes: List<String?>): FeatureTagsIndex {
-        return if (brandFeatureCollection == null) {
-            FeatureTagsIndex(emptyList())
-        } else FeatureTagsIndex(brandFeatureCollection.getAll(countryCodes))
-    }
-
-    //endregion
-    //region Query builders
-    inner class QueryByIdBuilder(private val id: String) {
-        private var locale: List<Locale?> = listOf(default)
-        private var countryCode: String? = null
-
-        private operator fun get(id: String, locales: List<Locale?>, countryCode: String): Feature? {
-            val feature = featureCollection[id, locales]
-            if (feature != null) return feature
-            val countryCodes = dissectCountryCode(countryCode)
-            brandFeatureCollection?.let {
-                return it[id, countryCodes]
-            }
-            throw NullPointerException("brandFeatureCollection is null")
-        }
-
-        /**
-         *
-         *Sets the locale(s) in which to present the results.
-         *
-         * You can specify several locales in
-         * a row to each fall back to if a translation does not exist in the locale before that.
-         * For example `[new Locale("ca", "ES"), new Locale("es","ES")]` if you
-         * wanted results preferredly in Catalan, but Spanish is also fine.
-         *
-         *
-         * `null` means to include unlocalized results.
-         *
-         *
-         * If nothing is specified, it defaults to `[Locale.getDefault(), null]`,
-         * i.e. unlocalized results are included by default.
-         */
-        fun forLocale(vararg locales: Locale?): QueryByIdBuilder {
-            this.locale = locales.toList()
-            return this
-        }
-
-        /** the ISO 3166-1 alpha-2 country code (e.g. "US") or the ISO 3166-2 (e.g. "US-NY") of the
-         * country/state the element is in. If not specified, will only return matches that are not
-         * county-specific.  */
-        fun inCountry(countryCode: String?): QueryByIdBuilder {
-            this.countryCode = countryCode
-            return this
-        }
-
-        /** Returns the feature associated with the given id or `null` if it does not
-         * exist  */
-        fun get(): Feature? {
-            return countryCode?.let { this[id, locale, it] }
-        }
-    }
-
-    inner class QueryByTagBuilder (private val tags: Map<String, String>) {
-        private var geometryType: GeometryType? = null
-        private var locale: List<Locale?> = listOf(default)
-        private var suggestion: Boolean? = null
-        private var countryCode: String? = null
-
-        /** Sets for which geometry type to look. If not set or `null`, any will match.  */
-        fun forGeometry(geometryType: GeometryType?): QueryByTagBuilder {
-            this.geometryType = geometryType
-            return this
-        }
-
-        /**
-         *
-         *Sets the locale(s) in which to present the results.
-         *
-         * You can specify several locales in
-         * a row to each fall back to if a translation does not exist in the locale before that.
-         * For example `[new Locale("ca", "ES"), new Locale("es","ES")]` if you
-         * wanted results preferredly in Catalan, but Spanish is also fine.
-         *
-         *
-         * `null` means to include unlocalized results.
-         *
-         *
-         * If nothing is specified, it defaults to `[Locale.getDefault(), null]`,
-         * i.e. unlocalized results are included by default.
-         */
-        fun forLocale(vararg locales: Locale?): QueryByTagBuilder {
-            this.locale = locales.toList()
-            return this
-        }
-
-        /** the ISO 3166-1 alpha-2 country code (e.g. "US") or the ISO 3166-2 (e.g. "US-NY") of the
-         * country/state the element is in. If not specified, will only return matches that are not
-         * county-specific.  */
-        fun inCountry(countryCode: String?): QueryByTagBuilder {
-            this.countryCode = countryCode
-            return this
-        }
-
-        /** Set whether to only include suggestions (=true) or to not include suggestions (=false).
-         * Suggestions are brands, like 7-Eleven.  */
-        fun isSuggestion(suggestion: Boolean?): QueryByTagBuilder {
-            this.suggestion = suggestion
-            return this
-        }
-
-        /** Returns a list of dictionary entries that match or an empty list if nothing is
-         * found. <br></br>In rare cases, a set of tags may match multiple primary features, such as for
-         * tag combinations like `shop=deli` + `amenity=cafe`, so, this is why
-         * it is a list.  */
-        fun find(): List<Feature> {
-            return get(tags, geometryType, countryCode, suggestion, locale)
-        }
-    }
-
-    inner class QueryByTermBuilder(private val term: String) {
-        private var geometryType: GeometryType? = null
-        private var locale: List<Locale?> = listOf(default)
-        private var suggestion: Boolean? = null
-        private var limit = 50
-        private var countryCode: String? = null
-
-        /** Sets for which geometry type to look. If not set or `null`, any will match.  */
-        fun forGeometry(geometryType: GeometryType?): QueryByTermBuilder {
-            this.geometryType = geometryType
-            return this
-        }
-
-        /**
-         *
-         *Sets the locale(s) in which to present the results.
-         *
-         * You can specify several locales in
-         * a row to each fall back to if a translation does not exist in the locale before that.
-         * For example `[new Locale("ca", "ES"), new Locale("es","ES")]` if you
-         * wanted results preferredly in Catalan, but Spanish is also fine.
-         *
-         *
-         * `null` means to include unlocalized results.
-         *
-         *
-         * If nothing is specified, it defaults to `[Locale.getDefault()]`, i.e.
-         * unlocalized results are excluded by default.
-         */
-        fun forLocale(vararg locales:  Locale?): QueryByTermBuilder {
-            this.locale = locales.toList()
-            return this
-        }
-
-        /** the ISO 3166-1 alpha-2 country code (e.g. "US") or the ISO 3166-2 (e.g. "US-NY") of the
-         * country/state the element is in. If not specified, will only return matches that are not
-         * county-specific.  */
-        fun inCountry(countryCode: String?): QueryByTermBuilder {
-            this.countryCode = countryCode
-            return this
-        }
-
-        /** Set whether to only include suggestions (=true) or to not include suggestions (=false).
-         * Suggestions are brands, like 7-Eleven.  */
-        fun isSuggestion(suggestion: Boolean?): QueryByTermBuilder {
-            this.suggestion = suggestion
-            return this
-        }
-
-        /** limit how many results to return at most. Default is 50, -1 for unlimited.  */
-        fun limit(limit: Int): QueryByTermBuilder {
-            this.limit = limit
-            return this
-        }
-
-        /** Returns a list of dictionary entries that match or an empty list if nothing is
-         * found. <br></br>
-         * Results are sorted mainly in this order: Matches with names, with brand names, then
-         * matches with terms (keywords).  */
-        fun find(): List<Feature> {
-            return get(term, geometryType, countryCode, suggestion, limit, locale)
-        }
-    } //endregion
-
-    companion object {
-        private val VALID_COUNTRY_CODE_REGEX = Regex("([A-Z]{2})(?:-([A-Z0-9]{1,3}))?")
-        /** Create a new FeatureDictionary which gets its data from the given directory. Optionally,
-         * a path to brand presets can be specified.  */
-        /** Create a new FeatureDictionary which gets its data from the given directory.  */
-        @JvmOverloads
-        fun create(presetsBasePath: String, brandPresetsBasePath: String? = null): FeatureDictionary {
-            val featureCollection: LocalizedFeatureCollection =
-                IDLocalizedFeatureCollection(FileSystemAccess(presetsBasePath))
-            val brandsFeatureCollection: PerCountryFeatureCollection? =
-                if (brandPresetsBasePath != null) IDBrandPresetsFeatureCollection(
-                    FileSystemAccess(brandPresetsBasePath)
-                ) else null
-            return FeatureDictionary(featureCollection, brandsFeatureCollection)
+        private fun createBrandTagsIndex(countryCodes: List<String?>): FeatureTagsIndex {
+            return if (brandFeatureCollection == null) {
+                FeatureTagsIndex(emptyList())
+            } else FeatureTagsIndex(brandFeatureCollection.getAll(countryCodes))
         }
 
         //endregion
-        //region Utility / Filter functions
-        private fun getParentCategoryIds(id: String): Collection<String> {
-            var id: String? = id
-            val result: MutableList<String> = ArrayList()
-            do {
-                id = getParentId(id)
-                if (id != null) result.add(id)
-            } while (id != null)
-            return result
-        }
+        //region Query builders
+        inner class QueryByIdBuilder(private val id: String) {
+            private var locale: List<Locale?> = listOf(default)
+            private var countryCode: String? = null
 
-        private fun getParentId(id: String?): String? {
-            val lastSlashIndex = id!!.lastIndexOf("/")
-            return if (lastSlashIndex == -1) null else id.substring(0, lastSlashIndex)
-        }
-
-        private fun isFeatureMatchingParameters(
-            feature: Feature,
-            geometry: GeometryType?,
-            countryCode: String?
-        ): Boolean {
-            if (geometry != null && !feature.geometry?.contains(geometry)!!) return false
-            val include: List<String> = feature.includeCountryCodes
-            val exclude: List<String> = feature.excludeCountryCodes
-            if (include.isNotEmpty() || exclude.isNotEmpty()) {
-                if (countryCode == null) return false
-                if (include.isNotEmpty() && !matchesAnyCountryCode(countryCode, include)) return false
-                if (matchesAnyCountryCode(countryCode, exclude)) return false
+            private operator fun get(id: String, locales: List<Locale?>, countryCode: String?): Feature? {
+                return this@FeatureDictionary[id, locales, countryCode]
             }
-            return true
+
+            /**
+             *
+             *Sets the locale(s) in which to present the results.
+             *
+             * You can specify several locales in
+             * a row to each fall back to if a translation does not exist in the locale before that.
+             * For example `[new Locale("ca", "ES"), new Locale("es","ES")]` if you
+             * wanted results preferredly in Catalan, but Spanish is also fine.
+             *
+             *
+             * `null` means to include unlocalized results.
+             *
+             *
+             * If nothing is specified, it defaults to `[Locale.getDefault(), null]`,
+             * i.e. unlocalized results are included by default.
+             */
+            fun forLocale(vararg locales: Locale?): QueryByIdBuilder {
+                this.locale = locales.toList()
+                return this
+            }
+
+            /** the ISO 3166-1 alpha-2 country code (e.g. "US") or the ISO 3166-2 (e.g. "US-NY") of the
+             * country/state the element is in. If not specified, will only return matches that are not
+             * county-specific.  */
+            fun inCountry(countryCode: String?): QueryByIdBuilder {
+                this.countryCode = countryCode
+                return this
+            }
+
+            /** Returns the feature associated with the given id or `null` if it does not
+             * exist  */
+            fun get(): Feature? {
+                return this[id, locale, countryCode]
+            }
         }
 
-        private fun dissectCountryCode(countryCode: String?): List<String?> {
-            val result: MutableList<String?> = ArrayList()
-            // add default / international
-            result.add(null)
-            countryCode?.let {
-                val matcher = VALID_COUNTRY_CODE_REGEX.find(it)
-                if (matcher?.groups?.isNotEmpty() == true) {
-                    // add ISO 3166-1 alpha2 (e.g. "US")
-                    result.add(matcher.groups[1].toString())
-                    if (matcher.groups.size == 2 && matcher.groups[2] != null) {
-                        // add ISO 3166-2 (e.g. "US-NY")
-                        result.add(it)
+        inner class QueryByTagBuilder(private val tags: Map<String, String>) {
+            private var geometryType: GeometryType? = null
+            private var locale: List<Locale?> = listOf(default)
+            private var suggestion: Boolean? = null
+            private var countryCode: String? = null
+
+            /** Sets for which geometry type to look. If not set or `null`, any will match.  */
+            fun forGeometry(geometryType: GeometryType?): QueryByTagBuilder {
+                this.geometryType = geometryType
+                return this
+            }
+
+            /**
+             *
+             *Sets the locale(s) in which to present the results.
+             *
+             * You can specify several locales in
+             * a row to each fall back to if a translation does not exist in the locale before that.
+             * For example `[new Locale("ca", "ES"), new Locale("es","ES")]` if you
+             * wanted results preferredly in Catalan, but Spanish is also fine.
+             *
+             *
+             * `null` means to include unlocalized results.
+             *
+             *
+             * If nothing is specified, it defaults to `[Locale.getDefault(), null]`,
+             * i.e. unlocalized results are included by default.
+             */
+            fun forLocale(vararg locales: Locale?): QueryByTagBuilder {
+                this.locale = locales.toList()
+                return this
+            }
+
+            /** the ISO 3166-1 alpha-2 country code (e.g. "US") or the ISO 3166-2 (e.g. "US-NY") of the
+             * country/state the element is in. If not specified, will only return matches that are not
+             * county-specific.  */
+            fun inCountry(countryCode: String?): QueryByTagBuilder {
+                this.countryCode = countryCode
+                return this
+            }
+
+            /** Set whether to only include suggestions (=true) or to not include suggestions (=false).
+             * Suggestions are brands, like 7-Eleven.  */
+            fun isSuggestion(suggestion: Boolean?): QueryByTagBuilder {
+                this.suggestion = suggestion
+                return this
+            }
+
+            /** Returns a list of dictionary entries that match or an empty list if nothing is
+             * found. <br></br>In rare cases, a set of tags may match multiple primary features, such as for
+             * tag combinations like `shop=deli` + `amenity=cafe`, so, this is why
+             * it is a list.  */
+            fun find(): List<Feature> {
+                return get(tags, geometryType, countryCode, suggestion, locale)
+            }
+        }
+
+        inner class QueryByTermBuilder(private val term: String) {
+            private var geometryType: GeometryType? = null
+            private var locale: List<Locale?> = listOf(default)
+            private var suggestion: Boolean? = null
+            private var limit = 50
+            private var countryCode: String? = null
+
+            /** Sets for which geometry type to look. If not set or `null`, any will match.  */
+            fun forGeometry(geometryType: GeometryType?): QueryByTermBuilder {
+                this.geometryType = geometryType
+                return this
+            }
+
+            /**
+             *
+             *Sets the locale(s) in which to present the results.
+             *
+             * You can specify several locales in
+             * a row to each fall back to if a translation does not exist in the locale before that.
+             * For example `[new Locale("ca", "ES"), new Locale("es","ES")]` if you
+             * wanted results preferredly in Catalan, but Spanish is also fine.
+             *
+             *
+             * `null` means to include unlocalized results.
+             *
+             *
+             * If nothing is specified, it defaults to `[Locale.getDefault()]`, i.e.
+             * unlocalized results are excluded by default.
+             */
+            fun forLocale(vararg locales: Locale?): QueryByTermBuilder {
+                this.locale = locales.toList()
+                return this
+            }
+
+            /** the ISO 3166-1 alpha-2 country code (e.g. "US") or the ISO 3166-2 (e.g. "US-NY") of the
+             * country/state the element is in. If not specified, will only return matches that are not
+             * county-specific.  */
+            fun inCountry(countryCode: String?): QueryByTermBuilder {
+                this.countryCode = countryCode
+                return this
+            }
+
+            /** Set whether to only include suggestions (=true) or to not include suggestions (=false).
+             * Suggestions are brands, like 7-Eleven.  */
+            fun isSuggestion(suggestion: Boolean?): QueryByTermBuilder {
+                this.suggestion = suggestion
+                return this
+            }
+
+            /** limit how many results to return at most. Default is 50, -1 for unlimited.  */
+            fun limit(limit: Int): QueryByTermBuilder {
+                this.limit = limit
+                return this
+            }
+
+            /** Returns a list of dictionary entries that match or an empty list if nothing is
+             * found. <br></br>
+             * Results are sorted mainly in this order: Matches with names, with brand names, then
+             * matches with terms (keywords).  */
+            fun find(): List<Feature> {
+                return get(term, geometryType, countryCode, suggestion, limit, locale)
+            }
+        } //endregion
+
+        companion object {
+            private val VALID_COUNTRY_CODE_REGEX = Regex("([A-Z]{2})(?:-([A-Z0-9]{1,3}))?")
+            /** Create a new FeatureDictionary which gets its data from the given directory. Optionally,
+             * a path to brand presets can be specified.  */
+            /** Create a new FeatureDictionary which gets its data from the given directory.  */
+            @JvmOverloads
+            fun create(presetsBasePath: String, brandPresetsBasePath: String? = null): FeatureDictionary {
+                val featureCollection: LocalizedFeatureCollection =
+                    IDLocalizedFeatureCollection(FileSystemAccess(presetsBasePath))
+                val brandsFeatureCollection: PerCountryFeatureCollection? =
+                    if (brandPresetsBasePath != null) IDBrandPresetsFeatureCollection(
+                        FileSystemAccess(brandPresetsBasePath)
+                    ) else null
+                return FeatureDictionary(featureCollection, brandsFeatureCollection)
+            }
+
+            //endregion
+            //region Utility / Filter functions
+            private fun getParentCategoryIds(id: String): Collection<String> {
+                var id: String? = id
+                val result: MutableList<String> = ArrayList()
+                do {
+                    id = getParentId(id)
+                    if (id != null) result.add(id)
+                } while (id != null)
+                return result
+            }
+
+            private fun getParentId(id: String?): String? {
+                val lastSlashIndex = id!!.lastIndexOf("/")
+                return if (lastSlashIndex == -1) null else id.substring(0, lastSlashIndex)
+            }
+
+            private fun isFeatureMatchingParameters(
+                feature: Feature,
+                geometry: GeometryType?,
+                countryCode: String?
+            ): Boolean {
+                if (geometry != null && !feature.geometry?.contains(geometry)!!) return false
+                val include: List<String> = feature.includeCountryCodes
+                val exclude: List<String> = feature.excludeCountryCodes
+                if (include.isNotEmpty() || exclude.isNotEmpty()) {
+                    if (countryCode == null) return false
+                    if (include.isNotEmpty() && !matchesAnyCountryCode(countryCode, include)) return false
+                    if (matchesAnyCountryCode(countryCode, exclude)) return false
+                }
+                return true
+            }
+
+            private fun dissectCountryCode(countryCode: String?): List<String?> {
+                val result: MutableList<String?> = ArrayList()
+                // add default / international
+                result.add(null)
+                countryCode?.let {
+                    val matcher = VALID_COUNTRY_CODE_REGEX.find(it)
+                    if (matcher?.groups?.isNotEmpty() == true) {
+                        // add ISO 3166-1 alpha2 (e.g. "US")
+                        if (matcher.groups[2] != null) {
+                            // add ISO 3166-2 (e.g. "US-NY")
+                            result.add(countryCode)
+                        }
+                        result.add(matcher.groups[1]?.value)
+
                     }
                 }
+                return result
             }
-            return result
-        }
 
-        private fun matchesAnyCountryCode(showOnly: String, featureCountryCodes: List<String>): Boolean {
-            for (featureCountryCode in featureCountryCodes) {
-                if (matchesCountryCode(showOnly, featureCountryCode)) return true
+            private fun matchesAnyCountryCode(showOnly: String, featureCountryCodes: List<String>): Boolean {
+                return featureCountryCodes.any { matchesCountryCode(showOnly, it) }
             }
-            return false
-        }
 
-        private fun matchesCountryCode(showOnly: String, featureCountryCode: String): Boolean {
-            return showOnly == featureCountryCode || showOnly.substring(0, 2) == featureCountryCode
+            private fun matchesCountryCode(showOnly: String, featureCountryCode: String): Boolean {
+                return showOnly == featureCountryCode || showOnly.substring(0, 2) == featureCountryCode
+            }
         }
     }
-}
+
+

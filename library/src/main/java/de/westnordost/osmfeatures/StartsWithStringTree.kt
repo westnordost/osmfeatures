@@ -1,122 +1,105 @@
-package de.westnordost.osmfeatures;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+package de.westnordost.osmfeatures
 
 /** Index that makes finding strings that start with characters very efficient.
- *  It sorts the strings into a tree structure with configurable depth.
+ * It sorts the strings into a tree structure with configurable depth.
  *
- *  It is threadsafe because it is immutable.
+ * It is threadsafe because it is immutable.
  *
- *  For the strings ["f", "foobar", "foo", "fu", "funicular"], the tree may internally look f.e.
- *  like this:
- *  <pre>
- *  f ->
- *    [ "f" ]
- *    o ->
- *      o ->
- *        [ "foobar", "foo", ...]
- *    u ->
- *      [ "fu", "funicular", ... ]
- *  </pre>*/
-class StartsWithStringTree
-{
-    private final Node root;
-
-    public StartsWithStringTree(Collection<String> strings)
-    {
-        this(strings, 16, 16);
-    }
+ * For the strings ["f", "foobar", "foo", "fu", "funicular"], the tree may internally look f.e.
+ * like this:
+ * <pre>
+ * f ->
+ * [ "f" ]
+ * o ->
+ * o ->
+ * [ "foobar", "foo", ...]
+ * u ->
+ * [ "fu", "funicular", ... ]
+</pre> */
+internal class StartsWithStringTree
+@JvmOverloads constructor(strings: Collection<String>, maxDepth: Int = 16, minContainerSize: Int = 16) {
+    private val root: Node
 
     /** Create this index with the given strings.
      *
-     *  The generated tree will have a max depth of maxDepth and another depth is not added to the
-     *  tree if there are less than minContainerSize strings in one tree node.
+     * The generated tree will have a max depth of maxDepth and another depth is not added to the
+     * tree if there are less than minContainerSize strings in one tree node.
      */
-    public StartsWithStringTree(Collection<String> strings, int maxDepth, int minContainerSize)
-    {
-        if (maxDepth < 0) maxDepth = 0;
-        if (minContainerSize < 1) minContainerSize = 1;
-        root = buildTree(strings, 0, maxDepth, minContainerSize);
+    init {
+        var maxDepth = maxDepth
+        var minContainerSize = minContainerSize
+        if (maxDepth < 0) maxDepth = 0
+        if (minContainerSize < 1) minContainerSize = 1
+        root = buildTree(strings, 0, maxDepth, minContainerSize)
     }
 
-    /** Get all strings which start with the given string */
-    public List<String> getAll(String startsWith)
-    {
-        return root.getAll(startsWith, 0);
+    /** Get all strings which start with the given string  */
+    fun getAll(startsWith: String?): List<String> {
+        return root.getAll(startsWith, 0)
     }
 
-    private static Node buildTree(Collection<String> strings, int currentDepth, int maxDepth, int minContainerSize)
-    {
-        if (currentDepth == maxDepth || strings.size() < minContainerSize)
-            return new Node(null, strings);
+    private class Node(val children: Map<Char, Node>?, val strings: Collection<String>) {
 
-        Map<Character, Collection<String>> stringsByCharacter = getStringsByCharacter(strings, currentDepth);
-        HashMap<Character, Node> children = new HashMap<>(stringsByCharacter.size());
+        /** Get all strings that start with the given string  */
+        fun getAll(startsWith: String?, offset: Int): List<String> {
+            if (startsWith != null) {
+                if (startsWith.isEmpty()) return emptyList()
+            }
 
-        for (Map.Entry<Character, Collection<String>> entry : stringsByCharacter.entrySet()) {
-            Character c = entry.getKey();
-            if (c == null) continue;
-            Node child = buildTree(entry.getValue(), currentDepth + 1, maxDepth, minContainerSize);
-            children.put(c, child);
-        }
-        Collection<String> remainingStrings = stringsByCharacter.get(null);
-        if (children.isEmpty()) children = null;
-        return new Node(children, remainingStrings);
-    }
-
-    /** returns the given strings grouped by their nth character. Strings whose length is shorter
-     *  or equal to nth go into the "null" group. */
-    private static Map<Character, Collection<String>> getStringsByCharacter(Collection<String> strings, int nth)
-    {
-        HashMap<Character, Collection<String>> result = new HashMap<>();
-        for (String string : strings) {
-            Character c = string.length() > nth ? string.charAt(nth) : null;
-            if (!result.containsKey(c)) result.put(c, new ArrayList<>());
-            result.get(c).add(string);
-        }
-        return result;
-    }
-
-    private static class Node
-    {
-        final Map<Character, Node> children;
-        final Collection<String> strings;
-
-        private Node(Map<Character, Node> children, Collection<String> strings)
-        {
-            this.children = children;
-            this.strings = strings;
-        }
-
-        /** Get all strings that start with the given string */
-        private List<String> getAll(String startsWith, int offset)
-        {
-            if (startsWith.isEmpty()) return Collections.emptyList();
-
-            List<String> result = new ArrayList<>();
-            if (children != null)
-            {
-                for (Map.Entry<Character, Node> charToNode : children.entrySet())
-                {
-                    if (startsWith.length() <= offset || charToNode.getKey() == startsWith.charAt(offset))
-                    {
-                        result.addAll(charToNode.getValue().getAll(startsWith, offset + 1));
+            val result: MutableList<String> = ArrayList()
+            if (children != null) {
+                for ((key, value) in children) {
+                    if (startsWith != null) {
+                        if (startsWith.length <= offset || key == startsWith[offset]) {
+                            result.addAll(value.getAll(startsWith, offset + 1))
+                        }
                     }
                 }
             }
-            if (strings != null)
-            {
-                for (String string : strings)
-                {
-                    if (string.startsWith(startsWith)) result.add(string);
-                }
+            for (string in strings) {
+                if (startsWith?.let { string.startsWith(it) } == true) result.add(string)
             }
-            return result;
+            return result
+        }
+    }
+
+    companion object {
+        private fun buildTree(
+            strings: Collection<String>,
+            currentDepth: Int,
+            maxDepth: Int,
+            minContainerSize: Int
+        ): Node {
+            if (currentDepth == maxDepth || strings.size < minContainerSize) return Node(null, strings)
+
+            val stringsByCharacter = getStringsByCharacter(strings, currentDepth)
+            var children: HashMap<Char, Node>? = HashMap(stringsByCharacter.size)
+
+            for ((key, value) in stringsByCharacter) {
+                val c = key ?: continue
+                val child = buildTree(value, currentDepth + 1, maxDepth, minContainerSize)
+                children?.set(c, child)
+            }
+            val remainingStrings: Collection<String> = stringsByCharacter[null].orEmpty()
+            if (children != null) {
+                if (children.isEmpty()) children = null
+            }
+            return Node(children, remainingStrings)
+        }
+
+        /** returns the given strings grouped by their nth character. Strings whose length is shorter
+         * or equal to nth go into the "null" group.  */
+        private fun getStringsByCharacter(
+            strings: Collection<String>,
+            nth: Int
+        ): Map<Char?, Collection<String>> {
+            val result = HashMap<Char?, MutableCollection<String>>()
+            for (string in strings) {
+                val c = if (string.length > nth) string[nth] else null
+                if (!result.containsKey(c)) result[c] = ArrayList()
+                result[c]?.add(string)
+            }
+            return result
         }
     }
 }

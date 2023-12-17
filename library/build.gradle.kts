@@ -17,6 +17,7 @@ dependencies {
     implementation("io.fluidsonic.locale:fluid-locale:0.13.0")
     implementation("com.squareup.okio:okio:3.6.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    implementation("com.doist.x:normalize:1.0.5")
 }
 
 tasks {

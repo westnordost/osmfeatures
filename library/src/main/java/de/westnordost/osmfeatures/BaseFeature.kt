@@ -5,9 +5,9 @@ open class BaseFeature(
         override val id: String,
         override val tags: Map<String, String>,
         final override var geometry: List<GeometryType>,
-        final override val icon: String?,
-        final override val imageURL: String?,
-        final override val names: List<String>,
+        private val _icon: String? = "",
+        private val _imageURL: String? = "",
+        private val _names: List<String>,
         final override val terms: List<String>?,
         final override val includeCountryCodes: List<String>,
         final override val excludeCountryCodes: List<String>,
@@ -25,6 +25,15 @@ open class BaseFeature(
                         this.canonicalTerms = terms.map { term -> StringUtils.canonicalize(term)}
                 }
         }
+
+        override val icon: String
+                get() = _icon ?: ""
+
+        override val imageURL: String
+                get() = _imageURL ?: ""
+
+        final override val names: List<String>
+                get() = _names.ifEmpty { listOf("") }
 
         override val name: String
                 get() = names[0]
