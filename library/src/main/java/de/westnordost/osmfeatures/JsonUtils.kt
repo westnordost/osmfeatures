@@ -17,7 +17,7 @@ internal object JsonUtils {
     @JvmStatic
     fun parseStringMap(map: JsonObject?): Map<String, String> {
         if (map == null) return HashMap(1)
-        return map.map { (key, value) -> key.intern() to value.jsonPrimitive.toString()}.toMap().toMutableMap()
+        return map.map { (key, value) -> key.intern() to value.jsonPrimitive.content}.toMap().toMutableMap()
     }
 
     // this is only necessary because Android uses some old version of org.json where

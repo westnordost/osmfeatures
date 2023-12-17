@@ -86,6 +86,17 @@ class Locale(
 
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (other == null) {
+            return false
+        }
+        if (other is Locale) {
+            return other.language == this.language && other.region == this.region && other.script == this.script
+        }
+        return false
+
+    }
+
 
     class Builder {
         private var language: String? = null

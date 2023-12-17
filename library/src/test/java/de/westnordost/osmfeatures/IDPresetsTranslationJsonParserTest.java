@@ -1,6 +1,8 @@
 package de.westnordost.osmfeatures;
 
+import okio.FileSystem;
 import okio.Okio;
+import okio.Path;
 import okio.Source;
 import org.junit.Test;
 
@@ -103,7 +105,7 @@ public class IDPresetsTranslationJsonParserTest {
         }
     }
 
-    private Source getSource(String file) throws FileNotFoundException {
-        return Okio.source(new File(file));
+    private Source getSource(String file) throws IOException {
+        return FileSystem.SYSTEM.source(Path.get(getClass().getClassLoader().getResource(file).getFile()));
     }
 }

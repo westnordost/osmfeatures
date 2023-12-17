@@ -52,16 +52,16 @@ class IDPresetsTranslationJsonParser {
     private fun parseFeature(feature: BaseFeature?, locale: Locale, localization: JsonObject): LocalizedFeature? {
         if (feature == null) return null
 
-        val name = localization["name"]?.jsonPrimitive.toString()
-        if (name.isEmpty()) return null
+        val name = localization["name"]?.jsonPrimitive?.content
+        if (name.isNullOrEmpty()) return null
 
-        val namesArray = parseNewlineSeparatedList(localization["aliases"]?.jsonPrimitive.toString())
+        val namesArray = parseNewlineSeparatedList(localization["aliases"]?.jsonPrimitive?.content)
         val names: MutableList<String> = ArrayList(namesArray.size + 1)
         names.addAll(namesArray)
         names.remove(name)
         names.add(0, name)
 
-        val termsArray = parseCommaSeparatedList(localization["terms"]?.jsonPrimitive.toString())
+        val termsArray = parseCommaSeparatedList(localization["terms"]?.jsonPrimitive?.content)
         val terms: MutableList<String> = ArrayList(termsArray.size)
         terms.addAll(termsArray)
         terms.removeAll(names)

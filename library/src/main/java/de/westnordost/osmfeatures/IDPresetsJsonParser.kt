@@ -42,12 +42,14 @@ class IDPresetsJsonParser {
             JsonUtils.Transformer { item -> GeometryType.valueOf(((item as JsonPrimitive).content).uppercase())
             })
 
-        val name = p["name"]?.jsonPrimitive.toString()
-        val icon = p["icon"]?.jsonPrimitive.toString()
-        val imageURL = p["imageURL"]?.jsonPrimitive.toString()
+        val name = p["name"]?.jsonPrimitive?.content
+        val icon = p["icon"]?.jsonPrimitive?.content
+        val imageURL = p["imageURL"]?.jsonPrimitive?.content
         val names = parseList(p["aliases"]?.jsonArray,
             JsonUtils.Transformer { item -> item as String }).toMutableList()
-        names.add(0, name)
+        if(name != null) {
+            names.add(0, name)
+        }
         val terms = parseList(p["terms"]?.jsonArray,
             JsonUtils.Transformer { item: Any? -> item as String })
 

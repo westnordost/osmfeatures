@@ -1,14 +1,5 @@
 package de.westnordost.osmfeatures
 
-import okio.BufferedSource
-import okio.FileSystem
-import okio.Okio
-import okio.Path
-import okio.Path.Companion.toPath
-import org.json.JSONException
-import java.io.IOException
-
-
 /** Localized feature collection sourcing from iD presets defined in JSON.
  *
  * The base path is defined via the given FileAccessAdapter. In the base path, it is expected that
@@ -28,8 +19,13 @@ class IDLocalizedFeatureCollection(private val fileAccess: FileAccessAdapter) : 
     }
 
     private fun loadFeatures(): List<BaseFeature> {
-        fileAccess.open(FEATURES_FILE).use { fileHandle ->
-            return IDPresetsJsonParser().parse(fileHandle)
+        try {
+            val source = fileAccess.open(FEATURES_FILE)
+            return IDPresetsJsonParser().parse(source)
+        }
+        catch (e: Exception)
+        {
+            throw RuntimeException(e);
         }
     }
     private fun getOrLoadLocalizedFeatures(locales: List<Locale?>): LinkedHashMap<String, Feature> {
@@ -72,9 +68,8 @@ class IDLocalizedFeatureCollection(private val fileAccess: FileAccessAdapter) : 
         val filename = getLocalizationFilename(locale)
         if (!fileAccess.exists(filename)) return emptyList()
 
-        FileSystem.SYSTEM.
-        openReadOnly(filename.toPath()).use { fileHandle ->
-            return IDPresetsTranslationJsonParser().parse(fileHandle.source(), locale, featuresById.toMap())
+        fileAccess.open(filename).use { source ->
+            return IDPresetsTranslationJsonParser().parse(source, locale, featuresById.toMap())
         }
     }
 
@@ -88,7 +83,7 @@ class IDLocalizedFeatureCollection(private val fileAccess: FileAccessAdapter) : 
 
     companion object {
         private const val FEATURES_FILE = "presets.json"
-        private fun getLocalizationFilename(locale: Locale): String {
+        private fun     getLocalizationFilename(locale: Locale): String {
             /* we only want language+country+script of the locale, not anything else. So we construct
 		   it anew here */
             return Locale.Builder()
