@@ -32,8 +32,8 @@ public class TestPerCountryFeatureCollection implements PerCountryFeatureCollect
 	public Feature get(String id, List<String> countryCodes) {
 		for (Feature feature : features) {
 			if (!feature.getId().equals(id)) continue;
+			List<String> includeCountryCodes = feature.getIncludeCountryCodes();
 			for (String countryCode : countryCodes) {
-				List<String> includeCountryCodes = feature.getIncludeCountryCodes();
 				if (includeCountryCodes.contains(countryCode) || countryCode == null && includeCountryCodes.isEmpty()) {
 					return feature;
 				}

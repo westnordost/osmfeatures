@@ -7,8 +7,8 @@ package de.westnordost.osmfeatures
  * located in the same directory named like e.g. de.json, pt-BR.json etc.  */
 class IDLocalizedFeatureCollection(private val fileAccess: FileAccessAdapter) : LocalizedFeatureCollection {
     private val featuresById: LinkedHashMap<String, BaseFeature>
-    private val localizedFeaturesList: Map<Locale, List<LocalizedFeature>> = HashMap()
-    private val localizedFeatures: Map<List<Locale?>, LinkedHashMap<String, Feature>> = HashMap()
+    private val localizedFeaturesList: MutableMap<Locale?, List<LocalizedFeature>> = HashMap()
+    private val localizedFeatures: MutableMap<List<Locale?>?, LinkedHashMap<String, Feature>> = HashMap()
 
     init {
         val features = loadFeatures()
@@ -25,17 +25,11 @@ class IDLocalizedFeatureCollection(private val fileAccess: FileAccessAdapter) : 
         }
         catch (e: Exception)
         {
-            throw RuntimeException(e);
+            throw RuntimeException(e)
         }
     }
-    private fun getOrLoadLocalizedFeatures(locales: List<Locale?>): LinkedHashMap<String, Feature> {
-        return CollectionUtils.synchronizedGetOrCreate(
-            localizedFeatures, locales
-        ) { locales ->
-            loadLocalizedFeatures(
-                locales
-            )
-        }
+    private fun getOrLoadLocalizedFeatures(locales: List<Locale?>): LinkedHashMap<String, Feature>? {
+        return CollectionUtils.synchronizedGetOrCreate(localizedFeatures, locales, ::loadLocalizedFeatures)
     }
 
     private fun loadLocalizedFeatures(locales: List<Locale?>): LinkedHashMap<String, Feature> {
@@ -45,7 +39,7 @@ class IDLocalizedFeatureCollection(private val fileAccess: FileAccessAdapter) : 
             val locale = it.previous()
             if (locale != null) {
                 for (localeComponent in getLocaleComponents(locale)) {
-                    putAllFeatures(result, getOrLoadLocalizedFeaturesList(localeComponent))
+                    getOrLoadLocalizedFeaturesList(localeComponent)?.let { it1 -> putAllFeatures(result, it1) }
                 }
             } else {
                 putAllFeatures(result, featuresById.values)
@@ -54,17 +48,17 @@ class IDLocalizedFeatureCollection(private val fileAccess: FileAccessAdapter) : 
         return result
     }
 
-    private fun getOrLoadLocalizedFeaturesList(locale: Locale): List<LocalizedFeature> {
+    private fun getOrLoadLocalizedFeaturesList(locale: Locale): List<LocalizedFeature>? {
         return CollectionUtils.synchronizedGetOrCreate(
             localizedFeaturesList, locale
-        ) { locale: Locale ->
+        ) { locale: Locale? ->
             loadLocalizedFeaturesList(
                 locale
             )
         }
     }
 
-    private fun loadLocalizedFeaturesList(locale: Locale): List<LocalizedFeature> {
+    private fun loadLocalizedFeaturesList(locale: Locale?): List<LocalizedFeature> {
         val filename = getLocalizationFilename(locale)
         if (!fileAccess.exists(filename)) return emptyList()
 
@@ -74,34 +68,34 @@ class IDLocalizedFeatureCollection(private val fileAccess: FileAccessAdapter) : 
     }
 
     override fun getAll(locales: List<Locale?>): Collection<Feature> {
-        return getOrLoadLocalizedFeatures(locales).values;
+        return getOrLoadLocalizedFeatures(locales)?.values ?: emptyList()
     }
 
     override operator fun get(id: String, locales: List<Locale?>): Feature? {
-        return getOrLoadLocalizedFeatures(locales)[id];
+        return getOrLoadLocalizedFeatures(locales)?.get(id)
     }
 
     companion object {
         private const val FEATURES_FILE = "presets.json"
-        private fun     getLocalizationFilename(locale: Locale): String {
+        private fun getLocalizationFilename(locale: Locale?): String {
             /* we only want language+country+script of the locale, not anything else. So we construct
 		   it anew here */
             return Locale.Builder()
-                .setLanguage(locale.language)
-                .setRegion(locale.country)
-                .setScript(locale.script)
+                .setLanguage(locale?.language ?: "")
+                .setRegion(locale?.country ?: "")
+                .setScript(locale?.script ?: "")
                 .build()
-                .toLanguageTag() + ".json"
+                .languageTag + ".json"
         }
 
-        private fun getLocaleComponents(locale: Locale): List<Locale> {
-            val lang = locale.language
-            val country = locale.country
-            val script = locale.script
+        private fun getLocaleComponents(locale: Locale?): List<Locale> {
+            val lang = locale?.language ?: ""
+            val country = locale?.country ?: ""
+            val script = locale?.script ?: ""
             val result: MutableList<Locale> = ArrayList(4)
             result.add(Locale(lang))
             if (country.isNotEmpty()) result.add(Locale.Builder().setLanguage(lang).setRegion(country).build())
-            if (script!!.isNotEmpty()) result.add(Locale.Builder().setLanguage(lang).setScript(script).build())
+            if (script.isNotEmpty()) result.add(Locale.Builder().setLanguage(lang).setScript(script).build())
             if (country.isNotEmpty() && script.isNotEmpty()) result.add(
                 Locale.Builder().setLanguage(lang).setRegion(country).setScript(script).build()
             )

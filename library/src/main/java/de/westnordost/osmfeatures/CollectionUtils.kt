@@ -1,69 +1,46 @@
-package de.westnordost.osmfeatures;
+package de.westnordost.osmfeatures
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
-
-class CollectionUtils {
-
-    public interface CreateFn<K,V> { V create(K value); }
-
+object CollectionUtils {
     /** For the given map, get the value of the entry at the given key and if there is no
-     *  entry yet, create it using the given create function thread-safely */
-    public static <K,V> V synchronizedGetOrCreate(Map<K,V> map, K key, CreateFn<K,V> createFn)
-    {
-        synchronized(map)
-        {
-            if (!map.containsKey(key))
-            {
-                map.put(key, createFn.create(key));
+     * entry yet, create it using the given create function thread-safely  */
+    fun <K, V> synchronizedGetOrCreate(map: MutableMap<K?, V>, key: K, createFn: (K) -> V): V? {
+        synchronized(map) {
+            if (!map.containsKey(key)) {
+                map[key] = createFn(key)
             }
         }
-        return map.get(key);
+        return map[key]
     }
 
-    /** Whether the given map contains all the given entries */
-    public static <K,V> boolean mapContainsAllEntries(Map<K,V> map, Iterable<Map.Entry<K,V>> entries)
-    {
-        for (Map.Entry<K, V> entry : entries)
-        {
-            if(!mapContainsEntry(map, entry)) return false;
+    @JvmStatic
+    /** Whether the given map contains all the given entries  */
+    fun <K, V> mapContainsAllEntries(map: Map<K, V>, entries: Iterable<Map.Entry<K, V>>): Boolean {
+        for (entry in entries) {
+            if (!mapContainsEntry(map, entry)) return false
         }
-        return true;
+        return true
     }
 
-    /** Number of entries contained in the given map */
-    public static <K,V> int numberOfContainedEntriesInMap(Map<K,V> map, Iterable<Map.Entry<K,V>> entries)
-    {
-        int found = 0;
-        for (Map.Entry<K, V> entry : entries)
-        {
-            if(mapContainsEntry(map, entry)) found++;
+    @JvmStatic
+    /** Number of entries contained in the given map  */
+    fun <K, V> numberOfContainedEntriesInMap(map: Map<K, V>, entries: Iterable<Map.Entry<K, V>>): Int {
+        var found = 0
+        for (entry in entries) {
+            if (mapContainsEntry(map, entry)) found++
         }
-        return found;
+        return found
     }
 
-    /** Whether the given map contains the given entry */
-    public static <K,V> boolean mapContainsEntry(Map<K,V> map, Map.Entry<K,V> entry)
-    {
-        V mapValue = map.get(entry.getKey());
-        V value = entry.getValue();
-        return Objects.equals(value, mapValue);
+    @JvmStatic
+    /** Whether the given map contains the given entry  */
+    fun <K, V> mapContainsEntry(map: Map<K, V>, entry: Map.Entry<K, V>): Boolean {
+        val mapValue = map[entry.key]
+        val value = entry.value
+        return value == mapValue
     }
 
-    public interface Predicate<T> { boolean fn(T v); }
-
-    /** Backport of Collection.removeIf */
-    public static <T> void removeIf(Collection<T> list, Predicate<T> predicate)
-    {
-        list.removeIf(predicate::fn);
-    }
-
-    public static <T> T find(Collection<T> list, Predicate<T> predicate)
-    {
-        for (T item : list) {
-            if (predicate.fn(item)) return item;
-        }
-        return null;
+    /** Backport of Collection.removeIf  */
+    fun <T> removeIf(list: MutableList<T>, predicate: (T) -> Boolean) {
+        list.removeIf(predicate)
     }
 }
