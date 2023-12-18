@@ -281,7 +281,6 @@ class FeatureDictionary internal constructor(
                 if (!feature.isSearchable) return@Selector emptyList<String>()
                 val names: List<String> = feature.canonicalNames
                 val result = ArrayList(names)
-                try {
                     for (name in names) {
                         if (name.contains(" ")) {
                             result.addAll(
@@ -289,11 +288,6 @@ class FeatureDictionary internal constructor(
                             )
                         }
                     }
-                }
-                catch (e: Exception) {
-                    println(e)
-                }
-
                 result
             })
         }
@@ -551,12 +545,12 @@ class FeatureDictionary internal constructor(
             //endregion
             //region Utility / Filter functions
             private fun getParentCategoryIds(id: String): Collection<String> {
-                var id: String? = id
+                var currentId: String? = id
                 val result: MutableList<String> = ArrayList()
                 do {
-                    id = getParentId(id)
-                    if (id != null) result.add(id)
-                } while (id != null)
+                    currentId = getParentId(currentId)
+                    if (currentId != null) result.add(currentId)
+                } while (currentId != null)
                 return result
             }
 
@@ -587,15 +581,17 @@ class FeatureDictionary internal constructor(
                 result.add(null)
                 countryCode?.let {
                     val matcher = VALID_COUNTRY_CODE_REGEX.find(it)
-                    if (matcher?.groups?.isNotEmpty() == true) {
+                    if(matcher?.groups?.get(1) != null) {
+                        result.add(matcher.groups[1]?.value)
+
                         // add ISO 3166-1 alpha2 (e.g. "US")
-                        if (matcher.groups[2] != null) {
+                        if (matcher.groups.size != 2 && matcher.groups[2] != null) {
                             // add ISO 3166-2 (e.g. "US-NY")
                             result.add(countryCode)
                         }
-                        result.add(matcher.groups[1]?.value)
-
                     }
+
+
                 }
                 return result
             }
