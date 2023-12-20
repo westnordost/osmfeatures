@@ -1,35 +1,20 @@
-package de.westnordost.osmfeatures;
+package de.westnordost.osmfeatures
 
-import android.content.res.AssetManager;
+import android.content.res.AssetManager
+import java.io.File
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+internal class AssetManagerAccess(assetManager: AssetManager, private val basePath: String) : FileAccessAdapter {
+    private val assetManager: AssetManager = assetManager
 
-class AssetManagerAccess implements FileAccessAdapter
-{
-    private final AssetManager assetManager;
-    private final String basePath;
-
-    AssetManagerAccess(AssetManager assetManager, String basePath)
-    {
-        this.assetManager = assetManager;
-        this.basePath = basePath;
-    }
-
-    @Override public boolean exists(String name) throws IOException
-    {
-        String[] files = assetManager.list(basePath);
-        if(files == null) return false;
-        for (String file : files)
-        {
-            if(file.equals(name)) return true;
+    override fun exists(name: String): Boolean {
+        val files: Array<String> = assetManager.list(basePath) ?: return false
+        for (file in files) {
+            if (file == name) return true
         }
-        return false;
+        return false
     }
 
-    @Override public InputStream open(String name) throws IOException
-    {
-        return assetManager.open(basePath + File.separator + name);
+    override fun open(name: String): okio.Source {
+        return assetManager.open(basePath + File.separator + name)
     }
 }
