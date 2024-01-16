@@ -27,8 +27,7 @@ kotlin {
             dependencies {
                 implementation(libs.kotlin.test)
                 implementation(libs.junit)
-            },
-            resources.sr
+            }
         }
     }
 }
