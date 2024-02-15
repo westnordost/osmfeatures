@@ -2,8 +2,8 @@ package osmfeatures
 
 import de.westnordost.osmfeatures.ContainedMapTree
 import org.junit.Test
-import de.westnordost.osmfeatures.TestUtils.assertEqualsIgnoreOrder
-import de.westnordost.osmfeatures.TestUtils.listOf
+import osmfeatures.TestUtils.assertEqualsIgnoreOrder
+import osmfeatures.TestUtils.listOf
 import osmfeatures.MapEntry.Companion.tag
 import osmfeatures.MapEntry.Companion.mapOf
 import kotlin.test.assertEquals

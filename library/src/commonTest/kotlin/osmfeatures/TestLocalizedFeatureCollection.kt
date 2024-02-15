@@ -1,7 +1,6 @@
 package osmfeatures
 
 import de.westnordost.osmfeatures.Feature
-import de.westnordost.osmfeatures.Locale
 
 
 class TestLocalizedFeatureCollection(features: List<Feature>) : LocalizedFeatureCollection {

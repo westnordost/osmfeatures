@@ -2,18 +2,15 @@ package osmfeatures
 
 import de.westnordost.osmfeatures.Feature
 import de.westnordost.osmfeatures.IDBrandPresetsFeatureCollection
+import okio.FileSystem
+import okio.Path.Companion.toPath
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
-import de.westnordost.osmfeatures.TestUtils.assertEqualsIgnoreOrder
-import de.westnordost.osmfeatures.TestUtils.listOf
-import okio.FileSystem
-import okio.Path
-import okio.Path.Companion.toPath
+import osmfeatures.TestUtils.assertEqualsIgnoreOrder
+import osmfeatures.TestUtils.listOf
 import okio.Source
-import okio.source
 import org.junit.Test
 import java.io.IOException
-import java.util.ArrayList
 
 class IDBrandPresetsFeatureCollectionTest {
     @Test
@@ -61,9 +58,8 @@ class IDBrandPresetsFeatureCollectionTest {
 
     @kotlin.Throws(IOException::class)
     private fun getSource(file: String): Source {
-        val resourceStream = this.javaClass.getResourceAsStream(file)
-            ?: throw IOException("Could not retrieve file $file in resource assets")
-        return resourceStream.source()
+        val resourcePath = "src/commonTest/resources/${file}".toPath()
+        return FileSystem.SYSTEM.source(resourcePath)
     }
 
     companion object {

@@ -1,7 +1,6 @@
 package osmfeatures
 
 import de.westnordost.osmfeatures.Feature
-import de.westnordost.osmfeatures.Locale
 
 /** A localized collection of features  */
 interface LocalizedFeatureCollection {

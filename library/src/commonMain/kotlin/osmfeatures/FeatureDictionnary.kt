@@ -5,8 +5,7 @@ import de.westnordost.osmfeatures.Feature
 import de.westnordost.osmfeatures.GeometryType
 import de.westnordost.osmfeatures.IDBrandPresetsFeatureCollection
 import de.westnordost.osmfeatures.IDLocalizedFeatureCollection
-import de.westnordost.osmfeatures.Locale
-import de.westnordost.osmfeatures.Locale.Companion.default
+import osmfeatures.Locale.Companion.default
 import de.westnordost.osmfeatures.PerCountryFeatureCollection
 import de.westnordost.osmfeatures.StringUtils
 import kotlin.math.min
@@ -432,7 +431,7 @@ class FeatureDictionary internal constructor(
             private var countryCode: String? = null
 
             /** Sets for which geometry type to look. If not set or `null`, any will match.  */
-            fun forGeometry(geometryType: GeometryType?): QueryByTagBuilder {
+            fun forGeometry(geometryType: GeometryType): QueryByTagBuilder {
                 this.geometryType = geometryType
                 return this
             }
@@ -490,7 +489,7 @@ class FeatureDictionary internal constructor(
             private var countryCode: String? = null
 
             /** Sets for which geometry type to look. If not set or `null`, any will match.  */
-            fun forGeometry(geometryType: GeometryType?): QueryByTermBuilder {
+            fun forGeometry(geometryType: GeometryType): QueryByTermBuilder {
                 this.geometryType = geometryType
                 return this
             }
@@ -584,7 +583,7 @@ class FeatureDictionary internal constructor(
                 geometry: GeometryType?,
                 countryCode: String?
             ): Boolean {
-                if (geometry != null && !feature.geometry?.contains(geometry)!!) return false
+                if (geometry != null && !feature.geometry.contains(geometry)) return false
                 val include: List<String> = feature.includeCountryCodes
                 val exclude: List<String> = feature.excludeCountryCodes
                 if (include.isNotEmpty() || exclude.isNotEmpty()) {

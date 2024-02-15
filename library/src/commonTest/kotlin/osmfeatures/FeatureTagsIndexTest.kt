@@ -6,7 +6,7 @@ import de.westnordost.osmfeatures.GeometryType
 import org.junit.Test
 import osmfeatures.MapEntry.Companion.tag
 import osmfeatures.MapEntry.Companion.mapOf
-import de.westnordost.osmfeatures.TestUtils.listOf
+import osmfeatures.TestUtils.listOf
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 

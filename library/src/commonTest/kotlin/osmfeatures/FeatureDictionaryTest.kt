@@ -4,10 +4,9 @@ import de.westnordost.osmfeatures.BaseFeature
 import de.westnordost.osmfeatures.Feature
 import de.westnordost.osmfeatures.GeometryType
 import de.westnordost.osmfeatures.IDLocalizedFeatureCollection
-import de.westnordost.osmfeatures.Locale
 import de.westnordost.osmfeatures.LocalizedFeature
 import org.junit.Test
-import de.westnordost.osmfeatures.TestUtils.assertEqualsIgnoreOrder
+import osmfeatures.TestUtils.assertEqualsIgnoreOrder
 import org.junit.Assert.*
 import osmfeatures.MapEntry.Companion.tag
 import osmfeatures.MapEntry.Companion.mapOf
@@ -406,7 +405,7 @@ class FeatureDictionaryTest {
     fun find_multiple_brands_sorts_by_locale() {
         val tags: Map<String, String> = mapOf(tag("shop", "bakery"), tag("name", "Ditsch"))
         val dictionary: FeatureDictionary = dictionary(ditschRussian, ditschInternational, ditsch)
-        val matches: List<Feature> = dictionary.byTags(tags).forLocale(null as Locale?).find()
+        val matches: List<Feature> = dictionary.byTags(tags).forLocale(null).find()
         assertEquals(ditschInternational, matches[0])
     }
 

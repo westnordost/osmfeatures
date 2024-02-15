@@ -5,6 +5,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import okio.Source
+import osmfeatures.Locale
 
 /** Parses a file from
  * https://github.com/openstreetmap/id-tagging-schema/tree/main/dist/translations

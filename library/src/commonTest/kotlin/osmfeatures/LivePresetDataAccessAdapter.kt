@@ -2,7 +2,7 @@ package osmfeatures
 
 import java.io.IOException
 import java.net.URL
-import de.westnordost.osmfeatures.TestUtils.listOf
+import osmfeatures.TestUtils.listOf
 import okio.source
 
 class LivePresetDataAccessAdapter : FileAccessAdapter {

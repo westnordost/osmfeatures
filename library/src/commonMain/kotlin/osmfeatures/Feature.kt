@@ -1,9 +1,11 @@
 package de.westnordost.osmfeatures
 
+import osmfeatures.Locale
+
 interface Feature {
     val id: String
     val tags: Map<String, String>
-    val geometry: List<GeometryType>?
+    val geometry: List<GeometryType>
     val name: String
     val icon: String?
     val imageURL: String?

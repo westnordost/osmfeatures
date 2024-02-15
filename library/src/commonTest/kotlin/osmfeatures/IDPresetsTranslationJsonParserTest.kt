@@ -5,11 +5,9 @@ import de.westnordost.osmfeatures.Feature
 import de.westnordost.osmfeatures.GeometryType
 import de.westnordost.osmfeatures.IDPresetsJsonParser
 import de.westnordost.osmfeatures.IDPresetsTranslationJsonParser
-import de.westnordost.osmfeatures.Locale
 import de.westnordost.osmfeatures.LocalizedFeature
 import okio.FileSystem
-import okio.Okio
-import okio.Path
+import okio.Path.Companion.toPath
 import okio.Source
 import org.junit.Test
 import java.io.IOException
@@ -17,7 +15,7 @@ import java.net.URISyntaxException
 import java.net.URL
 import osmfeatures.MapEntry.Companion.tag
 import osmfeatures.MapEntry.Companion.mapOf
-import de.westnordost.osmfeatures.TestUtils.listOf
+import osmfeatures.TestUtils.listOf
 import okio.source
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -101,8 +99,7 @@ class IDPresetsTranslationJsonParserTest {
 
     @kotlin.Throws(IOException::class)
     private fun getSource(file: String): Source {
-        val resourceStream = this.javaClass.getResourceAsStream(file)
-            ?: throw IOException("Could not retrieve file $file in resource assets")
-        return resourceStream.source()
+        val resourcePath = "src/commonTest/resources/${file}".toPath()
+        return FileSystem.SYSTEM.source(resourcePath)
     }
 }

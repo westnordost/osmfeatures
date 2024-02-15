@@ -1,11 +1,11 @@
 package de.westnordost.osmfeatures
 
-import okio.Okio
+import okio.FileSystem
 import okio.Source
 import org.junit.Test
 import osmfeatures.MapEntry.Companion.tag
 import osmfeatures.MapEntry.Companion.mapOf
-import de.westnordost.osmfeatures.TestUtils.listOf
+import osmfeatures.TestUtils.listOf
 import okio.IOException
 import okio.Path.Companion.toPath
 import okio.source
@@ -99,8 +99,7 @@ class IDPresetsJsonParserTest {
 
     @kotlin.Throws(IOException::class)
     private fun getSource(file: String): Source {
-        val resourceStream = this.javaClass.getResourceAsStream(file)
-            ?: throw IOException("Could not retrieve file $file in resource assets")
-        return resourceStream.source()
+        val resourcePath = "src/commonTest/resources/${file}".toPath()
+        return FileSystem.SYSTEM.source(resourcePath)
     }
 }

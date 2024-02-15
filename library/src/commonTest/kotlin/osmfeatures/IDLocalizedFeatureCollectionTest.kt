@@ -2,12 +2,11 @@ package osmfeatures
 
 import de.westnordost.osmfeatures.Feature
 import de.westnordost.osmfeatures.IDLocalizedFeatureCollection
-import de.westnordost.osmfeatures.Locale
 import okio.FileSystem
 import okio.Source
 import org.junit.Test
-import de.westnordost.osmfeatures.TestUtils.assertEqualsIgnoreOrder
-import de.westnordost.osmfeatures.TestUtils.listOf
+import osmfeatures.TestUtils.assertEqualsIgnoreOrder
+import osmfeatures.TestUtils.listOf
 import okio.FileNotFoundException
 import okio.IOException
 import okio.Path.Companion.toPath
@@ -144,9 +143,8 @@ class IDLocalizedFeatureCollectionTest {
 
     @kotlin.Throws(IOException::class)
     private fun getSource(file: String): Source {
-        return FileSystem.SYSTEM.source(
-            file.toPath()
-        )
+        val resourcePath = "src/commonTest/resources/${file}".toPath()
+        return FileSystem.SYSTEM.source(resourcePath)
     }
 
     companion object {

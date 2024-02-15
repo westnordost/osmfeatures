@@ -1,5 +1,7 @@
 package de.westnordost.osmfeatures
 
+import osmfeatures.Locale
+
 /** Data class associated with the Feature interface. Represents a non-localized feature.  */
 open class BaseFeature(
         override val id: String,

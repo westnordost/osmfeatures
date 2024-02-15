@@ -1,8 +1,8 @@
-package de.westnordost.osmfeatures
+package osmfeatures
 
 import io.fluidsonic.locale.LanguageTag
 
-class Locale(
+data class Locale(
 
     val language: String,
     private val region: String?,
@@ -56,6 +56,14 @@ class Locale(
         }
         return false
 
+    }
+
+    override fun hashCode(): Int {
+        var result = language.hashCode()
+        result = 31 * result + (region?.hashCode() ?: 0)
+        result = 31 * result + (script?.hashCode() ?: 0)
+        result = 31 * result + country.hashCode()
+        return result
     }
 
 

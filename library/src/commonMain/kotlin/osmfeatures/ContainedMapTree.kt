@@ -1,7 +1,6 @@
 package de.westnordost.osmfeatures
 
 import de.westnordost.osmfeatures.CollectionUtils.mapContainsAllEntries
-import java.util.*
 
 /** Index that makes finding which maps are completely contained by a given map very efficient.
  * It sorts the maps into a tree structure with configurable depth.
@@ -101,14 +100,13 @@ internal class ContainedMapTree<K, V>
             val mapsByKey = getMapsByKey(maps, previousKeys)
 
             /* the map should be categorized by frequent keys first and least frequent keys last. */
-            val sortedByCountDesc: List<Map.Entry<K, MutableList<Map<K, V>>>> = ArrayList(mapsByKey.entries)
-            Collections.sort(sortedByCountDesc) { a: Map.Entry<K, MutableList<Map<K, V>>>, b: Map.Entry<K, MutableList<Map<K, V>>> -> b.value.size - a.value.size }
+            val sortedByCountDesc: List<Map.Entry<K, List<Map<K, V>>>> = ArrayList(mapsByKey.entries).sortedByDescending { it.value.size }
 
             val result = HashMap<K, Map<V, Node<K, V>>>(mapsByKey.size)
 
             for ((key, mapsForKey) in sortedByCountDesc) {
                 // a map already sorted in a certain node should not be sorted into another too
-                mapsForKey.retainAll(unsortedMaps)
+                (mapsForKey as MutableList).retainAll(unsortedMaps)
                 if (mapsForKey.isEmpty()) continue
 
                 val featuresByValue: Map<V, MutableList<Map<K, V>>> = getMapsByKeyValue(key, mapsForKey)
@@ -150,10 +148,9 @@ internal class ContainedMapTree<K, V>
         ): Map<K, MutableList<Map<K, V>>> {
             val result = HashMap<K, MutableList<Map<K, V>>>()
             for (map in maps) {
-                for (key in map.keys) {
-                    if (excludeKeys.contains(key)) continue
+                for (key in map.keys.filter { !excludeKeys.contains(it) }) {
                     if (!result.containsKey(key)) result[key] = ArrayList()
-                    result[key]!!.add(map)
+                    result[key]?.add(map)
                 }
             }
             return result

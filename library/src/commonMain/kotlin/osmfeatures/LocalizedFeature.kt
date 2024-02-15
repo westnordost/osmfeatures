@@ -1,4 +1,7 @@
 package de.westnordost.osmfeatures
+
+import osmfeatures.Locale
+
 /** Data class associated with the Feature interface. Represents a localized feature.
  *
  * I.e. the name and terms are specified in the given locale.  */

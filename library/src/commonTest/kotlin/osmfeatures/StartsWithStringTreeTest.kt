@@ -1,8 +1,8 @@
 package de.westnordost.osmfeatures
 
 import org.junit.Test
-import de.westnordost.osmfeatures.TestUtils.assertEqualsIgnoreOrder
-import de.westnordost.osmfeatures.TestUtils.listOf
+import osmfeatures.TestUtils.assertEqualsIgnoreOrder
+import osmfeatures.TestUtils.listOf
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 

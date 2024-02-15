@@ -1,6 +1,7 @@
 package de.westnordost.osmfeatures
 
 import osmfeatures.FileAccessAdapter
+import osmfeatures.Locale
 import osmfeatures.LocalizedFeatureCollection
 
 /** Localized feature collection sourcing from iD presets defined in JSON.
