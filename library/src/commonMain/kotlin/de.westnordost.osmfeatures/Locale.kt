@@ -1,0 +1,103 @@
+package de.westnordost.osmfeatures
+
+data class Locale(
+
+    val language: String,
+    private val region: String?,
+    val script: String?) {
+        companion object {
+
+
+            @JvmField
+            val ENGLISH: Locale = Locale("en")
+            @JvmField
+            val UK: Locale = Locale("en","UK")
+            @JvmField
+            val US: Locale = Locale("en","US")
+            @JvmField
+            val FRENCH: Locale = Locale("fr")
+            @JvmField
+            val ITALIAN: Locale = Locale("it")
+            @JvmField
+            val GERMAN: Locale = Locale("de")
+            @JvmField
+            val GERMANY: Locale = Locale("de", "DE")
+            @JvmField
+            val CHINESE: Locale = Locale("zh")
+
+            @JvmStatic
+            val default: Locale? = null
+
+        }
+
+
+
+    val country : String
+        get() = this.region.orEmpty()
+
+    val languageTag : String? by lazy {
+        when {
+            region == null -> "${language}-${script}"
+            script == null -> "${language}-${region}"
+            else -> "${language}-${script}-${region}"
+        }
+    }
+
+    constructor(lang: String) : this(lang,"", "")
+
+    constructor(lang: String, region: String) : this(lang, region, "")
+
+
+
+    override fun equals(other: Any?): Boolean {
+        if (other == null) {
+            return false
+        }
+        if (other is Locale) {
+            return other.languageTag == this.languageTag
+        }
+        return false
+
+    }
+
+    override fun hashCode(): Int {
+        var result = language.hashCode()
+        result = 31 * result + (region?.hashCode() ?: 0)
+        result = 31 * result + (script?.hashCode() ?: 0)
+        result = 31 * result + country.hashCode()
+        return result
+    }
+
+
+    class Builder {
+        private var language: String? = null
+        fun setLanguage(language: String) : Builder {
+            this.language = language
+            return this
+        }
+
+        private var region: String? = null
+
+        fun setRegion(region: String?) : Builder {
+            this.region = region.orEmpty()
+            return this
+        }
+
+        private var script: String? = null
+        fun setScript(script: String?) : Builder {
+
+            this.script = script.orEmpty()
+            return this
+        }
+
+        fun build(): Locale {
+            language?.let {
+                return Locale(it, region, script)
+            }
+            throw IllegalArgumentException("Language should not be empty")
+        }
+
+    }
+
+
+}

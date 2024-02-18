@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "osmfeatures"
+rootProject.name = "de.westnordost.osmfeatures"
 include(":library")

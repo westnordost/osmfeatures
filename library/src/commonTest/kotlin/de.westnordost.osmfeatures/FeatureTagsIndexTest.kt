@@ -1,0 +1,62 @@
+package de.westnordost.osmfeatures
+
+import de.westnordost.osmfeatures.BaseFeature
+import de.westnordost.osmfeatures.Feature
+import de.westnordost.osmfeatures.GeometryType
+import org.junit.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+
+class FeatureTagsIndexTest {
+    @Test
+    fun copes_with_empty_collection() {
+        val index: FeatureTagsIndex = index()
+        assertTrue(index.getAll(mapOf("a" to "b")).isEmpty())
+    }
+
+    @Test
+    fun get_two_features_with_same_tags() {
+        val f1: Feature = feature("a" to "b")
+        val f2: Feature = feature("a" to "b")
+        val index: FeatureTagsIndex = index(f1, f2)
+        assertEquals(
+            listOf(f1, f2),
+            index.getAll(mapOf("a" to "b", "c" to "d"))
+        )
+    }
+
+    @Test
+    fun get_two_features_with_different_tags() {
+        val f1: Feature = feature("a" to "b")
+        val f2: Feature = feature("c" to "d")
+        val index: FeatureTagsIndex = index(f1, f2)
+        assertEquals(
+            listOf(f1, f2),
+            index.getAll(mapOf("a" to "b", "c" to "d"))
+        )
+    }
+
+    companion object {
+        private fun index(vararg features: Feature): FeatureTagsIndex {
+            return FeatureTagsIndex(features.toList())
+        }
+
+        private fun feature(vararg pairs: Pair<String, String>): Feature {
+            return BaseFeature(
+                "id",
+                mapOf(*pairs),
+                listOf(GeometryType.POINT),
+                null, null,
+                listOf("name"),
+                listOf(),
+                listOf(),
+                listOf(),
+                true,
+                1.0f,
+                false,
+                mapOf(),
+                mapOf()
+            )
+        }
+    }
+}
