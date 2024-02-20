@@ -3,29 +3,28 @@ package de.westnordost.osmfeatures
 data class Locale(
 
     val language: String,
-    private val region: String?,
+    val region: String?,
     val script: String?) {
         companion object {
 
 
-            @JvmField
             val ENGLISH: Locale = Locale("en")
-            @JvmField
+
             val UK: Locale = Locale("en","UK")
-            @JvmField
+
             val US: Locale = Locale("en","US")
-            @JvmField
+
             val FRENCH: Locale = Locale("fr")
-            @JvmField
+
             val ITALIAN: Locale = Locale("it")
-            @JvmField
+
             val GERMAN: Locale = Locale("de")
-            @JvmField
+
             val GERMANY: Locale = Locale("de", "DE")
-            @JvmField
+
             val CHINESE: Locale = Locale("zh")
 
-            @JvmStatic
+
             val default: Locale? = null
 
         }
@@ -35,17 +34,18 @@ data class Locale(
     val country : String
         get() = this.region.orEmpty()
 
-    val languageTag : String? by lazy {
+    val languageTag : String by lazy {
         when {
+            region == null && script == null -> language
             region == null -> "${language}-${script}"
             script == null -> "${language}-${region}"
             else -> "${language}-${script}-${region}"
         }
     }
 
-    constructor(lang: String) : this(lang,"", "")
+    constructor(lang: String) : this(lang,null, null)
 
-    constructor(lang: String, region: String) : this(lang, region, "")
+    constructor(lang: String, region: String) : this(lang, region, null)
 
 
 
@@ -64,7 +64,6 @@ data class Locale(
         var result = language.hashCode()
         result = 31 * result + (region?.hashCode() ?: 0)
         result = 31 * result + (script?.hashCode() ?: 0)
-        result = 31 * result + country.hashCode()
         return result
     }
 
@@ -79,14 +78,14 @@ data class Locale(
         private var region: String? = null
 
         fun setRegion(region: String?) : Builder {
-            this.region = region.orEmpty()
+            this.region = region
             return this
         }
 
         private var script: String? = null
         fun setScript(script: String?) : Builder {
 
-            this.script = script.orEmpty()
+            this.script = script
             return this
         }
 

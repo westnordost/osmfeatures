@@ -1,8 +1,5 @@
 package de.westnordost.osmfeatures
 
-import de.westnordost.osmfeatures.Feature
-import de.westnordost.osmfeatures.PerCountryFeatureCollection
-
 class TestPerCountryFeatureCollection(features: List<Feature>) : PerCountryFeatureCollection {
     private val features: List<Feature>
 
@@ -10,23 +7,21 @@ class TestPerCountryFeatureCollection(features: List<Feature>) : PerCountryFeatu
         this.features = features
     }
 
-    @Override
     override fun getAll(countryCodes: List<String?>): Collection<Feature> {
-        return features.filter {
-                countryCodes
-                    .find { countryCode ->
-                        it.includeCountryCodes.contains(countryCode) || countryCode == null && it.includeCountryCodes.isEmpty()
-                    } != null
+        return features.filter { feature ->
+            countryCodes
+                .any { countryCode ->
+                    feature.includeCountryCodes.contains(countryCode) || countryCode == null && feature.includeCountryCodes.isEmpty()
+                }
         }
     }
 
-    @Override
     override operator fun get(id: String, countryCodes: List<String?>): Feature? {
         return features.find { feature ->
             feature.id == id
-                    && countryCodes.find {
-                        feature.includeCountryCodes.contains(it) || it == null && feature.includeCountryCodes.isEmpty()
-                    } != null
+                    && countryCodes.any { countryCode ->
+                        feature.includeCountryCodes.contains(countryCode) || countryCode == null && feature.includeCountryCodes.isEmpty()
+                    }
         }
 
     }

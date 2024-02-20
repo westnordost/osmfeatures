@@ -2,13 +2,13 @@ package de.westnordost.osmfeatures
 
 import okio.FileSystem
 import okio.Source
-import org.junit.Test
+import kotlin.test.Test
 import okio.IOException
 import okio.Path.Companion.toPath
 import okio.source
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import java.net.URL
 
 class IDPresetsJsonParserTest {

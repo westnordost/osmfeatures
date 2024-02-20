@@ -1,21 +1,15 @@
 package de.westnordost.osmfeatures
 
-import de.westnordost.osmfeatures.BaseFeature
-import de.westnordost.osmfeatures.Feature
-import de.westnordost.osmfeatures.GeometryType
-import de.westnordost.osmfeatures.IDPresetsJsonParser
-import de.westnordost.osmfeatures.IDPresetsTranslationJsonParser
-import de.westnordost.osmfeatures.LocalizedFeature
 import okio.FileSystem
 import okio.Path.Companion.toPath
 import okio.Source
-import org.junit.Test
-import java.io.IOException
+import okio.IOException
 import java.net.URISyntaxException
 import java.net.URL
 import okio.source
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import kotlin.test.Test
 
 class IDPresetsTranslationJsonParserTest {
     @Test

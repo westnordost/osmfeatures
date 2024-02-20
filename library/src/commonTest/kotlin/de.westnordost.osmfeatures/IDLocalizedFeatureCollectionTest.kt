@@ -1,22 +1,19 @@
 package de.westnordost.osmfeatures
 
-import de.westnordost.osmfeatures.Feature
-import de.westnordost.osmfeatures.IDLocalizedFeatureCollection
 import okio.FileSystem
 import okio.Source
-import org.junit.Test
 import de.westnordost.osmfeatures.TestUtils.assertEqualsIgnoreOrder
 import okio.FileNotFoundException
 import okio.IOException
 import okio.Path.Companion.toPath
-import org.junit.Assert.*
+import kotlin.test.*
 
 class IDLocalizedFeatureCollectionTest {
     @Test
     fun features_not_found_produces_runtime_exception() {
         try {
             IDLocalizedFeatureCollection(object : FileAccessAdapter {
-                @Override
+
                 override fun exists(name: String): Boolean {
                     return false
                 }

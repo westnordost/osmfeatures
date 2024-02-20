@@ -1,10 +1,9 @@
 package de.westnordost.osmfeatures
 
-import org.junit.Test
+import kotlin.test.Test
 import de.westnordost.osmfeatures.TestUtils.assertEqualsIgnoreOrder
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import de.westnordost.osmfeatures.FeatureTermIndex
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class FeatureTermIndexTest {
     @Test

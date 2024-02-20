@@ -1,11 +1,12 @@
 package de.westnordost.osmfeatures
 
-import org.junit.Test
 import de.westnordost.osmfeatures.TestUtils.assertEqualsIgnoreOrder
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class StartsWithStringTreeTest {
+
     @Test
     fun copes_with_empty_collection() {
         val t = StartsWithStringTree(listOf())

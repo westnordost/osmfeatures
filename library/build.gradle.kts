@@ -21,12 +21,11 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.normalize)
         }
-        val commonTest by getting {
-            dependencies {
+//        val commonTest by getting {
+            commonTest.dependencies {
                 implementation(libs.kotlin.test)
-                implementation(libs.junit)
             }
-        }
+//        }
     }
 }
 

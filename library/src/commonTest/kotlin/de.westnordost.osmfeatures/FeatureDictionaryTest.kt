@@ -1,15 +1,10 @@
 package de.westnordost.osmfeatures
 
-import org.junit.Test
+import kotlin.test.Test
 import de.westnordost.osmfeatures.TestUtils.assertEqualsIgnoreOrder
-import org.junit.Assert.*
-import de.westnordost.osmfeatures.FeatureDictionary
-import de.westnordost.osmfeatures.LivePresetDataAccessAdapter
-import de.westnordost.osmfeatures.Locale
-import de.westnordost.osmfeatures.LocalizedFeatureCollection
-import de.westnordost.osmfeatures.TestLocalizedFeatureCollection
-import de.westnordost.osmfeatures.TestPerCountryFeatureCollection
-import java.util.Collections
+import kotlin.test.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class FeatureDictionaryTest {
     private val bakery: Feature = feature( // unlocalized shop=bakery
@@ -807,7 +802,7 @@ class FeatureDictionaryTest {
     )
 
     companion object {
-        private val POINT: List<GeometryType> = Collections.singletonList(GeometryType.POINT)
+        private val POINT: List<GeometryType> = listOf(GeometryType.POINT)
         private fun dictionary(vararg entries: Feature): FeatureDictionary {
             return FeatureDictionary(
                 TestLocalizedFeatureCollection(entries.filterNot { it is SuggestionFeature }),

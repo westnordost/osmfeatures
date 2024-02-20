@@ -4,7 +4,7 @@ package de.westnordost.osmfeatures
  * very efficient.
  *
  * Based on ContainedMapTree data structure, see that class.  */
-internal class FeatureTagsIndex(features: Collection<Feature>) {
+internal class FeatureTagsIndex(features: Iterable<Feature>) {
     private val featureMap: MutableMap<Map<String, String>, MutableList<Feature>>
     private val tree: ContainedMapTree<String, String>
 
@@ -13,7 +13,7 @@ internal class FeatureTagsIndex(features: Collection<Feature>) {
         for (feature in features) {
             val map: Map<String, String> = feature.tags
             if (!featureMap.containsKey(map)) featureMap[map] = ArrayList(1)
-            featureMap[map]!!.add(feature)
+            featureMap[map]?.add(feature)
         }
         tree = ContainedMapTree(featureMap.keys)
     }

@@ -1,9 +1,6 @@
 package de.westnordost.osmfeatures
 
-import de.westnordost.osmfeatures.BaseFeature
-import de.westnordost.osmfeatures.Feature
-import de.westnordost.osmfeatures.GeometryType
-import org.junit.Test
+import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 

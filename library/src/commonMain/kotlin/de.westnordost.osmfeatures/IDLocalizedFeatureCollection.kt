@@ -9,14 +9,11 @@ class IDLocalizedFeatureCollection(private val fileAccess: FileAccessAdapter) :
     LocalizedFeatureCollection {
     private val featuresById: LinkedHashMap<String, BaseFeature>
     private val localizedFeaturesList: MutableMap<Locale?, List<LocalizedFeature>> = HashMap()
-    private val localizedFeatures: MutableMap<List<Locale?>?, LinkedHashMap<String, Feature>> = HashMap()
+    private val localizedFeatures: MutableMap<List<Locale?>, LinkedHashMap<String, Feature>> = HashMap()
 
     init {
         val features = loadFeatures()
-        featuresById = LinkedHashMap(features.size)
-        for (feature in features) {
-            featuresById[feature.id] = feature
-        }
+        featuresById = LinkedHashMap(features.associateBy { it.id })
     }
 
     private fun loadFeatures(): List<BaseFeature> {
@@ -52,7 +49,7 @@ class IDLocalizedFeatureCollection(private val fileAccess: FileAccessAdapter) :
     private fun getOrLoadLocalizedFeaturesList(locale: Locale): List<LocalizedFeature>? {
         return CollectionUtils.synchronizedGetOrCreate(
             localizedFeaturesList, locale
-        ) { locale: Locale? ->
+        ) {locale: Locale? ->
             loadLocalizedFeaturesList(
                 locale
             )
@@ -82,9 +79,9 @@ class IDLocalizedFeatureCollection(private val fileAccess: FileAccessAdapter) :
             /* we only want language+country+script of the locale, not anything else. So we construct
 		   it anew here */
             return Locale.Builder()
-                .setLanguage(locale?.language ?: "")
-                .setRegion(locale?.country ?: "")
-                .setScript(locale?.script ?: "")
+                .setLanguage(locale?.language ?: Locale.ENGLISH.language)
+                .setRegion(locale?.region)
+                .setScript(locale?.script)
                 .build()
                 .languageTag + ".json"
         }

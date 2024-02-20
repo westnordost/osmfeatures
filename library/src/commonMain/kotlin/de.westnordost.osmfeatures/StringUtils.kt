@@ -8,7 +8,6 @@ class StringUtils {
     companion object {
         private val FIND_DIACRITICS = "\\p{InCombiningDiacriticalMarks}+".toRegex()
 
-        @JvmStatic
         fun canonicalize(str: String): String {
             return stripDiacritics(str).lowercase()
         }

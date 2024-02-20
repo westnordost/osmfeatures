@@ -8,12 +8,12 @@ class FeatureDictionary internal constructor(
     private val featureCollection: LocalizedFeatureCollection,
     private val brandFeatureCollection: PerCountryFeatureCollection?
 ) {
-    private val brandNamesIndexes: Map<List<String?>, FeatureTermIndex> = HashMap()
-    private val brandTagsIndexes: Map<List<String?>, FeatureTagsIndex> = HashMap()
-    private val tagsIndexes: Map<List<Locale?>, FeatureTagsIndex> = HashMap()
-    private val namesIndexes: Map<List<Locale?>, FeatureTermIndex> = HashMap()
-    private val termsIndexes: Map<List<Locale?>, FeatureTermIndex> = HashMap()
-    private val tagValuesIndexes: Map<List<Locale?>, FeatureTermIndex> = HashMap()
+    private val brandNamesIndexes: MutableMap<List<String?>, FeatureTermIndex> = HashMap()
+    private val brandTagsIndexes: MutableMap<List<String?>, FeatureTagsIndex> = HashMap()
+    private val tagsIndexes: MutableMap<List<Locale?>, FeatureTagsIndex> = HashMap()
+    private val namesIndexes: MutableMap<List<Locale?>, FeatureTermIndex> = HashMap()
+    private val termsIndexes: MutableMap<List<Locale?>, FeatureTermIndex> = HashMap()
+    private val tagValuesIndexes: MutableMap<List<Locale?>, FeatureTermIndex> = HashMap()
 
     init {
         // build indices for default locale
@@ -102,14 +102,8 @@ class FeatureDictionary internal constructor(
                 // 3. features with more matching tags in addTags first
                 // https://github.com/openstreetmap/iD/issues/7927
                 val numberOfMatchedAddTags =
-                    (CollectionUtils.numberOfContainedEntriesInMap(
-                        b.addTags,
-                        tags.entries
-                    )
-                            - CollectionUtils.numberOfContainedEntriesInMap(
-                        a.addTags,
-                        tags.entries
-                    ))
+                    (tags.entries.count { b.addTags.entries.contains(it) }
+                            - tags.entries.count { a.addTags.entries.contains(it) })
                 if (numberOfMatchedAddTags != 0) return numberOfMatchedAddTags
                 return (100 * b.matchScore - 100 * a.matchScore).toInt()
             }
@@ -264,7 +258,7 @@ class FeatureDictionary internal constructor(
         /** lazily get or create tags index for given locale(s)  */
         private fun getTagsIndex(locales: List<Locale?>): FeatureTagsIndex? {
             return CollectionUtils.synchronizedGetOrCreate(
-                tagsIndexes.toMutableMap(),
+                tagsIndexes,
                 locales,
                 ::createTagsIndex
             )
@@ -277,7 +271,7 @@ class FeatureDictionary internal constructor(
         /** lazily get or create names index for given locale(s)  */
         private fun getNamesIndex(locales: List<Locale?>): FeatureTermIndex? {
             return CollectionUtils.synchronizedGetOrCreate(
-                namesIndexes.toMutableMap(),
+                namesIndexes,
                 locales,
                 ::createNamesIndex
             )
@@ -303,7 +297,7 @@ class FeatureDictionary internal constructor(
         /** lazily get or create terms index for given locale(s)  */
         private fun getTermsIndex(locales: List<Locale?>): FeatureTermIndex? {
             return CollectionUtils.synchronizedGetOrCreate(
-                termsIndexes.toMutableMap(),
+                termsIndexes,
                 locales,
                 ::createTermsIndex
             )
@@ -319,7 +313,7 @@ class FeatureDictionary internal constructor(
         /** lazily get or create tag values index  */
         private fun getTagValuesIndex(locales: List<Locale?>): FeatureTermIndex? {
             return CollectionUtils.synchronizedGetOrCreate(
-                tagValuesIndexes.toMutableMap(),
+                tagValuesIndexes,
                 locales,
                 ::createTagValuesIndex
             )
@@ -340,7 +334,7 @@ class FeatureDictionary internal constructor(
         /** lazily get or create brand names index for country  */
         private fun getBrandNamesIndex(countryCodes: List<String?>): FeatureTermIndex? {
             return CollectionUtils.synchronizedGetOrCreate(
-                brandNamesIndexes.toMutableMap(),
+                brandNamesIndexes,
                 countryCodes,
                 ::createBrandNamesIndex
             )
@@ -359,7 +353,7 @@ class FeatureDictionary internal constructor(
         /** lazily get or create tags index for the given countries  */
         private fun getBrandTagsIndex(countryCodes: List<String?>): FeatureTagsIndex? {
             return CollectionUtils.synchronizedGetOrCreate(
-                brandTagsIndexes.toMutableMap(),
+                brandTagsIndexes,
                 countryCodes,
                 ::createBrandTagsIndex
             )

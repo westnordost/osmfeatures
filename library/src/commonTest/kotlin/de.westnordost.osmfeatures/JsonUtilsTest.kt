@@ -1,10 +1,10 @@
 package de.westnordost.osmfeatures
 
 import kotlinx.serialization.json.JsonArray
-import org.junit.Test
+import kotlin.test.assertEquals
+import kotlin.test.Test
 import de.westnordost.osmfeatures.JsonUtils.parseList
 import de.westnordost.osmfeatures.JsonUtils.parseStringMap
-import org.junit.Assert.assertEquals
 
 class JsonUtilsTest {
     @Test
