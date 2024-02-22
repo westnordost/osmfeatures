@@ -8,8 +8,10 @@ okio = "3.6.0"
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
-normalize = { module = "com.doist.x:normalize", version.ref = "normalize" }
-okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
+normalize = { group = "com.doist.x", name = "normalize", version.ref = "normalize" }
+okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
+okio-assetfilesystem = { group = "com.squareup.okio", name = "okio-assetfilesystem", version.ref = "okio" }
+
 
 
 [plugins]

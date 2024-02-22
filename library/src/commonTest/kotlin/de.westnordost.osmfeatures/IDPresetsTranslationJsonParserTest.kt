@@ -1,12 +1,7 @@
 package de.westnordost.osmfeatures
 
-import okio.FileSystem
-import okio.Path.Companion.toPath
 import okio.Source
 import okio.IOException
-import java.net.URISyntaxException
-import java.net.URL
-import okio.source
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.Test
@@ -53,26 +48,6 @@ class IDPresetsTranslationJsonParserTest {
         assertEquals(listOf("a", "b"), feature?.terms)
     }
 
-    @Test
-    @kotlin.Throws(IOException::class, URISyntaxException::class)
-    fun parse_some_real_data() {
-        val url =
-            URL("https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json")
-        val features: List<BaseFeature> =
-            IDPresetsJsonParser().parse(url.openConnection().getInputStream().source())
-        val featureMap = HashMap(features.associateBy { it.id })
-        val rawTranslationsURL =
-            URL("https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/translations/de.json")
-        val translatedFeatures: List<LocalizedFeature> = IDPresetsTranslationJsonParser().parse(
-            rawTranslationsURL.openStream().source(),
-            Locale.GERMAN,
-            featureMap
-        )
-
-        // should not crash etc
-        assertTrue(translatedFeatures.size > 1000)
-    }
-
     private fun parse(presetsFile: String, translationsFile: String): List<LocalizedFeature> {
         return try {
             val baseFeatures: List<BaseFeature> =
@@ -88,9 +63,9 @@ class IDPresetsTranslationJsonParserTest {
         }
     }
 
-    @kotlin.Throws(IOException::class)
+    @Throws(IOException::class)
     private fun getSource(file: String): Source {
-        val resourcePath = "src/commonTest/resources/${file}".toPath()
-        return FileSystem.SYSTEM.source(resourcePath)
+        val fileSystemAccess = FileSystemAccess("src/commonTest/resources")
+        return fileSystemAccess.open(file)
     }
 }

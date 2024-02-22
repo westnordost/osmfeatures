@@ -1,7 +1,5 @@
 package de.westnordost.osmfeatures
 
-import de.westnordost.osmfeatures.Feature
-
 /** A localized collection of features  */
 interface LocalizedFeatureCollection {
     /** Returns all features in the given locale(s).  */

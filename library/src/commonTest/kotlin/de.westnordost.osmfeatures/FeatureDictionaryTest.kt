@@ -444,14 +444,14 @@ class FeatureDictionaryTest {
     @Test
     fun find_no_entry_by_name_because_wrong_country() {
         val dictionary: FeatureDictionary = dictionary(ditsch, ditschRussian)
-        assertEquals(emptyList<Feature>(), dictionary.byTerm("Ditsch").find())
-        assertEquals(emptyList<Feature>(), dictionary.byTerm("Ditsch").inCountry("FR").find()) // not in France
+        assertEquals(emptyList(), dictionary.byTerm("Ditsch").find())
+        assertEquals(emptyList(), dictionary.byTerm("Ditsch").inCountry("FR").find()) // not in France
         assertEquals(
-            emptyList<Feature>(),
+            emptyList(),
             dictionary.byTerm("Ditsch").inCountry("AT-9").find()
         ) // in all of AT but not Vienna
         assertEquals(
-            emptyList<Feature>(),
+            emptyList(),
             dictionary.byTerm("Дитсч").inCountry("UA").find()
         ) // only on the Krim
     }
@@ -835,7 +835,7 @@ class FeatureDictionaryTest {
                     excludeCountryCodes, searchable, matchScore, false, addTags, mapOf()
                 )
                 if (locale != null) {
-                    LocalizedFeature(f, locale, f.names, f.terms.orEmpty())
+                    LocalizedFeature(f, locale, f.names, f.terms)
                 } else {
                     f
                 }

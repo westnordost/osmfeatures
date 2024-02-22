@@ -1,15 +1,11 @@
 package de.westnordost.osmfeatures
 
-import okio.FileSystem
 import okio.Source
 import kotlin.test.Test
 import okio.IOException
-import okio.Path.Companion.toPath
-import okio.source
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import java.net.URL
 
 class IDPresetsJsonParserTest {
     @Test
@@ -76,16 +72,6 @@ class IDPresetsJsonParserTest {
         assertTrue(features.isEmpty())
     }
 
-    @Test
-    @kotlin.Throws(IOException::class)
-    fun parse_some_real_data() {
-        val url =
-            URL("https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json")
-        val features: List<BaseFeature> = IDPresetsJsonParser().parse(url.openStream().source())
-        // should not crash etc
-        assertTrue(features.size > 1000)
-    }
-
     private fun parse(file: String): List<BaseFeature> {
         return try {
             IDPresetsJsonParser().parse(getSource(file))
@@ -94,9 +80,9 @@ class IDPresetsJsonParserTest {
         }
     }
 
-    @kotlin.Throws(IOException::class)
+    @Throws(IOException::class)
     private fun getSource(file: String): Source {
-        val resourcePath = "src/commonTest/resources/${file}".toPath()
-        return FileSystem.SYSTEM.source(resourcePath)
+        val fileSystemAccess = FileSystemAccess("src/commonTest/resources")
+        return fileSystemAccess.open(file)
     }
 }

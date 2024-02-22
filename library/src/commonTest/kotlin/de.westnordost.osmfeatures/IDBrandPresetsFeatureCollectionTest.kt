@@ -1,7 +1,5 @@
 package de.westnordost.osmfeatures
 
-import okio.FileSystem
-import okio.Path.Companion.toPath
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.Test
@@ -46,8 +44,8 @@ class IDBrandPresetsFeatureCollectionTest {
     }
 
     private fun getSource(file: String): Source {
-        val resourcePath = "src/commonTest/resources/${file}".toPath()
-        return FileSystem.SYSTEM.source(resourcePath)
+        val fileSystemAccess = FileSystemAccess("src/commonTest/resources")
+        return fileSystemAccess.open(file)
     }
 
     companion object {

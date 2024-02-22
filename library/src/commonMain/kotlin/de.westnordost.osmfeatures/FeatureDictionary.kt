@@ -59,7 +59,7 @@ class FeatureDictionary internal constructor(
             val countryCodes = dissectCountryCode(countryCode)
             foundFeatures.addAll(getBrandTagsIndex(countryCodes)?.getAll(tags).orEmpty())
         }
-        foundFeatures.removeIf { feature: Feature ->
+        foundFeatures.removeAll { feature: Feature ->
             !isFeatureMatchingParameters(
                 feature,
                 geometry,
@@ -74,7 +74,7 @@ class FeatureDictionary internal constructor(
                 removeIds.addAll(getParentCategoryIds(feature.id))
             }
             if (removeIds.isNotEmpty()) {
-                foundFeatures.removeIf{ feature: Feature ->
+                foundFeatures.removeAll { feature: Feature ->
                     removeIds.contains(
                         feature.id
                     )
@@ -168,7 +168,7 @@ class FeatureDictionary internal constructor(
             // a. matches with presets first
             val foundFeaturesByName: MutableList<Feature> =
                 getNamesIndex(locales)?.getAll(canonicalSearch).orEmpty().toMutableList()
-            foundFeaturesByName.removeIf { feature: Feature ->
+            foundFeaturesByName.removeAll { feature: Feature ->
                 !isFeatureMatchingParameters(
                     feature,
                     geometry,
@@ -187,7 +187,7 @@ class FeatureDictionary internal constructor(
             // b. matches with brand names second
             val countryCodes = dissectCountryCode(countryCode)
             val foundBrandFeatures = getBrandNamesIndex(countryCodes)?.getAll(canonicalSearch).orEmpty().toMutableList()
-            foundBrandFeatures.removeIf{ feature: Feature ->
+            foundBrandFeatures.removeAll { feature: Feature ->
                 !isFeatureMatchingParameters(
                     feature,
                     geometry,
@@ -206,7 +206,7 @@ class FeatureDictionary internal constructor(
         if (isSuggestion == null || !isSuggestion) {
             // c. matches with terms third
             val foundFeaturesByTerm = getTermsIndex(locales)?.getAll(canonicalSearch).orEmpty().toMutableList()
-            foundFeaturesByTerm.removeIf { feature: Feature ->
+            foundFeaturesByTerm.removeAll { feature: Feature ->
                 !isFeatureMatchingParameters(
                     feature,
                     geometry,
@@ -215,7 +215,7 @@ class FeatureDictionary internal constructor(
             }
             if (foundFeaturesByTerm.isNotEmpty()) {
                 val alreadyFoundFeatures: Set<Feature> = HashSet(result)
-                foundFeaturesByTerm.removeIf { feature: Feature ->
+                foundFeaturesByTerm.removeAll { feature: Feature ->
                     alreadyFoundFeatures.contains(
                         feature
                     )
@@ -233,7 +233,7 @@ class FeatureDictionary internal constructor(
         if (isSuggestion == null || !isSuggestion) {
             // d. matches with tag values fourth
             val foundFeaturesByTagValue = getTagValuesIndex(locales)?.getAll(canonicalSearch).orEmpty().toMutableList()
-            foundFeaturesByTagValue.removeIf { feature: Feature ->
+            foundFeaturesByTagValue.removeAll { feature: Feature ->
                 !isFeatureMatchingParameters(
                     feature,
                     geometry,
@@ -242,7 +242,7 @@ class FeatureDictionary internal constructor(
             }
             if (foundFeaturesByTagValue.isNotEmpty()) {
                 val alreadyFoundFeatures: Set<Feature> = HashSet(result)
-                foundFeaturesByTagValue.removeIf { feature: Feature ->
+                foundFeaturesByTagValue.removeAll { feature: Feature ->
                     alreadyFoundFeatures.contains(
                         feature
                     )
@@ -537,7 +537,7 @@ class FeatureDictionary internal constructor(
             /** Create a new FeatureDictionary which gets its data from the given directory. Optionally,
              * a path to brand presets can be specified.  */
             /** Create a new FeatureDictionary which gets its data from the given directory.  */
-            @JvmOverloads
+
             fun create(presetsBasePath: String, brandPresetsBasePath: String? = null): FeatureDictionary {
                 val featureCollection: LocalizedFeatureCollection =
                     IDLocalizedFeatureCollection(FileSystemAccess(presetsBasePath))

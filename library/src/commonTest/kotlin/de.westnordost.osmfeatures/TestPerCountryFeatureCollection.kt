@@ -9,7 +9,8 @@ class TestPerCountryFeatureCollection(features: List<Feature>) : PerCountryFeatu
 
     override fun getAll(countryCodes: List<String?>): Collection<Feature> {
         return features.filter { feature ->
-            countryCodes
+            !countryCodes.any { feature.excludeCountryCodes.contains(it) }
+                    && countryCodes
                 .any { countryCode ->
                     feature.includeCountryCodes.contains(countryCode) || countryCode == null && feature.includeCountryCodes.isEmpty()
                 }
@@ -19,6 +20,7 @@ class TestPerCountryFeatureCollection(features: List<Feature>) : PerCountryFeatu
     override operator fun get(id: String, countryCodes: List<String?>): Feature? {
         return features.find { feature ->
             feature.id == id
+                    && !countryCodes.any { feature.excludeCountryCodes.contains(it) }
                     && countryCodes.any { countryCode ->
                         feature.includeCountryCodes.contains(countryCode) || countryCode == null && feature.includeCountryCodes.isEmpty()
                     }
