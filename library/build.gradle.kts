@@ -4,6 +4,7 @@ plugins {
 }
 
 kotlin {
+    jvm()
     androidTarget {
         compilations.all {
             kotlinOptions {
@@ -11,6 +12,7 @@ kotlin {
             }
         }
     }
+    iosArm64()
 
     sourceSets {
 
@@ -21,11 +23,13 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.normalize)
         }
-//        val commonTest by getting {
-            commonTest.dependencies {
-                implementation(libs.kotlin.test)
-            }
-//        }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+        }
+
+        jvmTest.dependencies {
+            implementation(libs.kotlin.test)
+        }
     }
 }
 
