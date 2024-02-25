@@ -1,5 +1,8 @@
 package de.westnordost.osmfeatures
 
+/** Subset of a feature as defined in the iD editor
+ *  https://github.com/ideditor/schema-builder#preset-schema
+ *  with only the fields helpful for the dictionary */
 interface Feature {
     val id: String
     val tags: Map<String, String>
