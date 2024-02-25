@@ -18,11 +18,7 @@ open class BaseFeature(
         final override val removeTags: Map<String, String>
 ): Feature {
         final override val canonicalNames: List<String> = names.map { name -> StringUtils.canonicalize(name)}
-        final override var canonicalTerms: List<String>? = null
-
-        init {
-                this.canonicalTerms = terms.map { term -> StringUtils.canonicalize(term)}
-        }
+        final override val canonicalTerms: List<String> = terms.map { term -> StringUtils.canonicalize(term)}
 
         override val icon: String
                 get() = _icon ?: ""
