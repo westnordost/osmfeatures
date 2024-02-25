@@ -8,30 +8,30 @@ package de.westnordost.osmfeatures
  * For example for the string maps...
  * <pre>
  * [
- * #1 (amenity -> bicycle_parking),
- * #2 (amenity -> bicycle_parking, bicycle_parking -> shed),
- * #3 (amenity -> bicycle_parking, bicycle_parking -> lockers),
- * #4 (amenity -> taxi),
- * #5 (shop -> supermarket),
+ *   #1 (amenity -> bicycle_parking),
+ *   #2 (amenity -> bicycle_parking, bicycle_parking -> shed),
+ *   #3 (amenity -> bicycle_parking, bicycle_parking -> lockers),
+ *   #4 (amenity -> taxi),
+ *   #5 (shop -> supermarket),
  * ]
-</pre> *
+ * </pre>
  * ...the tree internally looks like this:
  * <pre>
  * amenity ->
- * bicycle_parking ->
- * #1
- * bicycle_parking ->
- * shed ->
- * #2
- * lockers ->
- * #3
- * taxi ->
- * #4
+ *   bicycle_parking ->
+ *     #1
+ *     bicycle_parking ->
+ *       shed ->
+ *         #2
+ *       lockers ->
+ *         #3
+ *   taxi ->
+ *     #4
  * shop ->
- * supermarket ->
- * #5
+ *   supermarket ->
+ *     #5
  * ...
-</pre> *
+* </pre>
  */
 internal class ContainedMapTree<K, V>(maps: Collection<Map<K, V>>, maxDepth: Int = 4, minContainerSize: Int = 4) {
     private val root: Node<K, V>

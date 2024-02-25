@@ -16,8 +16,4 @@ class StringUtils {
             return FIND_DIACRITICS.replace(str.normalize(Form.NFD),"")
         }
     }
-
-
-
-
 }

@@ -9,13 +9,13 @@ package de.westnordost.osmfeatures
  * like this:
  * <pre>
  * f ->
- * [ "f" ]
- * o ->
- * o ->
- * [ "foobar", "foo", ...]
- * u ->
- * [ "fu", "funicular", ... ]
-</pre> */
+ *   [ "f" ]
+ *   o ->
+ *     o ->
+ *       [ "foobar", "foo", ...]
+ *   u ->
+ *     [ "fu", "funicular", ... ]
+ * </pre> */
 internal class StartsWithStringTree
 @JvmOverloads constructor(strings: Collection<String>, maxDepth: Int = 16, minContainerSize: Int = 16) {
     private val root: Node

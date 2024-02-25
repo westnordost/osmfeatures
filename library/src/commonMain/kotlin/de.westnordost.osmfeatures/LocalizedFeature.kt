@@ -8,23 +8,9 @@ class LocalizedFeature(
     override val locale: Locale?,
     override val names: List<String>,
     override val terms: List<String>
-) :
-    Feature {
-    override val canonicalNames: List<String>
-    override val canonicalTerms: List<String>
-
-    init {
-        val canonicalNames: MutableList<String> = ArrayList(names.size)
-        for (name in names) {
-            canonicalNames.add(StringUtils.canonicalize(name))
-        }
-        this.canonicalNames = canonicalNames.toList()
-        val canonicalTerms: MutableList<String> = ArrayList(terms.size)
-        for (term in terms) {
-            canonicalTerms.add(StringUtils.canonicalize(term))
-        }
-        this.canonicalTerms = canonicalTerms.toList()
-    }
+) : Feature {
+    override val canonicalNames: List<String> = names.map { name -> StringUtils.canonicalize(name) }
+    override val canonicalTerms: List<String> = terms.map { term -> StringUtils.canonicalize(term) }
 
     override val id: String
         get() = p.id
