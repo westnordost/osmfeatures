@@ -57,23 +57,19 @@ internal class ContainedMapTree<K, V>
     ) {
         /** Get all maps whose entries are all contained by the given map  */
         fun getAll(map: Map<K, V>): List<Map<K, V>> {
-            val result: MutableList<Map<K, V>> = ArrayList()
-            if (children != null) {
-                for ((key, value) in children) {
-                    if (map.containsKey(key)) {
-                        for ((keyNode, node) in value) {
-                            if (keyNode == map[key]) {
-                                result.addAll(node.getAll(map))
-                            }
+            val result = ArrayList<Map<K, V>>()
+            for ((key, nodesByValue) in children) {
+                if (map.containsKey(key)) {
+                    for ((value, node) in nodesByValue) {
+                        if (value == map[key]) {
+                            result.addAll(node.getAll(map))
                         }
                     }
                 }
             }
-            if (maps != null) {
-                for (m in maps) {
-                    if (m.all { entry ->  map[entry.key] == entry.value } ) {
-                        result.add(m)
-                    }
+            for (m in maps) {
+                if (m.all { entry -> map[entry.key] == entry.value } ) {
+                    result.add(m)
                 }
             }
             return result
@@ -91,7 +87,7 @@ internal class ContainedMapTree<K, V>
                 return Node(emptyMap(), maps)
             }
 
-            val unsortedMaps: MutableSet<Map<K, V>> = HashSet(maps)
+            val unsortedMaps = HashSet<Map<K, V>>(maps)
 
             val mapsByKey = maps.groupByEachKey(previousKeys)
 
