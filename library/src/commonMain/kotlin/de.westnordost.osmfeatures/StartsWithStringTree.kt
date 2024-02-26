@@ -39,30 +39,26 @@ internal class StartsWithStringTree
     )
 
     /** Get all strings which start with the given string  */
-    fun getAll(startsWith: String?): List<String> {
+    fun getAll(startsWith: String): List<String> {
         return root.getAll(startsWith, 0)
     }
 
     private class Node(val children: Map<Char, Node>?, val strings: Collection<String>) {
 
         /** Get all strings that start with the given string  */
-        fun getAll(startsWith: String?, offset: Int): List<String> {
-            if (startsWith != null) {
-                if (startsWith.isEmpty()) return emptyList()
-            }
+        fun getAll(startsWith: String, offset: Int): List<String> {
+            if (startsWith.isEmpty()) return emptyList()
 
             val result: MutableList<String> = ArrayList()
             if (children != null) {
                 for ((key, value) in children) {
-                    if (startsWith != null) {
-                        if (startsWith.length <= offset || key == startsWith[offset]) {
-                            result.addAll(value.getAll(startsWith, offset + 1))
-                        }
+                    if (startsWith.length <= offset || key == startsWith[offset]) {
+                        result.addAll(value.getAll(startsWith, offset + 1))
                     }
                 }
             }
             for (string in strings) {
-                if (startsWith?.let { string.startsWith(it) } == true) result.add(string)
+                if (string.startsWith(startsWith)) result.add(string)
             }
             return result
         }
