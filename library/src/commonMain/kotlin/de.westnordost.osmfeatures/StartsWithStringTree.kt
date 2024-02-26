@@ -1,5 +1,7 @@
 package de.westnordost.osmfeatures
 
+import kotlin.jvm.JvmOverloads
+
 /** Index that makes finding strings that start with characters very efficient.
  * It sorts the strings into a tree structure with configurable depth.
  *
