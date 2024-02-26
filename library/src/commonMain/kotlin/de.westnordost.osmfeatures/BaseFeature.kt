@@ -34,7 +34,6 @@ open class BaseFeature(
         override val locale: Locale?
                 get() = null
 
-        override fun toString(): String {
-                return id
-        }
+        override fun toString(): String =
+                id
 }

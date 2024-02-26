@@ -39,7 +39,6 @@ class LocalizedFeature(
     override val isSuggestion: Boolean
         get() = p.isSuggestion
 
-    override fun toString(): String {
-        return id
-    }
+    override fun toString(): String =
+        id
 }
