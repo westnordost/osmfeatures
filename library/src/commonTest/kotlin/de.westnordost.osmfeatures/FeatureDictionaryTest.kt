@@ -775,43 +775,12 @@ class FeatureDictionaryTest {
         assertEquals(lush, byId)
     }
 
-    internal class SuggestionFeature(
-        id: String,
-        tags: Map<String, String>,
-        geometry: List<GeometryType>,
-        icon: String?,
-        imageURL: String?,
-        names: List<String>,
-        terms: List<String>,
-        includeCountryCodes: List<String>,
-        excludeCountryCodes: List<String>,
-        searchable: Boolean,
-        matchScore: Float,
-        addTags: Map<String, String>,
-        removeTags: Map<String, String>
-    ) : BaseFeature(
-        id,
-        tags,
-        geometry,
-        icon,
-        imageURL,
-        names,
-        terms,
-        includeCountryCodes,
-        excludeCountryCodes,
-        searchable,
-        matchScore,
-        true,
-        addTags,
-        removeTags
-    )
-
     companion object {
         private val POINT: List<GeometryType> = listOf(GeometryType.POINT)
         private fun dictionary(vararg entries: Feature): FeatureDictionary {
             return FeatureDictionary(
-                TestLocalizedFeatureCollection(entries.filterNot { it is SuggestionFeature }),
-                TestPerCountryFeatureCollection(entries.filterIsInstance<SuggestionFeature>())
+                TestLocalizedFeatureCollection(entries.filterNot { it.isSuggestion }),
+                TestPerCountryFeatureCollection(entries.filter { it.isSuggestion })
             )
         }
 
@@ -830,9 +799,9 @@ class FeatureDictionaryTest {
             locale: Locale?
         ): Feature {
             return if (isSuggestion) {
-                SuggestionFeature(
+                BaseFeature(
                     id, tags, geometries, null, null, names, terms, countryCodes,
-                    excludeCountryCodes, searchable, matchScore, addTags, mapOf()
+                    excludeCountryCodes, searchable, matchScore, isSuggestion, addTags, mapOf()
                 )
             } else {
                 val f = BaseFeature(
