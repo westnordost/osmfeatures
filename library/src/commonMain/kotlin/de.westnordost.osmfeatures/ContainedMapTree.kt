@@ -93,7 +93,7 @@ internal class ContainedMapTree<K, V>
 
             val unsortedMaps: MutableSet<Map<K, V>> = HashSet(maps)
 
-            val mapsByKey = getMapsByKey(maps, previousKeys)
+            val mapsByKey = maps.groupByEachKey(previousKeys)
 
             /* the map should be categorized by frequent keys first and least frequent keys last. */
             val sortedByCountDesc: List<Map.Entry<K, List<Map<K, V>>>> = ArrayList(mapsByKey.entries).sortedByDescending { it.value.size }
@@ -105,7 +105,7 @@ internal class ContainedMapTree<K, V>
                 (mapsForKey as MutableList).retainAll(unsortedMaps)
                 if (mapsForKey.isEmpty()) continue
 
-                val featuresByValue: Map<V, List<Map<K, V>>> = getMapsByKeyValue(key, mapsForKey)
+                val featuresByValue: Map<V, List<Map<K, V>>> = mapsForKey.groupByByKeyValue(key)
 
                 val valueNodes: MutableMap<V, Node<K, V>> = HashMap(featuresByValue.size)
                 for ((value, featuresForValue) in featuresByValue) {
@@ -124,29 +124,27 @@ internal class ContainedMapTree<K, V>
             return Node(result, ArrayList(unsortedMaps))
         }
 
-        /** returns the given features grouped by the map entry value of the given key.  */
-        private fun <K, V> getMapsByKeyValue(key: K, maps: Collection<Map<K, V>>): Map<V, List<Map<K, V>>> {
+        /** returns these maps grouped by the map entry value of the given key.  */
+        private fun <K, V>  Collection<Map<K, V>>.groupByByKeyValue(
+            key: K
+        ): Map<V, List<Map<K, V>>> {
             val result = HashMap<V, MutableList<Map<K, V>>>()
-            for (map in maps) {
-                val value = map[key]
-                value?.let {
-                    if (!result.containsKey(it)) result[it] = ArrayList()
-                    result[it]?.add(map)
-                }
+            for (map in this) {
+                val value = map[key] ?: continue
+                result.getOrPut(value) { ArrayList() }.add(map)
             }
             return result
         }
 
-        /** returns the given maps grouped by each of their keys (except the given ones).  */
-        private fun <K, V> getMapsByKey(
-            maps: Collection<Map<K, V>>,
+        /** returns these maps grouped by each of their keys (except the given ones).  */
+        private fun <K, V> Collection<Map<K, V>>.groupByEachKey(
             excludeKeys: Collection<K>
         ): Map<K, List<Map<K, V>>> {
             val result = HashMap<K, MutableList<Map<K, V>>>()
-            for (map in maps) {
-                for (key in map.keys.filter { !excludeKeys.contains(it) }) {
-                    if (!result.containsKey(key)) result[key] = ArrayList()
-                    result[key]?.add(map)
+            for (map in this) {
+                for (key in map.keys) {
+                    if (excludeKeys.contains(key)) continue
+                    result.getOrPut(key) { ArrayList() }.add(map)
                 }
             }
             return result
