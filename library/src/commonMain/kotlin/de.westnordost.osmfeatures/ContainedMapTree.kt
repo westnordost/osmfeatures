@@ -48,17 +48,14 @@ internal class ContainedMapTree<K, V>
         buildTree(maps, emptyList(), maxDepth.coerceAtLeast(0), minContainerSize)
 
     /** Get all maps whose entries are completely contained by the given map  */
-    fun getAll(map: Map<K, V>?): List<Map<K, V>> {
-        return root.getAll(map!!)
-    }
+    fun getAll(map: Map<K, V>): List<Map<K, V>> = root.getAll(map)
 
     private class Node<K, V>(
         /** key -> (value -> Node)  */
-        val children: Map<K, Map<V, Node<K, V>>>?, maps: Collection<Map<K, V>>
+        val children: Map<K, Map<V, Node<K, V>>>,
+        val maps: Collection<Map<K, V>>
     ) {
-        val maps: Collection<Map<K, V>>? = maps
-
-        /** Get all maps whose entries are all contained by given map  */
+        /** Get all maps whose entries are all contained by the given map  */
         fun getAll(map: Map<K, V>): List<Map<K, V>> {
             val result: MutableList<Map<K, V>> = ArrayList()
             if (children != null) {
@@ -90,7 +87,9 @@ internal class ContainedMapTree<K, V>
             maxDepth: Int,
             minContainerSize: Int
         ): Node<K, V> {
-            if (previousKeys.size == maxDepth || maps.size < minContainerSize) return Node(null, maps)
+            if (previousKeys.size == maxDepth || maps.size < minContainerSize) {
+                return Node(emptyMap(), maps)
+            }
 
             val unsortedMaps: MutableSet<Map<K, V>> = HashSet(maps)
 

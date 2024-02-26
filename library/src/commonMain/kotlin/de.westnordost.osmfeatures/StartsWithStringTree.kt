@@ -1,7 +1,5 @@
 package de.westnordost.osmfeatures
 
-import kotlin.jvm.JvmOverloads
-
 /** Index that makes finding strings that start with characters very efficient.
  * It sorts the strings into a tree structure with configurable depth.
  *
@@ -26,22 +24,16 @@ internal class StartsWithStringTree
  * The generated tree will have a max depth of maxDepth and another depth is not added to the
  * tree if there are less than minContainerSize strings in one tree node.
  */
-@JvmOverloads constructor(
+constructor(
     strings: Collection<String>,
     maxDepth: Int = 16,
     minContainerSize: Int = 16
 ) {
-    private val root: Node = buildTree(
-        strings,
-        0,
-        maxDepth.coerceAtLeast(0),
-        minContainerSize.coerceAtLeast(1)
-    )
+    private val root: Node =
+        buildTree(strings, 0, maxDepth.coerceAtLeast(0), minContainerSize.coerceAtLeast(1))
 
     /** Get all strings which start with the given string  */
-    fun getAll(startsWith: String): List<String> {
-        return root.getAll(startsWith, 0)
-    }
+    fun getAll(startsWith: String): List<String> = root.getAll(startsWith, 0)
 
     private class Node(val children: Map<Char, Node>, val strings: Collection<String>) {
 
@@ -50,9 +42,9 @@ internal class StartsWithStringTree
             if (startsWith.isEmpty()) return emptyList()
 
             val result = ArrayList<String>()
-            for ((key, value) in children) {
-                if (startsWith.length <= offset || key == startsWith[offset]) {
-                    result.addAll(value.getAll(startsWith, offset + 1))
+            for ((char, childNode) in children) {
+                if (startsWith.length <= offset || char == startsWith[offset]) {
+                    result.addAll(childNode.getAll(startsWith, offset + 1))
                 }
             }
             for (string in strings) {
@@ -76,9 +68,9 @@ internal class StartsWithStringTree
             val stringsByCharacter = strings.groupedByNthCharacter(currentDepth)
             val children = HashMap<Char, Node>(stringsByCharacter.size)
 
-            for ((key, value) in stringsByCharacter) {
-                val c = key ?: continue
-                val child = buildTree(value, currentDepth + 1, maxDepth, minContainerSize)
+            for ((char, stringsForChar) in stringsByCharacter) {
+                val c = char ?: continue
+                val child = buildTree(stringsForChar, currentDepth + 1, maxDepth, minContainerSize)
                 children[c] = child
             }
             val remainingStrings = stringsByCharacter[null].orEmpty()

@@ -18,7 +18,7 @@ internal class FeatureTagsIndex(features: Iterable<Feature>) {
         tree = ContainedMapTree(featureMap.keys)
     }
 
-    fun getAll(tags: Map<String, String>?): List<Feature> {
+    fun getAll(tags: Map<String, String>): List<Feature> {
         val result: MutableList<Feature> = ArrayList()
         for (map in tree.getAll(tags)) {
             val fs: List<Feature>? = featureMap[map]
