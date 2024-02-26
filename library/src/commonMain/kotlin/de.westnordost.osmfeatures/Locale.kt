@@ -1,13 +1,13 @@
 package de.westnordost.osmfeatures
 
-data class Locale(
+import kotlin.jvm.JvmOverloads
 
+data class Locale @JvmOverloads constructor(
     val language: String,
-    val region: String?,
-    val script: String?) {
+    val region: String? = null,
+    val script: String? = null
+) {
         companion object {
-
-
             val ENGLISH: Locale = Locale("en")
 
             val UK: Locale = Locale("en","UK")
@@ -24,12 +24,8 @@ data class Locale(
 
             val CHINESE: Locale = Locale("zh")
 
-
             val default: Locale? = null
-
         }
-
-
 
     val country : String
         get() = this.region.orEmpty()
@@ -42,12 +38,6 @@ data class Locale(
             else -> "${language}-${script}-${region}"
         }
     }
-
-    constructor(lang: String) : this(lang,null, null)
-
-    constructor(lang: String, region: String) : this(lang, region, null)
-
-
 
     override fun equals(other: Any?): Boolean {
         if (other == null) {
@@ -97,6 +87,4 @@ data class Locale(
         }
 
     }
-
-
 }
