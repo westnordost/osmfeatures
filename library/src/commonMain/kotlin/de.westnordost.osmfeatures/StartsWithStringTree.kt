@@ -9,7 +9,8 @@ import kotlin.jvm.JvmOverloads
  *
  * For the strings ["f", "foobar", "foo", "fu", "funicular"], the tree may internally look f.e.
  * like this:
- * <pre>
+ *
+ * ```
  * f ->
  *   [ "f" ]
  *   o ->
@@ -17,7 +18,8 @@ import kotlin.jvm.JvmOverloads
  *       [ "foobar", "foo", ...]
  *   u ->
  *     [ "fu", "funicular", ... ]
- * </pre> */
+ * ```
+ * */
 internal class StartsWithStringTree
 @JvmOverloads constructor(strings: Collection<String>, maxDepth: Int = 16, minContainerSize: Int = 16) {
     private val root: Node
