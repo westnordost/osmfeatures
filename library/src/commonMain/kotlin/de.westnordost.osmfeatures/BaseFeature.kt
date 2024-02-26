@@ -4,7 +4,7 @@ package de.westnordost.osmfeatures
 open class BaseFeature(
         override val id: String,
         override val tags: Map<String, String>,
-        final override var geometry: List<GeometryType>,
+        final override val geometry: List<GeometryType>,
         private val _icon: String? = "",
         private val _imageURL: String? = "",
         private val _names: List<String>,
