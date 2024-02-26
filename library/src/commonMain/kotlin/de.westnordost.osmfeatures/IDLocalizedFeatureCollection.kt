@@ -78,25 +78,19 @@ class IDLocalizedFeatureCollection(private val fileAccess: FileAccessAdapter) :
         private fun getLocalizationFilename(locale: Locale?): String {
             /* we only want language+country+script of the locale, not anything else. So we construct
 		   it anew here */
-            return Locale.Builder()
-                .setLanguage(locale?.language ?: Locale.ENGLISH.language)
-                .setRegion(locale?.region)
-                .setScript(locale?.script)
-                .build()
+            return Locale(locale?.language ?: "en", locale?.region, locale?.script)
                 .languageTag + ".json"
         }
 
         private fun getLocaleComponents(locale: Locale?): List<Locale> {
             val lang = locale?.language ?: ""
-            val country = locale?.country ?: ""
-            val script = locale?.script ?: ""
+            val region = locale?.region
+            val script = locale?.script
             val result: MutableList<Locale> = ArrayList(4)
             result.add(Locale(lang))
-            if (country.isNotEmpty()) result.add(Locale.Builder().setLanguage(lang).setRegion(country).build())
-            if (script.isNotEmpty()) result.add(Locale.Builder().setLanguage(lang).setScript(script).build())
-            if (country.isNotEmpty() && script.isNotEmpty()) result.add(
-                Locale.Builder().setLanguage(lang).setRegion(country).setScript(script).build()
-            )
+            if (region != null) result.add(Locale(language = lang, region = region))
+            if (script != null) result.add(Locale(language = lang, script = script))
+            if (region != null && script != null) result.add(Locale(language = lang, region = region, script = script))
             return result
         }
 

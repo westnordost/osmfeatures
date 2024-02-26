@@ -38,34 +38,4 @@ data class Locale @JvmOverloads constructor(
             else -> "${language}-${script}-${region}"
         }
     }
-
-    class Builder {
-        private var language: String? = null
-        fun setLanguage(language: String) : Builder {
-            this.language = language
-            return this
-        }
-
-        private var region: String? = null
-
-        fun setRegion(region: String?) : Builder {
-            this.region = region
-            return this
-        }
-
-        private var script: String? = null
-        fun setScript(script: String?) : Builder {
-
-            this.script = script
-            return this
-        }
-
-        fun build(): Locale {
-            language?.let {
-                return Locale(it, region, script)
-            }
-            throw IllegalArgumentException("Language should not be empty")
-        }
-
-    }
 }

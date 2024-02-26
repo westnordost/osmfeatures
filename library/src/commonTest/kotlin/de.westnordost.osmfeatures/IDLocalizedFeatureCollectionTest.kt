@@ -130,10 +130,9 @@ class IDLocalizedFeatureCollectionTest {
         assertEquals("Brückle", c["yet/another/id", austria]?.name)
 
         // merging scripts
-        val cryllic: List<Locale> = listOf(Locale.Builder().setLanguage("de").setScript("Cyrl").build())
+        val cryllic = listOf(Locale("de", null, "Cyrl"))
         assertEquals("бацкхаус", c["some/id", cryllic]?.name)
-        val cryllicAustria: List<Locale> =
-            listOf(Locale.Builder().setLanguage("de").setRegion("AT").setScript("Cyrl").build())
+        val cryllicAustria = listOf(Locale("de", "AT","Cyrl"))
         assertEquals("бацкхусл", c["some/id", cryllicAustria]?.name)
     }
 
