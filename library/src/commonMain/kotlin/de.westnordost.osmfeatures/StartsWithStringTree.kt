@@ -21,21 +21,22 @@ import kotlin.jvm.JvmOverloads
  * ```
  * */
 internal class StartsWithStringTree
-@JvmOverloads constructor(strings: Collection<String>, maxDepth: Int = 16, minContainerSize: Int = 16) {
-    private val root: Node
-
-    /** Create this index with the given strings.
-     *
-     * The generated tree will have a max depth of maxDepth and another depth is not added to the
-     * tree if there are less than minContainerSize strings in one tree node.
-     */
-    init {
-        var maxDepth = maxDepth
-        var minContainerSize = minContainerSize
-        if (maxDepth < 0) maxDepth = 0
-        if (minContainerSize < 1) minContainerSize = 1
-        root = buildTree(strings, 0, maxDepth, minContainerSize)
-    }
+/** Create this index with the given strings.
+ *
+ * The generated tree will have a max depth of maxDepth and another depth is not added to the
+ * tree if there are less than minContainerSize strings in one tree node.
+ */
+@JvmOverloads constructor(
+    strings: Collection<String>,
+    maxDepth: Int = 16,
+    minContainerSize: Int = 16
+) {
+    private val root: Node = buildTree(
+        strings,
+        0,
+        maxDepth.coerceAtLeast(0),
+        minContainerSize.coerceAtLeast(1)
+    )
 
     /** Get all strings which start with the given string  */
     fun getAll(startsWith: String?): List<String> {
