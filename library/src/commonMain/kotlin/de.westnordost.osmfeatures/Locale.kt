@@ -8,22 +8,6 @@ data class Locale @JvmOverloads constructor(
     val script: String? = null
 ) {
         companion object {
-            val ENGLISH: Locale = Locale("en")
-
-            val UK: Locale = Locale("en","UK")
-
-            val US: Locale = Locale("en","US")
-
-            val FRENCH: Locale = Locale("fr")
-
-            val ITALIAN: Locale = Locale("it")
-
-            val GERMAN: Locale = Locale("de")
-
-            val GERMANY: Locale = Locale("de", "DE")
-
-            val CHINESE: Locale = Locale("zh")
-
             val default: Locale? = null
         }
 

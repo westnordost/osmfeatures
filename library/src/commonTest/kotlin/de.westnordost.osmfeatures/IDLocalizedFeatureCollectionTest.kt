@@ -9,6 +9,9 @@ import okio.Path.Companion.toPath
 import kotlin.test.*
 
 class IDLocalizedFeatureCollectionTest {
+    private val ENGLISH = Locale("en")
+    private val GERMAN = Locale("de")
+
     @Test
     fun features_not_found_produces_runtime_exception() {
         try {
@@ -56,7 +59,7 @@ class IDLocalizedFeatureCollectionTest {
         assertEquals("test", c["yet/another/id", notLocalized]?.name)
 
         // getting English features
-        val english: List<Locale> = listOf(Locale.ENGLISH)
+        val english: List<Locale> = listOf(ENGLISH)
         val englishFeatures: Collection<Feature> = c.getAll(english)
         assertEqualsIgnoreOrder(listOf("Bakery"), getNames(englishFeatures))
         assertEquals("Bakery", c["some/id", english]?.name)
@@ -65,7 +68,7 @@ class IDLocalizedFeatureCollectionTest {
 
         // getting Germany features
         // this also tests if the fallback from de-DE to de works if de-DE.json does not exist
-        val germany: List<Locale> = listOf(Locale.GERMANY)
+        val germany: List<Locale> = listOf(GERMANY)
         val germanyFeatures: Collection<Feature> = c.getAll(germany)
         assertEqualsIgnoreOrder(listOf("Bäckerei", "Gullideckel"), getNames(germanyFeatures))
         assertEquals("Bäckerei", c["some/id", germany]?.name)
@@ -73,14 +76,14 @@ class IDLocalizedFeatureCollectionTest {
         assertNull(c["yet/another/id", germany])
 
         // getting features through fallback chain
-        val locales: List<Locale?> = listOf(Locale.ENGLISH, Locale.GERMANY, null)
+        val locales: List<Locale?> = listOf(ENGLISH, GERMANY, null)
         val fallbackFeatures: Collection<Feature> = c.getAll(locales)
         assertEqualsIgnoreOrder(listOf("Bakery", "Gullideckel", "test"), getNames(fallbackFeatures))
         assertEquals("Bakery", c["some/id", locales]?.name)
         assertEquals("Gullideckel", c["another/id", locales]?.name)
         assertEquals("test", c["yet/another/id", locales]?.name)
-        assertEquals(Locale.ENGLISH, c["some/id", locales]?.locale)
-        assertEquals(Locale.GERMAN, c["another/id", locales]?.locale)
+        assertEquals(ENGLISH, c["some/id", locales]?.locale)
+        assertEquals(GERMAN, c["another/id", locales]?.locale)
         assertNull(c["yet/another/id", locales]?.locale)
     }
 
@@ -111,7 +114,7 @@ class IDLocalizedFeatureCollectionTest {
         })
 
         // standard case - no merging
-        val german: List<Locale> = listOf(Locale.GERMAN)
+        val german: List<Locale> = listOf(GERMAN)
         val germanFeatures: Collection<Feature> = c.getAll(german)
         assertEqualsIgnoreOrder(listOf("Bäckerei", "Gullideckel"), getNames(germanFeatures))
         assertEquals("Bäckerei", c["some/id", german]?.name)

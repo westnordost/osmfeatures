@@ -55,7 +55,7 @@ class IDPresetsTranslationJsonParserTest {
             val featureMap = HashMap(baseFeatures.associateBy { it.id })
             IDPresetsTranslationJsonParser().parse(
                 getSource(translationsFile),
-                Locale.ENGLISH,
+                Locale("en"),
                 featureMap
             )
         } catch (e: IOException) {
