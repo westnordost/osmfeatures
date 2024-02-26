@@ -21,7 +21,7 @@ interface Feature {
     val addTags: Map<String, String>
     val removeTags: Map<String, String>
     val canonicalNames: List<String>
-    val canonicalTerms: List<String>?
+    val canonicalTerms: List<String>
     val isSuggestion: Boolean
     val locale: Locale?
 }

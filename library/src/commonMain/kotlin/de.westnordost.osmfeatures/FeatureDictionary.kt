@@ -306,7 +306,7 @@ class FeatureDictionary internal constructor(
         private fun createTermsIndex(locales: List<Locale?>): FeatureTermIndex {
             return FeatureTermIndex(featureCollection.getAll(locales), FeatureTermIndex.Selector { feature: Feature ->
                 if (!feature.isSearchable) return@Selector emptyList<String>()
-                feature.canonicalTerms.orEmpty()
+                feature.canonicalTerms
             })
         }
 
