@@ -6,7 +6,7 @@ package de.westnordost.osmfeatures
  * It is threadsafe because it is immutable.
  *
  * For example for the string maps...
- * <pre>
+ * ```
  * [
  *   #1 (amenity -> bicycle_parking),
  *   #2 (amenity -> bicycle_parking, bicycle_parking -> shed),
@@ -14,9 +14,9 @@ package de.westnordost.osmfeatures
  *   #4 (amenity -> taxi),
  *   #5 (shop -> supermarket),
  * ]
- * </pre>
+ * ```
  * ...the tree internally looks like this:
- * <pre>
+ * ```
  * amenity ->
  *   bicycle_parking ->
  *     #1
@@ -31,7 +31,7 @@ package de.westnordost.osmfeatures
  *   supermarket ->
  *     #5
  * ...
-* </pre>
+* ```
  */
 internal class ContainedMapTree<K, V>(maps: Collection<Map<K, V>>, maxDepth: Int = 4, minContainerSize: Int = 4) {
     private val root: Node<K, V>
