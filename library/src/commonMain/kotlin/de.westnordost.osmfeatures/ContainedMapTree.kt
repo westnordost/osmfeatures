@@ -33,19 +33,19 @@ package de.westnordost.osmfeatures
  * ...
 * ```
  */
-internal class ContainedMapTree<K, V>(maps: Collection<Map<K, V>>, maxDepth: Int = 4, minContainerSize: Int = 4) {
-    private val root: Node<K, V>
-
-    /** Create this index with the given maps.
-     *
-     * The generated tree will have a max depth of maxDepth and another depth is not added to the
-     * tree if there are less than minContainerSize maps in one tree node.
-     */
-    init {
-        var maxDepth = maxDepth
-        if (maxDepth < 0) maxDepth = 0
-        root = buildTree(maps, emptyList(), maxDepth, minContainerSize)
-    }
+internal class ContainedMapTree<K, V>
+/** Create this index with the given maps.
+ *
+ *  The generated tree will have a max depth of maxDepth and another depth is not added to the
+ *  tree if there are less than minContainerSize maps in one tree node.
+ */
+ constructor(
+    maps: Collection<Map<K, V>>,
+    maxDepth: Int = 4,
+    minContainerSize: Int = 4
+) {
+    private val root: Node<K, V> =
+        buildTree(maps, emptyList(), maxDepth.coerceAtLeast(0), minContainerSize)
 
     /** Get all maps whose entries are completely contained by the given map  */
     fun getAll(map: Map<K, V>?): List<Map<K, V>> {
