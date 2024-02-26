@@ -27,15 +27,7 @@ data class Locale @JvmOverloads constructor(
             val default: Locale? = null
         }
 
-    val country : String
-        get() = this.region.orEmpty()
-
-    val languageTag : String by lazy {
-        when {
-            region == null && script == null -> language
-            region == null -> "${language}-${script}"
-            script == null -> "${language}-${region}"
-            else -> "${language}-${script}-${region}"
-        }
-    }
+    /** IETF language tag */
+    val languageTag: String
+        get() = listOfNotNull(language, script, region).joinToString("-")
 }
