@@ -3,7 +3,6 @@ package de.westnordost.osmfeatures
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.Test
-import de.westnordost.osmfeatures.TestUtils.assertEqualsIgnoreOrder
 import okio.Source
 
 class IDBrandPresetsFeatureCollectionTest {

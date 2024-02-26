@@ -1,9 +1,7 @@
 package de.westnordost.osmfeatures
 
-import kotlin.test.assertTrue
+import kotlin.test.assertEquals
 
-object TestUtils {
-    fun <T> assertEqualsIgnoreOrder(a: Collection<T>, b: Collection<T>) {
-        assertTrue(a.size == b.size && a.containsAll(b))
-    }
+fun <T> assertEqualsIgnoreOrder(a: Collection<T>, b: Collection<T>) {
+    assertEquals(a.toSet(), b.toSet())
 }

@@ -2,7 +2,6 @@ package de.westnordost.osmfeatures
 
 import okio.FileSystem
 import okio.Source
-import de.westnordost.osmfeatures.TestUtils.assertEqualsIgnoreOrder
 import okio.FileNotFoundException
 import okio.IOException
 import okio.Path.Companion.toPath

@@ -1,6 +1,5 @@
 package de.westnordost.osmfeatures
 
-import de.westnordost.osmfeatures.TestUtils.assertEqualsIgnoreOrder
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
