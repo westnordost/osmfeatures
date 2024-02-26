@@ -9,8 +9,8 @@ class LocalizedFeature(
     override val names: List<String>,
     override val terms: List<String>
 ) : Feature {
-    override val canonicalNames: List<String> = names.map { name -> StringUtils.canonicalize(name) }
-    override val canonicalTerms: List<String> = terms.map { term -> StringUtils.canonicalize(term) }
+    override val canonicalNames: List<String> = names.map { it.canonicalize() }
+    override val canonicalTerms: List<String> = terms.map { it.canonicalize() }
 
     override val id: String
         get() = p.id
