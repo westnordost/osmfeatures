@@ -39,25 +39,6 @@ data class Locale @JvmOverloads constructor(
         }
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (other == null) {
-            return false
-        }
-        if (other is Locale) {
-            return other.languageTag == this.languageTag
-        }
-        return false
-
-    }
-
-    override fun hashCode(): Int {
-        var result = language.hashCode()
-        result = 31 * result + (region?.hashCode() ?: 0)
-        result = 31 * result + (script?.hashCode() ?: 0)
-        return result
-    }
-
-
     class Builder {
         private var language: String? = null
         fun setLanguage(language: String) : Builder {
