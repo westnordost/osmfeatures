@@ -3,17 +3,11 @@ package de.westnordost.osmfeatures
 import doist.x.normalize.Form
 import doist.x.normalize.normalize
 
-class StringUtils {
+private val FIND_DIACRITICS = "\\p{InCombiningDiacriticalMarks}+".toRegex()
 
-    companion object {
-        private val FIND_DIACRITICS = "\\p{InCombiningDiacriticalMarks}+".toRegex()
+internal fun String.canonicalize(): String =
+    stripDiacritics().lowercase()
 
-        fun canonicalize(str: String): String {
-            return stripDiacritics(str).lowercase()
-        }
-
-        private fun stripDiacritics(str: String): String {
-            return FIND_DIACRITICS.replace(str.normalize(Form.NFD),"")
-        }
-    }
+private fun String.stripDiacritics(): String {
+    return FIND_DIACRITICS.replace(normalize(Form.NFD),"")
 }

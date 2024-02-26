@@ -124,7 +124,7 @@ class FeatureDictionary internal constructor(
         limit: Int,
         locales: List<Locale?>
     ): MutableList<Feature> {
-        val canonicalSearch = StringUtils.canonicalize(search)
+        val canonicalSearch = search.canonicalize()
         val sortNames = Comparator { a: Feature, b: Feature ->
             // 1. exact matches first
             val exactMatchOrder =
