@@ -6,451 +6,334 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class FeatureDictionaryTest {
-    private val ENGLISH = Locale("en")
-    private val UK = Locale("en","UK")
-    private val ITALIAN = Locale("it")
-    private val GERMAN = Locale("de")
-    private val CHINESE = Locale("zh")
 
-    private val bakery: Feature = feature( // unlocalized shop=bakery
-        "shop/bakery",
-        mapOf("shop" to "bakery"),
-        POINT,
-        listOf("Bäckerei"),
-        listOf("Brot"),
-        listOf(),
-        listOf(),
-        true,
-        1.0f,
-        mapOf(),
-        false,
-        null
+
+    private val bakery = feature( // unlocalized shop=bakery
+        id = "shop/bakery",
+        tags = mapOf("shop" to "bakery"),
+        names = listOf("Bäckerei"),
+        terms = listOf("Brot")
     )
-    private val panetteria: Feature = feature( // localized shop=bakery
-        "shop/bakery",
-        mapOf("shop" to "bakery"),
-        POINT,
-        listOf("Panetteria"),
-        listOf(),
-        listOf(),
-        listOf(),
-        true,
-        1.0f,
-        mapOf(),
-        false,
-        ITALIAN
+    private val panetteria = feature( // localized shop=bakery
+        id = "shop/bakery",
+        tags = mapOf("shop" to "bakery"),
+        names = listOf("Panetteria"),
+        locale = ITALIAN
     )
-    private val ditsch: Feature = feature( // brand in DE for shop=bakery
-        "shop/bakery/Ditsch",
-        mapOf("shop" to "bakery", "name" to "Ditsch"),
-        POINT,
-        listOf("Ditsch"),
-        listOf(),
-        listOf("DE", "AT"),
-        listOf("AT-9"),
-        true,
-        1.0f,
-        mapOf("wikipedia" to "de:Brezelb%C3%A4ckerei_Ditsch", "brand" to "Ditsch"),
-        true,
-        null
+    private val ditsch = feature( // brand in DE for shop=bakery
+        id = "shop/bakery/Ditsch",
+        tags = mapOf("shop" to "bakery", "name" to "Ditsch"),
+        names = listOf("Ditsch"),
+        countryCodes = listOf("DE", "AT"),
+        excludeCountryCodes = listOf("AT-9"),
+        addTags = mapOf("wikipedia" to "de:Brezelb%C3%A4ckerei_Ditsch", "brand" to "Ditsch"),
+        isSuggestion = true
     )
-    private val ditschRussian: Feature = feature( // brand in RU for shop=bakery
-        "shop/bakery/Дитсч",
-        mapOf("shop" to "bakery", "name" to "Ditsch"),
-        POINT,
-        listOf("Дитсч"),
-        listOf(),
-        listOf("RU", "UA-43"),
-        listOf(),
-        true,
-        1.0f,
-        mapOf("wikipedia" to "de:Brezelb%C3%A4ckerei_Ditsch", "brand" to "Дитсч"),
-        true,
-        null
+    private val ditschRussian = feature( // brand in RU for shop=bakery
+        id = "shop/bakery/Дитсч",
+        tags = mapOf("shop" to "bakery", "name" to "Ditsch"),
+        names = listOf("Дитсч"),
+        countryCodes = listOf("RU", "UA-43"),
+        addTags = mapOf("wikipedia" to "de:Brezelb%C3%A4ckerei_Ditsch", "brand" to "Дитсч"),
+        isSuggestion = true
     )
-    private val ditschInternational: Feature = feature( // brand everywhere for shop=bakery
-        "shop/bakery/Ditsh",
-        mapOf("shop" to "bakery", "name" to "Ditsch"),
-        POINT,
-        listOf("Ditsh"),
-        listOf(),
-        listOf(),
-        listOf(),
-        true,
-        1.0f,
-        mapOf("wikipedia" to "de:Brezelb%C3%A4ckerei_Ditsch"),
-        true,
-        null
+    private val ditschInternational = feature( // brand everywhere for shop=bakery
+        id = "shop/bakery/Ditsh",
+        tags = mapOf("shop" to "bakery", "name" to "Ditsch"),
+        names  = listOf("Ditsh"),
+        addTags = mapOf("wikipedia" to "de:Brezelb%C3%A4ckerei_Ditsch"),
+        isSuggestion = true
     )
-    private val liquor_store: Feature = feature( // English localized unspecific shop=alcohol
-        "shop/alcohol",
-        mapOf("shop" to "alcohol"),
-        POINT,
-        listOf("Off licence (Alcohol shop)"),
-        listOf(),
-        listOf(),
-        listOf(),
-        true,
-        1.0f,
-        mapOf(),
-        false,
-        UK
+    private val liquor_store = feature( // English localized unspecific shop=alcohol
+        id = "shop/alcohol",
+        tags = mapOf("shop" to "alcohol"),
+        names = listOf("Off licence (Alcohol shop)"),
+        locale = UK
     )
-    private val car_dealer: Feature = feature( // German localized  unspecific shop=car
-        "shop/car",
-        mapOf("shop" to "car"),
-        POINT,
-        listOf("Autohändler"),
-        listOf("auto"),
-        listOf(),
-        listOf(),
-        true,
-        1.0f,
-        mapOf(),
-        false,
-        GERMAN
+    private val car_dealer = feature( // German localized  unspecific shop=car
+        id = "shop/car",
+        tags = mapOf("shop" to "car"),
+        names = listOf("Autohändler"),
+        terms = listOf("auto"),
+        locale = GERMAN
     )
-    private val second_hand_car_dealer: Feature = feature( // German localized shop=car with subtags
-        "shop/car/second_hand",
-        mapOf("shop" to "car", "second_hand" to "only"),
-        POINT,
-        listOf("Gebrauchtwagenhändler"),
-        listOf("auto"),
-        listOf(),
-        listOf(),
-        true,
-        1.0f,
-        mapOf(),
-        false,
-        GERMAN
+    private val second_hand_car_dealer = feature( // German localized shop=car with subtags
+        id = "shop/car/second_hand",
+        tags = mapOf("shop" to "car", "second_hand" to "only"),
+        names = listOf("Gebrauchtwagenhändler"),
+        terms = listOf("auto"),
+        locale = GERMAN
     )
-    private val scheisshaus: Feature = feature( // unsearchable feature
-        "amenity/scheißhaus",
-        mapOf("amenity" to "scheißhaus"),
-        POINT,
-        listOf("Scheißhaus"),
-        listOf(),
-        listOf(),
-        listOf(),
-        false,  // <--- not searchable!
-        1.0f,
-        mapOf(),
-        false,
-        null
+    private val scheisshaus = feature( // unsearchable feature
+        id = "amenity/scheißhaus",
+        tags = mapOf("amenity" to "scheißhaus"),
+        names = listOf("Scheißhaus"),
+        searchable = false
     )
-    private val bank: Feature = feature( // unlocalized shop=bank (Bank)
-        "amenity/bank",
-        mapOf("amenity" to "bank"),
-        POINT,
-        listOf("Bank"),
-        listOf(),
-        listOf(),
-        listOf(),
-        true,
-        1.0f,
-        mapOf(),
-        false,
-        null
+    private val bank = feature( // unlocalized shop=bank (Bank)
+        id = "amenity/bank",
+        tags = mapOf("amenity" to "bank"),
+        names = listOf("Bank")
     )
-    private val bench: Feature = feature( // unlocalized amenity=bench (PARKbank)
-        "amenity/bench",
-        mapOf("amenity" to "bench"),
-        POINT,
-        listOf("Parkbank"),
-        listOf("Bank"),
-        listOf(),
-        listOf(),
-        true,
-        5.0f,
-        mapOf(),
-        false,
-        null
+    private val bench = feature( // unlocalized amenity=bench (PARKbank)
+        id = "amenity/bench",
+        tags = mapOf("amenity" to "bench"),
+        names = listOf("Parkbank"),
+        terms = listOf("Bank"),
+        matchScore = 5.0f
     )
-    private val casino: Feature = feature( // unlocalized amenity=casino (SPIELbank)
-        "amenity/casino",
-        mapOf("amenity" to "casino"),
-        POINT,
-        listOf("Spielbank"),
-        listOf("Kasino"),
-        listOf(),
-        listOf(),
-        true,
-        1.0f,
-        mapOf(),
-        false,
-        null
+    private val casino = feature( // unlocalized amenity=casino (SPIELbank)
+        id = "amenity/casino",
+        tags = mapOf("amenity" to "casino"),
+        names = listOf("Spielbank"),
+        terms = listOf("Kasino")
     )
-    private val atm: Feature = feature( // unlocalized amenity=atm (BankOMAT)
-        "amenity/atm",
-        mapOf("amenity" to "atm"),
-        POINT,
-        listOf("Bankomat"),
-        listOf(),
-        listOf(),
-        listOf(),
-        true,
-        1.0f,
-        mapOf(),
-        false,
-        null
+    private val atm = feature( // unlocalized amenity=atm (BankOMAT)
+        id = "amenity/atm",
+        tags = mapOf("amenity" to "atm"),
+        names = listOf("Bankomat")
     )
-    private val stock_exchange: Feature =
-        feature( // unlocalized amenity=stock_exchange (has "Banking" as term)
-            "amenity/stock_exchange",
-            mapOf("amenity" to "stock_exchange"),
-            POINT,
-            listOf("Börse"),
-            listOf("Banking"),
-            listOf(),
-            listOf(),
-            true,
-            1.0f,
-            mapOf(),
-            false,
-            null
-        )
-    private val bank_of_america: Feature = feature( // Brand of a amenity=bank (has "Bank" in name)
-        "amenity/bank/Bank of America",
-        mapOf("amenity" to "bank", "name" to "Bank of America"),
-        POINT,
-        listOf("Bank of America"),
-        listOf(),
-        listOf(),
-        listOf(),
-        true,
-        1.0f,
-        mapOf(),
-        true,
-        null
+    private val stock_exchange = feature( // unlocalized amenity=stock_exchange (has "Banking" as term)
+        id = "amenity/stock_exchange",
+        tags = mapOf("amenity" to "stock_exchange"),
+        names = listOf("Börse"),
+        terms = listOf("Banking"),
     )
-    private val bank_of_liechtenstein: Feature =
-        feature( // Brand of a amenity=bank (has "Bank" in name), but low matchScore
-            "amenity/bank/Bank of Liechtenstein",
-            mapOf("amenity" to "bank", "name" to "Bank of Liechtenstein"),
-            POINT,
-            listOf("Bank of Liechtenstein"),
-            listOf(),
-            listOf(),
-            listOf(),
-            true,
-            0.2f,
-            mapOf(),
-            true,
-            null
-        )
-    private val deutsche_bank: Feature =
-        feature( // Brand of a amenity=bank (does not start with "Bank" in name)
-            "amenity/bank/Deutsche Bank",
-            mapOf("amenity" to "bank", "name" to "Deutsche Bank"),
-            POINT,
-            listOf("Deutsche Bank"),
-            listOf(),
-            listOf(),
-            listOf(),
-            true,
-            1.0f,
-            mapOf(),
-            true,
-            null
-        )
-    private val baenk: Feature =
-        feature( // amenity=bänk, to see if diacritics match non-strictly ("a" finds "ä")
-            "amenity/bänk",
-            mapOf("amenity" to "bänk"),
-            POINT,
-            listOf("Bänk"),
-            listOf(),
-            listOf(),
-            listOf(),
-            true,
-            1.0f,
-            mapOf(),
-            false,
-            null
-        )
-    private val bad_bank: Feature =
-        feature( // amenity=bank with subtags that has "Bank" in name but it is not the first word
-            "amenity/bank/bad",
-            mapOf("amenity" to "bank", "goodity" to "bad"),
-            POINT,
-            listOf("Bad Bank"),
-            listOf(),
-            listOf(),
-            listOf(),
-            true,
-            1.0f,
-            mapOf(),
-            false,
-            null
-        )
-    private val thieves_guild: Feature = feature( // only has "bank" in an alias
-        "amenity/thieves_guild",
-        mapOf("amenity" to "thieves_guild"),
-        POINT,
-        listOf("Diebesgilde", "Bankräuberausbildungszentrum"),
-        listOf(),
-        listOf(),
-        listOf(),
-        true,
-        1.0f,
-        mapOf(),
-        false,
-        null
+    private val bank_of_america = feature( // Brand of a amenity=bank (has "Bank" in name)
+        id = "amenity/bank/Bank of America",
+        tags = mapOf("amenity" to "bank", "name" to "Bank of America"),
+        names = listOf("Bank of America"),
+        isSuggestion = true
     )
-    private val miniature_train_shop: Feature =
-        feature( // feature whose name consists of several words
-            "shop/miniature_train",
-            mapOf("shop" to "miniature_train"),
-            POINT,
-            listOf("Miniature Train Shop"),
-            listOf(),
-            listOf(),
-            listOf(),
-            true,
-            1.0f,
-            mapOf(),
-            false,
-            null
-        )
+    private val bank_of_liechtenstein = feature( // Brand of a amenity=bank (has "Bank" in name), but low matchScore
+        id = "amenity/bank/Bank of Liechtenstein",
+        tags = mapOf("amenity" to "bank", "name" to "Bank of Liechtenstein"),
+        names = listOf("Bank of Liechtenstein"),
+        matchScore = 0.2f,
+        isSuggestion = true,
+    )
+    private val deutsche_bank = feature( // Brand of a amenity=bank (does not start with "Bank" in name)
+        id = "amenity/bank/Deutsche Bank",
+        tags = mapOf("amenity" to "bank", "name" to "Deutsche Bank"),
+        names = listOf("Deutsche Bank"),
+        isSuggestion = true
+    )
+    private val baenk = feature( // amenity=bänk, to see if diacritics match non-strictly ("a" finds "ä")
+        id = "amenity/bänk",
+        tags = mapOf("amenity" to "bänk"),
+        names = listOf("Bänk"),
+    )
+    private val bad_bank = feature( // amenity=bank with subtags that has "Bank" in name but it is not the first word
+        id = "amenity/bank/bad",
+        tags = mapOf("amenity" to "bank", "goodity" to "bad"),
+        names = listOf("Bad Bank")
+    )
+    private val thieves_guild = feature( // only has "bank" in an alias
+        id = "amenity/thieves_guild",
+        tags = mapOf("amenity" to "thieves_guild"),
+        names = listOf("Diebesgilde", "Bankräuberausbildungszentrum"),
+    )
+    private val miniature_train_shop = feature( // feature whose name consists of several words
+        id = "shop/miniature_train",
+        tags = mapOf("shop" to "miniature_train"),
+        names = listOf("Miniature Train Shop"),
+    )
 
     //region by tags
+    
     @Test
     fun find_no_entry_by_tags() {
-        val tags: Map<String, String> = mapOf("shop" to "supermarket")
-        val dictionary: FeatureDictionary = dictionary(bakery)
-        assertEquals(emptyList<Feature>(), dictionary.byTags(tags).find())
+        assertEquals(
+            emptyList(),
+            dictionary(bakery).byTags(mapOf("shop" to "supermarket")).find()
+        )
     }
 
     @Test
     fun find_no_entry_because_wrong_geometry() {
-        val tags: Map<String, String> = mapOf("shop" to "bakery")
-        val dictionary: FeatureDictionary = dictionary(bakery)
-        assertEquals(emptyList<Feature>(), dictionary.byTags(tags).forGeometry(GeometryType.RELATION).find())
+        assertEquals(
+            emptyList(),
+            dictionary(bakery)
+                .byTags(mapOf("shop" to "bakery"))
+                .forGeometry(GeometryType.RELATION)
+                .find()
+        )
     }
 
     @Test
     fun find_no_entry_because_wrong_locale() {
-        val tags: Map<String, String> = mapOf("shop" to "bakery")
-        val dictionary: FeatureDictionary = dictionary(bakery)
-        assertEquals(emptyList<Feature>(), dictionary.byTags(tags).forLocale(ITALIAN).find())
+        assertEquals(
+            emptyList(),
+            dictionary(bakery)
+                .byTags(mapOf("shop" to "bakery"))
+                .forLocale(ITALIAN)
+                .find()
+        )
     }
 
     @Test
     fun find_entry_because_fallback_locale() {
-        val tags: Map<String, String> = mapOf("shop" to "bakery")
-        val dictionary: FeatureDictionary = dictionary(bakery)
-        val matches: List<Feature> = dictionary.byTags(tags).forLocale(ITALIAN, null).find()
-        assertEquals(listOf(bakery), matches)
+        assertEquals(
+            listOf(bakery),
+            dictionary(bakery)
+                .byTags(mapOf("shop" to "bakery"))
+                .forLocale(ITALIAN, null)
+                .find()
+        )
     }
 
     @Test
     fun find_entry_by_tags() {
-        val tags: Map<String, String> = mapOf("shop" to "bakery")
-        val dictionary: FeatureDictionary = dictionary(bakery)
-        val matches: List<Feature> = dictionary.byTags(tags).find()
-        assertEquals(listOf(bakery), matches)
+        assertEquals(
+            listOf(bakery),
+            dictionary(bakery).byTags(mapOf("shop" to "bakery")).find()
+        )
     }
 
     @Test
     fun find_non_searchable_entry_by_tags() {
-        val tags: Map<String, String> = mapOf("amenity" to "scheißhaus")
-        val dictionary: FeatureDictionary = dictionary(scheisshaus)
-        val matches: List<Feature> = dictionary.byTags(tags).find()
-        assertEquals(listOf(scheisshaus), matches)
+        assertEquals(
+            listOf(scheisshaus),
+            dictionary(scheisshaus).byTags(mapOf("amenity" to "scheißhaus")).find()
+        )
     }
 
     @Test
     fun find_entry_by_tags_correct_geometry() {
-        val tags: Map<String, String> = mapOf("shop" to "bakery")
-        val dictionary: FeatureDictionary = dictionary(bakery)
-        val matches: List<Feature> = dictionary.byTags(tags).forGeometry(GeometryType.POINT).find()
-        assertEquals(listOf(bakery), matches)
+        assertEquals(
+            listOf(bakery),
+            dictionary(bakery)
+                .byTags(mapOf("shop" to "bakery"))
+                .forGeometry(GeometryType.POINT)
+                .find()
+        )
     }
 
     @Test
     fun find_brand_entry_by_tags() {
-        val tags: Map<String, String> = mapOf("shop" to "bakery", "name" to "Ditsch")
-        val dictionary: FeatureDictionary = dictionary(bakery, ditsch)
-        val matches: List<Feature> = dictionary.byTags(tags).inCountry("DE").find()
-        assertEquals(listOf(ditsch), matches)
+        assertEquals(
+            listOf(ditsch),
+            dictionary(bakery, ditsch)
+                .byTags(mapOf("shop" to "bakery", "name" to "Ditsch"))
+                .inCountry("DE")
+                .find()
+        )
     }
 
     @Test
     fun find_only_entries_with_given_locale() {
-        val tags: Map<String, String> = mapOf("shop" to "bakery")
-        val dictionary: FeatureDictionary = dictionary(bakery, panetteria)
-        assertEquals(listOf(panetteria), dictionary.byTags(tags).forLocale(ITALIAN).find())
-        assertEquals(emptyList<Feature>(), dictionary.byTags(tags).forLocale(ENGLISH).find())
-        assertEquals(listOf(bakery), dictionary.byTags(tags).forLocale(null as Locale?).find())
+        val tags = mapOf("shop" to "bakery")
+        val dictionary = dictionary(bakery, panetteria)
+
+        assertEquals(
+            listOf(panetteria),
+            dictionary.byTags(tags).forLocale(ITALIAN).find()
+        )
+        assertEquals(
+            emptyList(),
+            dictionary.byTags(tags).forLocale(ENGLISH).find()
+        )
+        assertEquals(
+            listOf(bakery),
+            dictionary.byTags(tags).forLocale(null).find()
+        )
     }
 
     @Test
     fun find_only_brands_finds_no_normal_entries() {
-        val tags: Map<String, String> = mapOf("shop" to "bakery", "name" to "Ditsch")
-        val dictionary: FeatureDictionary = dictionary(bakery)
-        val matches: List<Feature> = dictionary.byTags(tags).isSuggestion(true).find()
-        assertEquals(0, matches.size)
+        assertEquals(
+            0,
+            dictionary(bakery)
+                .byTags(mapOf("shop" to "bakery", "name" to "Ditsch"))
+                .isSuggestion(true)
+                .find().size
+        )
     }
 
     @Test
     fun find_no_brands_finds_only_normal_entries() {
-        val tags: Map<String, String> = mapOf("shop" to "bakery", "name" to "Ditsch")
-        val dictionary: FeatureDictionary = dictionary(bakery, ditsch)
-        val matches: List<Feature> = dictionary.byTags(tags).isSuggestion(false).find()
-        assertEquals(listOf(bakery), matches)
+        assertEquals(
+            listOf(bakery),
+            dictionary(bakery, ditsch)
+                .byTags(mapOf("shop" to "bakery", "name" to "Ditsch"))
+                .isSuggestion(false)
+                .find()
+        )
     }
 
     @Test
     fun find_multiple_brands_sorts_by_locale() {
-        val tags: Map<String, String> = mapOf("shop" to "bakery", "name" to "Ditsch")
-        val dictionary: FeatureDictionary = dictionary(ditschRussian, ditschInternational, ditsch)
-        val matches: List<Feature> = dictionary.byTags(tags).forLocale(null).find()
-        assertEquals(ditschInternational, matches[0])
+        assertEquals(
+            ditschInternational,
+            dictionary(ditschRussian, ditschInternational, ditsch)
+                .byTags(mapOf("shop" to "bakery", "name" to "Ditsch"))
+                .forLocale(null)
+                .find()
+                .first()
+        )
     }
 
     @Test
     fun find_multiple_entries_by_tags() {
-        val tags: Map<String, String> = mapOf("shop" to "bakery", "amenity" to "bank")
-        val dictionary: FeatureDictionary = dictionary(bakery, bank)
-        val matches: List<Feature> = dictionary.byTags(tags).find()
-        assertEquals(2, matches.size)
+        assertEquals(
+            2,
+            dictionary(bakery, bank)
+                .byTags(mapOf("shop" to "bakery", "amenity" to "bank"))
+                .find()
+                .size
+        )
     }
 
     @Test
     fun do_not_find_entry_with_too_specific_tags() {
-        val tags: Map<String, String> = mapOf("shop" to "car")
-        val dictionary: FeatureDictionary = dictionary(car_dealer, second_hand_car_dealer)
-        val matches: List<Feature> = dictionary.byTags(tags).forLocale(GERMAN, null).find()
-        assertEquals(listOf(car_dealer), matches)
+        assertEquals(
+            listOf(car_dealer),
+            dictionary(car_dealer, second_hand_car_dealer)
+                .byTags(mapOf("shop" to "car"))
+                .forLocale(GERMAN, null)
+                .find()
+        )
     }
 
     @Test
     fun find_entry_with_specific_tags() {
-        val tags: Map<String, String> = mapOf("shop" to "car", "second_hand" to "only")
-        val dictionary: FeatureDictionary = dictionary(car_dealer, second_hand_car_dealer)
-        val matches: List<Feature> = dictionary.byTags(tags).forLocale(GERMAN, null).find()
-        assertEquals(listOf(second_hand_car_dealer), matches)
+        assertEquals(
+            listOf(second_hand_car_dealer),
+            dictionary(car_dealer, second_hand_car_dealer)
+                .byTags(mapOf("shop" to "car", "second_hand" to "only"))
+                .forLocale(GERMAN, null)
+                .find()
+        )
     }
 
     //endregion
+    
     //region by name
+    
     @Test
     fun find_no_entry_by_name() {
-        val dictionary: FeatureDictionary = dictionary(bakery)
-        assertEquals(emptyList<Feature>(), dictionary.byTerm("Supermarkt").find())
+        assertEquals(emptyList(), dictionary(bakery).byTerm("Supermarkt").find())
     }
 
     @Test
     fun find_no_entry_by_name_because_wrong_geometry() {
-        val dictionary: FeatureDictionary = dictionary(bakery)
-        assertEquals(emptyList<Feature>(), dictionary.byTerm("Bäckerei").forGeometry(GeometryType.LINE).find())
+        assertEquals(
+            emptyList(),
+            dictionary(bakery).byTerm("Bäckerei").forGeometry(GeometryType.LINE).find()
+        )
     }
 
     @Test
     fun find_no_entry_by_name_because_wrong_country() {
-        val dictionary: FeatureDictionary = dictionary(ditsch, ditschRussian)
-        assertEquals(emptyList(), dictionary.byTerm("Ditsch").find())
-        assertEquals(emptyList(), dictionary.byTerm("Ditsch").inCountry("FR").find()) // not in France
+        val dictionary = dictionary(ditsch, ditschRussian)
+        assertEquals(
+            emptyList(),
+            dictionary.byTerm("Ditsch").find()
+        )
+        assertEquals(
+            emptyList(),
+            dictionary.byTerm("Ditsch").inCountry("FR").find()
+        ) // not in France
         assertEquals(
             emptyList(),
             dictionary.byTerm("Ditsch").inCountry("AT-9").find()
@@ -463,29 +346,34 @@ class FeatureDictionaryTest {
 
     @Test
     fun find_no_non_searchable_entry_by_name() {
-        val dictionary: FeatureDictionary = dictionary(scheisshaus)
-        assertEquals(emptyList<Feature>(), dictionary.byTerm("Scheißhaus").find())
+        assertEquals(emptyList(), dictionary(scheisshaus).byTerm("Scheißhaus").find())
     }
 
     @Test
     fun find_entry_by_name() {
-        val dictionary: FeatureDictionary = dictionary(bakery)
-        val matches: List<Feature> = dictionary.byTerm("Bäckerei").forLocale(null as Locale?).find()
-        assertEquals(listOf(bakery), matches)
+        assertEquals(
+            listOf(bakery),
+            dictionary(bakery)
+                .byTerm("Bäckerei")
+                .forLocale(null)
+                .find())
     }
 
     @Test
     fun find_entry_by_name_with_correct_geometry() {
-        val dictionary: FeatureDictionary = dictionary(bakery)
-        val matches: List<Feature> =
-            dictionary.byTerm("Bäckerei").forLocale(null as Locale?).forGeometry(GeometryType.POINT)
+        assertEquals(
+            listOf(bakery),
+            dictionary(bakery)
+                .byTerm("Bäckerei")
+                .forLocale(null)
+                .forGeometry(GeometryType.POINT)
                 .find()
-        assertEquals(listOf(bakery), matches)
+        )
     }
 
     @Test
     fun find_entry_by_name_with_correct_country() {
-        val dictionary: FeatureDictionary = dictionary(ditsch, ditschRussian, bakery)
+        val dictionary = dictionary(ditsch, ditschRussian, bakery)
         assertEquals(listOf(ditsch), dictionary.byTerm("Ditsch").inCountry("DE").find())
         assertEquals(listOf(ditsch), dictionary.byTerm("Ditsch").inCountry("DE-TH").find())
         assertEquals(listOf(ditsch), dictionary.byTerm("Ditsch").inCountry("AT").find())
@@ -496,29 +384,26 @@ class FeatureDictionaryTest {
 
     @Test
     fun find_entry_by_name_case_insensitive() {
-        val dictionary: FeatureDictionary = dictionary(bakery)
-        val matches: List<Feature> = dictionary.byTerm("BÄCkErEI").forLocale(null as Locale?).find()
-        assertEquals(listOf(bakery), matches)
+        assertEquals(listOf(bakery), dictionary(bakery).byTerm("BÄCkErEI").forLocale(null).find())
     }
 
     @Test
     fun find_entry_by_name_diacritics_insensitive() {
-        val dictionary: FeatureDictionary = dictionary(bakery)
-        val matches: List<Feature> = dictionary.byTerm("Backérèi").forLocale(null as Locale?).find()
-        assertEquals(listOf(bakery), matches)
+        assertEquals(listOf(bakery), dictionary(bakery).byTerm("Backérèi").forLocale(null).find())
     }
 
     @Test
     fun find_entry_by_term() {
-        val dictionary: FeatureDictionary = dictionary(bakery)
-        val matches: List<Feature> = dictionary.byTerm("bro").forLocale(null as Locale?).find()
-        assertEquals(listOf(bakery), matches)
+        assertEquals(listOf(bakery), dictionary(bakery).byTerm("bro").forLocale(null).find())
     }
 
     @Test
     fun find_entry_by_term_brackets() {
-        val dictionary: FeatureDictionary = dictionary(liquor_store)
-        assertEquals(listOf(liquor_store), dictionary.byTerm("Alcohol").forLocale(UK).find())
+        val dictionary = dictionary(liquor_store)
+        assertEquals(
+            listOf(liquor_store),
+            dictionary.byTerm("Alcohol").forLocale(UK).find()
+        )
         assertEquals(
             listOf(liquor_store),
             dictionary.byTerm("Off licence (Alcohol Shop)").forLocale(UK).find()
@@ -535,16 +420,12 @@ class FeatureDictionaryTest {
 
     @Test
     fun find_entry_by_term_case_insensitive() {
-        val dictionary: FeatureDictionary = dictionary(bakery)
-        val matches: List<Feature> = dictionary.byTerm("BRO").forLocale(null as Locale?).find()
-        assertEquals(listOf(bakery), matches)
+        assertEquals(listOf(bakery), dictionary(bakery).byTerm("BRO").forLocale(null).find())
     }
 
     @Test
     fun find_entry_by_term_diacritics_insensitive() {
-        val dictionary: FeatureDictionary = dictionary(bakery)
-        val matches: List<Feature> = dictionary.byTerm("bró").forLocale(null as Locale?).find()
-        assertEquals(listOf(bakery), matches)
+        assertEquals(listOf(bakery), dictionary(bakery).byTerm("bró").forLocale(null).find())
     }
 
     @Test
@@ -561,45 +442,61 @@ class FeatureDictionaryTest {
 
     @Test
     fun find_multiple_entries_by_name_but_respect_limit() {
-        val dictionary: FeatureDictionary = dictionary(second_hand_car_dealer, car_dealer)
-        val matches: List<Feature> =
-            dictionary.byTerm("auto").forLocale(GERMAN).limit(1).find()
-        assertEquals(1, matches.size)
+        assertEquals(
+            1,
+            dictionary(second_hand_car_dealer, car_dealer)
+                .byTerm("auto")
+                .forLocale(GERMAN)
+                .limit(1)
+                .find()
+                .size
+        )
     }
 
     @Test
     fun find_only_brands_by_name_finds_no_normal_entries() {
-        val dictionary: FeatureDictionary = dictionary(bakery)
-        val matches: List<Feature> =
-            dictionary.byTerm("Bäckerei").forLocale(null as Locale?).isSuggestion(true).find()
-        assertEquals(0, matches.size)
+        assertEquals(
+            0,
+            dictionary(bakery)
+                .byTerm("Bäckerei")
+                .forLocale(null)
+                .isSuggestion(true)
+                .find()
+                .size
+        )
     }
 
     @Test
     fun find_no_brands_by_name_finds_only_normal_entries() {
-        val dictionary: FeatureDictionary = dictionary(bank, bank_of_america)
-        val matches: List<Feature> =
-            dictionary.byTerm("Bank").forLocale(null as Locale?).isSuggestion(false).find()
-        assertEquals(listOf(bank), matches)
+        assertEquals(
+            listOf(bank),
+            dictionary(bank, bank_of_america)
+                .byTerm("Bank")
+                .forLocale(null)
+                .isSuggestion(false)
+                .find()
+        )
     }
 
     @Test
     fun find_no_entry_by_term_because_wrong_locale() {
-        val dictionary: FeatureDictionary = dictionary(bakery)
-        assertEquals(emptyList<Feature>(), dictionary.byTerm("Bäck").forLocale(ITALIAN).find())
+        assertEquals(
+            emptyList(),
+            dictionary(bakery).byTerm("Bäck").forLocale(ITALIAN).find()
+        )
     }
 
     @Test
     fun find_entry_by_term_because_fallback_locale() {
-        val dictionary: FeatureDictionary = dictionary(bakery)
-        val matches: List<Feature> =
-            dictionary.byTerm("Bäck").forLocale(ITALIAN, null).find()
-        assertEquals(listOf(bakery), matches)
+        assertEquals(
+            listOf(bakery),
+            dictionary(bakery).byTerm("Bäck").forLocale(ITALIAN, null).find()
+        )
     }
 
     @Test
     fun find_multi_word_brand_feature() {
-        val dictionary: FeatureDictionary = dictionary(deutsche_bank)
+        val dictionary = dictionary(deutsche_bank)
         assertEquals(listOf(deutsche_bank), dictionary.byTerm("Deutsche Ba").find())
         assertEquals(listOf(deutsche_bank), dictionary.byTerm("Deut").find())
         // by-word only for non-brand features
@@ -608,62 +505,66 @@ class FeatureDictionaryTest {
 
     @Test
     fun find_multi_word_feature() {
-        val dictionary: FeatureDictionary = dictionary(miniature_train_shop)
+        val dictionary = dictionary(miniature_train_shop)
         assertEquals(
             listOf(miniature_train_shop),
-            dictionary.byTerm("mini").forLocale(null as Locale?).find()
+            dictionary.byTerm("mini").forLocale(null).find()
         )
         assertEquals(
             listOf(miniature_train_shop),
-            dictionary.byTerm("train").forLocale(null as Locale?).find()
+            dictionary.byTerm("train").forLocale(null).find()
         )
         assertEquals(
             listOf(miniature_train_shop),
-            dictionary.byTerm("shop").forLocale(null as Locale?).find()
+            dictionary.byTerm("shop").forLocale(null).find()
         )
         assertEquals(
             listOf(miniature_train_shop),
-            dictionary.byTerm("Miniature Trai").forLocale(null as Locale?).find()
+            dictionary.byTerm("Miniature Trai").forLocale(null).find()
         )
         assertEquals(
             listOf(miniature_train_shop),
-            dictionary.byTerm("Miniature Train Shop").forLocale(null as Locale?).find()
+            dictionary.byTerm("Miniature Train Shop").forLocale(null).find()
         )
-        assertTrue(dictionary.byTerm("Train Sho").forLocale(null as Locale?).find().isEmpty())
+        assertTrue(dictionary.byTerm("Train Sho").forLocale(null).find().isEmpty())
     }
 
     @Test
     fun find_entry_by_tag_value() {
-        val dictionary: FeatureDictionary = dictionary(panetteria)
-        val matches: List<Feature> = dictionary.byTerm("bakery").forLocale(ITALIAN).find()
-        assertEquals(listOf(panetteria), matches)
+        assertEquals(
+            listOf(panetteria),
+            dictionary(panetteria).byTerm("bakery").forLocale(ITALIAN).find()
+        )
     }
 
     //endregion
+
     //region by id
+
     @Test
     fun find_no_entry_by_id() {
-        val dictionary: FeatureDictionary = dictionary(bakery)
-        assertNull(dictionary.byId("amenity/hospital").get())
+        assertNull(dictionary(bakery).byId("amenity/hospital").get())
     }
 
     @Test
     fun find_no_entry_by_id_because_unlocalized_results_are_excluded() {
-        val dictionary: FeatureDictionary = dictionary(bakery)
-        assertNull(dictionary.byId("shop/bakery").forLocale(ITALIAN).get())
+        assertNull(dictionary(bakery).byId("shop/bakery").forLocale(ITALIAN).get())
     }
 
     @Test
     fun find_entry_by_id() {
-        val dictionary: FeatureDictionary = dictionary(bakery)
+        val dictionary = dictionary(bakery)
         assertEquals(bakery, dictionary.byId("shop/bakery").get())
         assertEquals(bakery, dictionary.byId("shop/bakery").forLocale(CHINESE, null).get())
     }
 
     @Test
     fun find_localized_entry_by_id() {
-        val dictionary: FeatureDictionary = dictionary(panetteria)
-        assertEquals(panetteria, dictionary.byId("shop/bakery").forLocale(ITALIAN).get())
+        val dictionary = dictionary(panetteria)
+        assertEquals(
+            panetteria,
+            dictionary.byId("shop/bakery").forLocale(ITALIAN).get()
+        )
         assertEquals(
             panetteria,
             dictionary.byId("shop/bakery").forLocale(ITALIAN, null).get()
@@ -672,7 +573,7 @@ class FeatureDictionaryTest {
 
     @Test
     fun find_no_entry_by_id_because_wrong_country() {
-        val dictionary: FeatureDictionary = dictionary(ditsch)
+        val dictionary = dictionary(ditsch)
         assertNull(dictionary.byId("shop/bakery/Ditsch").get())
         assertNull(dictionary.byId("shop/bakery/Ditsch").inCountry("IT").get())
         assertNull(dictionary.byId("shop/bakery/Ditsch").inCountry("AT-9").get())
@@ -680,19 +581,19 @@ class FeatureDictionaryTest {
 
     @Test
     fun find_entry_by_id_in_country() {
-        val dictionary: FeatureDictionary = dictionary(ditsch)
+        val dictionary = dictionary(ditsch)
         assertEquals(ditsch, dictionary.byId("shop/bakery/Ditsch").inCountry("AT").get())
         assertEquals(ditsch, dictionary.byId("shop/bakery/Ditsch").inCountry("DE").get())
     }
 
     //endregion
+
     @Test
     fun find_by_term_sorts_result_in_correct_order() {
-        val dictionary: FeatureDictionary = dictionary(
+        val dictionary = dictionary(
             casino, baenk, bad_bank, stock_exchange, bank_of_liechtenstein, bank, bench, atm,
             bank_of_america, deutsche_bank, thieves_guild
         )
-        val matches: List<Feature> = dictionary.byTerm("Bank").forLocale(null as Locale?).find()
         assertEquals(
             listOf(
                 bank,  // exact name matches
@@ -706,29 +607,33 @@ class FeatureDictionaryTest {
                 stock_exchange // found word in terms - lower matchScore
                 // casino,       // not included: "Spielbank" does not start with "bank"
                 // deutsche_bank // not included: "Deutsche Bank" does not start with "bank" and is a brand
-            ), matches
+            ),
+            dictionary.byTerm("Bank").forLocale(null).find()
         )
     }
 
     @Test
     fun some_tests_with_real_data() {
-        val featureCollection: LocalizedFeatureCollection =
-            IDLocalizedFeatureCollection(LivePresetDataAccessAdapter())
+        val featureCollection = IDLocalizedFeatureCollection(LivePresetDataAccessAdapter())
         featureCollection.getAll(listOf(ENGLISH))
+
         val dictionary = FeatureDictionary(featureCollection, null)
-        val matches: List<Feature> = dictionary
+
+        val matches = dictionary
             .byTags(mapOf("amenity" to "studio"))
             .forLocale(ENGLISH)
             .find()
         assertEquals(1, matches.size)
         assertEquals("Studio", matches[0].name)
-        val matches2: List<Feature> = dictionary
+
+        val matches2 = dictionary
             .byTags(mapOf("amenity" to "studio", "studio" to "audio"))
             .forLocale(ENGLISH)
             .find()
         assertEquals(1, matches2.size)
         assertEquals("Recording Studio", matches2[0].name)
-        val matches3: List<Feature> = dictionary
+
+        val matches3 = dictionary
             .byTerm("Chinese Res")
             .forLocale(ENGLISH)
             .find()
@@ -738,87 +643,77 @@ class FeatureDictionaryTest {
 
     @Test
     fun issue19() {
-        val lush: Feature = feature(
-            "shop/cosmetics/lush-a08666",
-            mapOf("brand:wikidata" to "Q1585448", "shop" to "cosmetics"),
-            listOf(GeometryType.POINT, GeometryType.AREA),
-            listOf("Lush"),
-            listOf("lush"),
-            listOf(),
-            listOf(),
-            true,
-            2.0f,
-            mapOf(
+        val lush = feature(
+            id = "shop/cosmetics/lush-a08666",
+            tags = mapOf("brand:wikidata" to "Q1585448", "shop" to "cosmetics"),
+            geometries = listOf(GeometryType.POINT, GeometryType.AREA),
+            names = listOf("Lush"),
+            terms = listOf("lush"),
+            matchScore = 2.0f,
+            addTags = mapOf(
                 "brand" to "Lush",
                 "brand:wikidata" to "Q1585448",
                 "name" to "Lush",
                 "shop" to "cosmetics"
             ),
-            true,
-            null
+            isSuggestion = true,
         )
-        val dictionary: FeatureDictionary = dictionary(lush)
-        val byTags: List<Feature> = dictionary
+
+        val dictionary = dictionary(lush)
+
+        val byTags = dictionary
             .byTags(mapOf("brand:wikidata" to "Q1585448", "shop" to "cosmetics"))
             .forLocale(GERMAN, null)
             .inCountry("DE")
             .find()
         assertEquals(1, byTags.size)
         assertEquals(lush, byTags[0])
-        val byTerm: List<Feature> = dictionary
+
+        val byTerm = dictionary
             .byTerm("Lush")
             .forLocale(GERMAN, null)
             .inCountry("DE")
             .find()
         assertEquals(1, byTerm.size)
         assertEquals(lush, byTerm[0])
-        val byId: Feature? = dictionary
+
+        val byId = dictionary
             .byId("shop/cosmetics/lush-a08666")
             .forLocale(GERMAN, null)
             .inCountry("DE")
             .get()
         assertEquals(lush, byId)
     }
+}
 
-    companion object {
-        private val POINT: List<GeometryType> = listOf(GeometryType.POINT)
-        private fun dictionary(vararg entries: Feature): FeatureDictionary {
-            return FeatureDictionary(
-                TestLocalizedFeatureCollection(entries.filterNot { it.isSuggestion }),
-                TestPerCountryFeatureCollection(entries.filter { it.isSuggestion })
-            )
-        }
+private val ENGLISH = Locale("en")
+private val UK = Locale("en","UK")
+private val ITALIAN = Locale("it")
+private val GERMAN = Locale("de")
+private val CHINESE = Locale("zh")
 
-        private fun feature(
-            id: String,
-            tags: Map<String, String>,
-            geometries: List<GeometryType>,
-            names: List<String>,
-            terms: List<String>,
-            countryCodes: List<String>,
-            excludeCountryCodes: List<String>,
-            searchable: Boolean,
-            matchScore: Float,
-            addTags: Map<String, String>,
-            isSuggestion: Boolean,
-            locale: Locale?
-        ): Feature {
-            return if (isSuggestion) {
-                BaseFeature(
-                    id, tags, geometries, null, null, names, terms, countryCodes,
-                    excludeCountryCodes, searchable, matchScore, isSuggestion, addTags, mapOf()
-                )
-            } else {
-                val f = BaseFeature(
-                    id, tags, geometries, null, null, names, terms, countryCodes,
-                    excludeCountryCodes, searchable, matchScore, false, addTags, mapOf()
-                )
-                if (locale != null) {
-                    LocalizedFeature(f, locale, f.names, f.terms)
-                } else {
-                    f
-                }
-            }
-        }
-    }
+private fun dictionary(vararg entries: Feature) = FeatureDictionary(
+    TestLocalizedFeatureCollection(entries.filterNot { it.isSuggestion }),
+    TestPerCountryFeatureCollection(entries.filter { it.isSuggestion })
+)
+
+private fun feature(
+    id: String,
+    tags: Map<String, String>,
+    geometries: List<GeometryType> = listOf(GeometryType.POINT),
+    names: List<String>,
+    terms: List<String> = listOf(),
+    countryCodes: List<String> = listOf(),
+    excludeCountryCodes: List<String> = listOf(),
+    searchable: Boolean = true,
+    matchScore: Float = 1.0f,
+    addTags: Map<String, String> = mapOf(),
+    isSuggestion: Boolean = false,
+    locale: Locale? = null
+): Feature {
+    val f = BaseFeature(
+        id, tags, geometries, null, null, names, terms, countryCodes,
+        excludeCountryCodes, searchable, matchScore, isSuggestion, addTags, mapOf()
+    )
+    return if (locale != null) LocalizedFeature(f, locale, f.names, f.terms) else f
 }

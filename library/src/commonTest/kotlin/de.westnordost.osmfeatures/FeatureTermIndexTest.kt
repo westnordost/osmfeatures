@@ -16,7 +16,7 @@ class FeatureTermIndexTest {
         val f1 = feature("a", "b")
         val f2 = feature("c")
         val index = index(f1, f2)
-        assertEquals(setOf(f1), index.getAll("b").toSet())
+        assertEquals(setOf(f1), index.getAll("b"))
     }
 
     @Test
@@ -24,7 +24,7 @@ class FeatureTermIndexTest {
         val f1 = feature("a", "b")
         val f2 = feature("a", "c")
         val index = index(f1, f2)
-        assertEquals(setOf(f1, f2), index.getAll("a").toSet())
+        assertEquals(setOf(f1, f2), index.getAll("a"))
     }
 
     @Test
@@ -32,15 +32,15 @@ class FeatureTermIndexTest {
         val f1 = feature("anything")
         val f2 = feature("anybody")
         val index = index(f1, f2)
-        assertEquals(setOf(f1, f2), index.getAll("any").toSet())
-        assertEquals(setOf(f1), index.getAll("anyt").toSet())
+        assertEquals(setOf(f1, f2), index.getAll("any"))
+        assertEquals(setOf(f1), index.getAll("anyt"))
     }
 
     @Test
     fun do_not_get_one_feature_twice() {
         val f1 = feature("something", "someone")
         val index = index(f1)
-        assertEquals(listOf(f1), index.getAll("some"))
+        assertEquals(setOf(f1), index.getAll("some"))
     }
 }
 
