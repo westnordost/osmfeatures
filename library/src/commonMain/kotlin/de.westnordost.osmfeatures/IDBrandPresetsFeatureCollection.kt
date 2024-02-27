@@ -19,21 +19,21 @@ class IDBrandPresetsFeatureCollection internal constructor(private val fileAcces
     override fun getAll(countryCodes: List<String?>): Collection<Feature> {
         val result: MutableMap<String, Feature> = HashMap()
         for (cc in countryCodes) {
-            getOrLoadPerCountryFeatures(cc)?.let { result.putAll(it) }
+            result.putAll(getOrLoadPerCountryFeatures(cc))
         }
         return result.values
     }
 
     override fun get(id: String, countryCodes: List<String?>): Feature? {
         for (countryCode in countryCodes) {
-            val result = getOrLoadPerCountryFeatures(countryCode)?.get(id)
+            val result = getOrLoadPerCountryFeatures(countryCode).get(id)
             if (result != null) return result
         }
         return null
     }
 
-    private fun getOrLoadPerCountryFeatures(countryCode: String?): LinkedHashMap<String, Feature>? {
-        return CollectionUtils.synchronizedGetOrCreate(featuresByIdByCountryCode, countryCode) { this.loadPerCountryFeatures(it) }
+    private fun getOrLoadPerCountryFeatures(countryCode: String?): LinkedHashMap<String, Feature> {
+        return featuresByIdByCountryCode.synchronizedGetOrCreate(countryCode, ::loadPerCountryFeatures)
     }
 
     private fun loadPerCountryFeatures(countryCode: String?): LinkedHashMap<String, Feature> {

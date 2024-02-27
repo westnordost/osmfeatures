@@ -26,8 +26,8 @@ class IDLocalizedFeatureCollection(private val fileAccess: FileAccessAdapter) :
             throw RuntimeException(e)
         }
     }
-    private fun getOrLoadLocalizedFeatures(locales: List<Locale?>): LinkedHashMap<String, Feature>? {
-        return CollectionUtils.synchronizedGetOrCreate(localizedFeatures, locales, ::loadLocalizedFeatures)
+    private fun getOrLoadLocalizedFeatures(locales: List<Locale?>): LinkedHashMap<String, Feature> {
+        return localizedFeatures.synchronizedGetOrCreate(locales, ::loadLocalizedFeatures)
     }
 
     private fun loadLocalizedFeatures(locales: List<Locale?>): LinkedHashMap<String, Feature> {
@@ -37,7 +37,7 @@ class IDLocalizedFeatureCollection(private val fileAccess: FileAccessAdapter) :
             val locale = it.previous()
             if (locale != null) {
                 for (localeComponent in getLocaleComponents(locale)) {
-                    getOrLoadLocalizedFeaturesList(localeComponent)?.let { it1 -> putAllFeatures(result, it1) }
+                    putAllFeatures(result, getOrLoadLocalizedFeaturesList(localeComponent))
                 }
             } else {
                 putAllFeatures(result, featuresById.values)
@@ -46,14 +46,8 @@ class IDLocalizedFeatureCollection(private val fileAccess: FileAccessAdapter) :
         return result
     }
 
-    private fun getOrLoadLocalizedFeaturesList(locale: Locale): List<LocalizedFeature>? {
-        return CollectionUtils.synchronizedGetOrCreate(
-            localizedFeaturesList, locale
-        ) {locale: Locale? ->
-            loadLocalizedFeaturesList(
-                locale
-            )
-        }
+    private fun getOrLoadLocalizedFeaturesList(locale: Locale): List<LocalizedFeature> {
+        return localizedFeaturesList.synchronizedGetOrCreate(locale, ::loadLocalizedFeaturesList)
     }
 
     private fun loadLocalizedFeaturesList(locale: Locale?): List<LocalizedFeature> {
@@ -66,11 +60,11 @@ class IDLocalizedFeatureCollection(private val fileAccess: FileAccessAdapter) :
     }
 
     override fun getAll(locales: List<Locale?>): Collection<Feature> {
-        return getOrLoadLocalizedFeatures(locales)?.values ?: emptyList()
+        return getOrLoadLocalizedFeatures(locales).values
     }
 
     override operator fun get(id: String, locales: List<Locale?>): Feature? {
-        return getOrLoadLocalizedFeatures(locales)?.get(id)
+        return getOrLoadLocalizedFeatures(locales)[id]
     }
 
     companion object {

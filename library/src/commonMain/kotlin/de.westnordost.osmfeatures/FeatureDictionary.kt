@@ -53,11 +53,11 @@ class FeatureDictionary internal constructor(
         if (tags.isEmpty()) return emptyList()
         val foundFeatures: MutableList<Feature> = mutableListOf()
         if (isSuggestion == null || !isSuggestion) {
-            foundFeatures.addAll(getTagsIndex(locales)?.getAll(tags).orEmpty())
+            foundFeatures.addAll(getTagsIndex(locales).getAll(tags))
         }
         if (isSuggestion == null || isSuggestion) {
             val countryCodes = dissectCountryCode(countryCode)
-            foundFeatures.addAll(getBrandTagsIndex(countryCodes)?.getAll(tags).orEmpty())
+            foundFeatures.addAll(getBrandTagsIndex(countryCodes).getAll(tags))
         }
         foundFeatures.removeAll { feature: Feature ->
             !isFeatureMatchingParameters(
@@ -167,7 +167,7 @@ class FeatureDictionary internal constructor(
         if (isSuggestion == null || !isSuggestion) {
             // a. matches with presets first
             val foundFeaturesByName: MutableList<Feature> =
-                getNamesIndex(locales)?.getAll(canonicalSearch).orEmpty().toMutableList()
+                getNamesIndex(locales).getAll(canonicalSearch).toMutableList()
             foundFeaturesByName.removeAll { feature: Feature ->
                 !isFeatureMatchingParameters(
                     feature,
@@ -186,7 +186,7 @@ class FeatureDictionary internal constructor(
         if (isSuggestion == null || isSuggestion) {
             // b. matches with brand names second
             val countryCodes = dissectCountryCode(countryCode)
-            val foundBrandFeatures = getBrandNamesIndex(countryCodes)?.getAll(canonicalSearch).orEmpty().toMutableList()
+            val foundBrandFeatures = getBrandNamesIndex(countryCodes).getAll(canonicalSearch).toMutableList()
             foundBrandFeatures.removeAll { feature: Feature ->
                 !isFeatureMatchingParameters(
                     feature,
@@ -205,7 +205,7 @@ class FeatureDictionary internal constructor(
         }
         if (isSuggestion == null || !isSuggestion) {
             // c. matches with terms third
-            val foundFeaturesByTerm = getTermsIndex(locales)?.getAll(canonicalSearch).orEmpty().toMutableList()
+            val foundFeaturesByTerm = getTermsIndex(locales).getAll(canonicalSearch).toMutableList()
             foundFeaturesByTerm.removeAll { feature: Feature ->
                 !isFeatureMatchingParameters(
                     feature,
@@ -232,7 +232,7 @@ class FeatureDictionary internal constructor(
         }
         if (isSuggestion == null || !isSuggestion) {
             // d. matches with tag values fourth
-            val foundFeaturesByTagValue = getTagValuesIndex(locales)?.getAll(canonicalSearch).orEmpty().toMutableList()
+            val foundFeaturesByTagValue = getTagValuesIndex(locales).getAll(canonicalSearch).toMutableList()
             foundFeaturesByTagValue.removeAll { feature: Feature ->
                 !isFeatureMatchingParameters(
                     feature,
@@ -256,12 +256,8 @@ class FeatureDictionary internal constructor(
         //endregion
         //region Lazily get or create Indexes
         /** lazily get or create tags index for given locale(s)  */
-        private fun getTagsIndex(locales: List<Locale?>): FeatureTagsIndex? {
-            return CollectionUtils.synchronizedGetOrCreate(
-                tagsIndexes,
-                locales,
-                ::createTagsIndex
-            )
+        private fun getTagsIndex(locales: List<Locale?>): FeatureTagsIndex {
+            return tagsIndexes.synchronizedGetOrCreate(locales, ::createTagsIndex)
         }
 
         private fun createTagsIndex(locales: List<Locale?>): FeatureTagsIndex {
@@ -269,13 +265,8 @@ class FeatureDictionary internal constructor(
         }
 
         /** lazily get or create names index for given locale(s)  */
-        private fun getNamesIndex(locales: List<Locale?>): FeatureTermIndex? {
-            return CollectionUtils.synchronizedGetOrCreate(
-                namesIndexes,
-                locales,
-                ::createNamesIndex
-            )
-        }
+        private fun getNamesIndex(locales: List<Locale?>): FeatureTermIndex =
+            namesIndexes.synchronizedGetOrCreate(locales, ::createNamesIndex)
 
         private fun createNamesIndex(locales: List<Locale?>): FeatureTermIndex {
             val features = featureCollection.getAll(locales)
@@ -295,12 +286,8 @@ class FeatureDictionary internal constructor(
         }
 
         /** lazily get or create terms index for given locale(s)  */
-        private fun getTermsIndex(locales: List<Locale?>): FeatureTermIndex? {
-            return CollectionUtils.synchronizedGetOrCreate(
-                termsIndexes,
-                locales,
-                ::createTermsIndex
-            )
+        private fun getTermsIndex(locales: List<Locale?>): FeatureTermIndex {
+            return termsIndexes.synchronizedGetOrCreate(locales, ::createTermsIndex)
         }
 
         private fun createTermsIndex(locales: List<Locale?>): FeatureTermIndex {
@@ -311,12 +298,8 @@ class FeatureDictionary internal constructor(
         }
 
         /** lazily get or create tag values index  */
-        private fun getTagValuesIndex(locales: List<Locale?>): FeatureTermIndex? {
-            return CollectionUtils.synchronizedGetOrCreate(
-                tagValuesIndexes,
-                locales,
-                ::createTagValuesIndex
-            )
+        private fun getTagValuesIndex(locales: List<Locale?>): FeatureTermIndex {
+            return tagValuesIndexes.synchronizedGetOrCreate(locales, ::createTagValuesIndex)
         }
 
         private fun createTagValuesIndex(locales: List<Locale?>): FeatureTermIndex {
@@ -332,12 +315,8 @@ class FeatureDictionary internal constructor(
         }
 
         /** lazily get or create brand names index for country  */
-        private fun getBrandNamesIndex(countryCodes: List<String?>): FeatureTermIndex? {
-            return CollectionUtils.synchronizedGetOrCreate(
-                brandNamesIndexes,
-                countryCodes,
-                ::createBrandNamesIndex
-            )
+        private fun getBrandNamesIndex(countryCodes: List<String?>): FeatureTermIndex {
+            return brandNamesIndexes.synchronizedGetOrCreate(countryCodes, ::createBrandNamesIndex)
         }
 
         private fun createBrandNamesIndex(countryCodes: List<String?>): FeatureTermIndex {
@@ -351,12 +330,8 @@ class FeatureDictionary internal constructor(
         }
 
         /** lazily get or create tags index for the given countries  */
-        private fun getBrandTagsIndex(countryCodes: List<String?>): FeatureTagsIndex? {
-            return CollectionUtils.synchronizedGetOrCreate(
-                brandTagsIndexes,
-                countryCodes,
-                ::createBrandTagsIndex
-            )
+        private fun getBrandTagsIndex(countryCodes: List<String?>): FeatureTagsIndex {
+            return brandTagsIndexes.synchronizedGetOrCreate(countryCodes, ::createBrandTagsIndex)
         }
 
         private fun createBrandTagsIndex(countryCodes: List<String?>): FeatureTagsIndex {
