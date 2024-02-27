@@ -280,19 +280,19 @@ class FeatureDictionary internal constructor(
 
     private fun createNamesIndex(locales: List<Locale?>): FeatureTermIndex {
         val features = featureCollection.getAll(locales)
-        return FeatureTermIndex(features, FeatureTermIndex.Selector { feature: Feature ->
-            if (!feature.isSearchable) return@Selector emptyList<String>()
+        return FeatureTermIndex(features) { feature: Feature ->
+            if (!feature.isSearchable) return@FeatureTermIndex emptyList<String>()
             val names: List<String> = feature.canonicalNames
             val result = ArrayList(names)
-                for (name in names) {
-                    if (name.contains(" ")) {
-                        result.addAll(
-                            name.replace("[()]", "").split(" ")
-                        )
-                    }
+            for (name in names) {
+                if (name.contains(" ")) {
+                    result.addAll(
+                        name.replace("[()]", "").split(" ")
+                    )
                 }
+            }
             result
-        })
+        }
     }
 
     /** lazily get or create terms index for given locale(s)  */
@@ -301,10 +301,9 @@ class FeatureDictionary internal constructor(
     }
 
     private fun createTermsIndex(locales: List<Locale?>): FeatureTermIndex {
-        return FeatureTermIndex(featureCollection.getAll(locales), FeatureTermIndex.Selector { feature: Feature ->
-            if (!feature.isSearchable) return@Selector emptyList<String>()
-            feature.canonicalTerms
-        })
+        return FeatureTermIndex(featureCollection.getAll(locales)) { feature: Feature ->
+            if (!feature.isSearchable) emptyList() else feature.canonicalTerms
+        }
     }
 
     /** lazily get or create tag values index  */
@@ -313,15 +312,15 @@ class FeatureDictionary internal constructor(
     }
 
     private fun createTagValuesIndex(locales: List<Locale?>): FeatureTermIndex {
-        return FeatureTermIndex(featureCollection.getAll(locales), FeatureTermIndex.Selector { feature: Feature ->
-            if (!feature.isSearchable) return@Selector emptyList<String>()
+        return FeatureTermIndex(featureCollection.getAll(locales)) { feature: Feature ->
+            if (!feature.isSearchable) return@FeatureTermIndex emptyList<String>()
 
-            val result: ArrayList<String> = ArrayList(feature.tags.size)
+            val result = ArrayList<String>(feature.tags.size)
             for (tagValue in feature.tags.values) {
                 if (tagValue != "*") result.add(tagValue)
             }
-            return@Selector result
-        })
+            return@FeatureTermIndex result
+        }
     }
 
     /** lazily get or create brand names index for country  */
@@ -331,11 +330,11 @@ class FeatureDictionary internal constructor(
 
     private fun createBrandNamesIndex(countryCodes: List<String?>): FeatureTermIndex {
         return if (brandFeatureCollection == null) {
-            FeatureTermIndex(emptyList(), null)
-        } else FeatureTermIndex(
-            brandFeatureCollection.getAll(countryCodes)
-        ) {
-            if (!it.isSearchable) emptyList() else it.canonicalNames
+            FeatureTermIndex(emptyList()) { emptyList() }
+        } else {
+            FeatureTermIndex(brandFeatureCollection.getAll(countryCodes)) { feature ->
+                if (!feature.isSearchable) emptyList() else feature.canonicalNames
+            }
         }
     }
 
