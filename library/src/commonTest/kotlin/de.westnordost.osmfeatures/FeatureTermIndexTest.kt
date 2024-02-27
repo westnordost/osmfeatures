@@ -16,7 +16,7 @@ class FeatureTermIndexTest {
         val f1 = feature("a", "b")
         val f2 = feature("c")
         val index = index(f1, f2)
-        assertEqualsIgnoreOrder(listOf(f1), index.getAll("b"))
+        assertEquals(setOf(f1), index.getAll("b").toSet())
     }
 
     @Test
@@ -24,7 +24,7 @@ class FeatureTermIndexTest {
         val f1 = feature("a", "b")
         val f2 = feature("a", "c")
         val index = index(f1, f2)
-        assertEqualsIgnoreOrder(listOf(f1, f2), index.getAll("a"))
+        assertEquals(setOf(f1, f2), index.getAll("a").toSet())
     }
 
     @Test
@@ -32,8 +32,8 @@ class FeatureTermIndexTest {
         val f1 = feature("anything")
         val f2 = feature("anybody")
         val index = index(f1, f2)
-        assertEqualsIgnoreOrder(listOf(f1, f2), index.getAll("any"))
-        assertEqualsIgnoreOrder(listOf(f1), index.getAll("anyt"))
+        assertEquals(setOf(f1, f2), index.getAll("any").toSet())
+        assertEquals(setOf(f1), index.getAll("anyt").toSet())
     }
 
     @Test

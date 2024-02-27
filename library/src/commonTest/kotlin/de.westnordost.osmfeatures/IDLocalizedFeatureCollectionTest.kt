@@ -31,7 +31,7 @@ class IDLocalizedFeatureCollectionTest {
         // getting non-localized features
         val notLocalized = listOf<Locale?>(null)
         val notLocalizedFeatures = c.getAll(notLocalized)
-        assertEqualsIgnoreOrder(listOf("test", "test", "test"), notLocalizedFeatures.map { it.name })
+        assertEquals(setOf("test", "test", "test"), notLocalizedFeatures.map { it.name }.toSet())
         assertEquals("test", c.get("some/id", notLocalized)?.name)
         assertEquals("test", c.get("another/id", notLocalized)?.name)
         assertEquals("test", c.get("yet/another/id", notLocalized)?.name)
@@ -39,7 +39,7 @@ class IDLocalizedFeatureCollectionTest {
         // getting English features
         val english = listOf(ENGLISH)
         val englishFeatures = c.getAll(english)
-        assertEqualsIgnoreOrder(listOf("Bakery"), englishFeatures.map { it.name })
+        assertEquals(setOf("Bakery"), englishFeatures.map { it.name }.toSet())
         assertEquals("Bakery", c.get("some/id", english)?.name)
         assertNull(c.get("another/id", english))
         assertNull(c.get("yet/another/id", english))
@@ -48,7 +48,7 @@ class IDLocalizedFeatureCollectionTest {
         // this also tests if the fallback from de-DE to de works if de-DE.json does not exist
         val germany = listOf(GERMANY)
         val germanyFeatures = c.getAll(germany)
-        assertEqualsIgnoreOrder(listOf("Bäckerei", "Gullideckel"), germanyFeatures.map { it.name })
+        assertEquals(setOf("Bäckerei", "Gullideckel"), germanyFeatures.map { it.name }.toSet())
         assertEquals("Bäckerei", c.get("some/id", germany)?.name)
         assertEquals("Gullideckel", c.get("another/id", germany)?.name)
         assertNull(c.get("yet/another/id", germany))
@@ -56,9 +56,9 @@ class IDLocalizedFeatureCollectionTest {
         // getting features through fallback chain
         val locales = listOf<Locale?>(ENGLISH, GERMANY, null)
         val fallbackFeatures = c.getAll(locales)
-        assertEqualsIgnoreOrder(
-            listOf("Bakery", "Gullideckel", "test"),
-            fallbackFeatures.map { it.name }
+        assertEquals(
+            setOf("Bakery", "Gullideckel", "test"),
+            fallbackFeatures.map { it.name }.toSet()
         )
         assertEquals("Bakery", c.get("some/id", locales)?.name)
         assertEquals("Gullideckel", c.get("another/id", locales)?.name)
@@ -93,7 +93,7 @@ class IDLocalizedFeatureCollectionTest {
         // standard case - no merging
         val german = listOf(GERMAN)
         val germanFeatures = c.getAll(german)
-        assertEqualsIgnoreOrder(listOf("Bäckerei", "Gullideckel"), germanFeatures.map { it.name })
+        assertEquals(setOf("Bäckerei", "Gullideckel"), germanFeatures.map { it.name }.toSet())
         assertEquals("Bäckerei", c.get("some/id", german)?.name)
         assertEquals("Gullideckel", c.get("another/id", german)?.name)
         assertNull(c.get("yet/another/id", german))
@@ -101,9 +101,9 @@ class IDLocalizedFeatureCollectionTest {
         // merging de-AT and de
         val austria = listOf(Locale("de", "AT"))
         val austrianFeatures = c.getAll(austria)
-        assertEqualsIgnoreOrder(
-            listOf("Backhusl", "Gullideckel", "Brückle"),
-            austrianFeatures.map { it.name }
+        assertEquals(
+            setOf("Backhusl", "Gullideckel", "Brückle"),
+            austrianFeatures.map { it.name }.toSet()
         )
         assertEquals("Backhusl", c.get("some/id", austria)?.name)
         assertEquals("Gullideckel", c.get("another/id", austria)?.name)

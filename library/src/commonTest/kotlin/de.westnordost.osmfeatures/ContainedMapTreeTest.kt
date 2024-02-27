@@ -40,7 +40,7 @@ class ContainedMapTreeTest {
         val f3 = mapOf("a" to "b", "c" to "e")
         val f4 = mapOf("a" to "b", "d" to "d")
         val tree = tree(f1, f2, f3, f4)
-        assertEqualsIgnoreOrder(listOf(f1, f2), tree.getAll(mapOf("a" to "b", "c" to "d")))
+        assertEquals(setOf(f1, f2), tree.getAll(mapOf("a" to "b", "c" to "d")).toSet())
     }
 }
 

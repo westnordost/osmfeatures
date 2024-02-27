@@ -549,9 +549,14 @@ class FeatureDictionaryTest {
 
     @Test
     fun find_multiple_entries_by_term() {
-        val dictionary: FeatureDictionary = dictionary(second_hand_car_dealer, car_dealer)
-        val matches: List<Feature> = dictionary.byTerm("auto").forLocale(GERMAN).find()
-        assertEqualsIgnoreOrder(listOf(second_hand_car_dealer, car_dealer), matches)
+        assertEquals(
+            setOf(second_hand_car_dealer, car_dealer),
+            dictionary(second_hand_car_dealer, car_dealer)
+                .byTerm("auto")
+                .forLocale(GERMAN)
+                .find()
+                .toSet()
+        )
     }
 
     @Test

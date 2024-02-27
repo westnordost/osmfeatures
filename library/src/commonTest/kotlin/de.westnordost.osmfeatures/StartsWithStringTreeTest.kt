@@ -30,7 +30,7 @@ class StartsWithStringTreeTest {
     @Test
     fun find_several_strings() {
         val t = tree("anything", "anybody", "anytime")
-        assertEqualsIgnoreOrder(listOf("anything", "anybody", "anytime"), t.getAll("any"))
+        assertEquals(setOf("anything", "anybody", "anytime"), t.getAll("any").toSet())
     }
 }
 
