@@ -393,7 +393,7 @@ class FeatureDictionary internal constructor(
         /** Returns the feature associated with the given id or `null` if it does not
          * exist  */
         fun get(): Feature? {
-            return this[id, locale, countryCode]
+            return get(id, locale, countryCode)
         }
     }
 
