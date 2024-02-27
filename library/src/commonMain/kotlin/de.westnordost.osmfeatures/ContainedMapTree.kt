@@ -121,13 +121,14 @@ internal class ContainedMapTree<K, V>
         }
 
         /** returns these maps grouped by the map entry value of the given key.  */
-        private fun <K, V>  Collection<Map<K, V>>.groupByKeyValue(
+        private fun <K, V> Collection<Map<K, V>>.groupByKeyValue(
             key: K
         ): Map<V, List<Map<K, V>>> {
             val result = HashMap<V, MutableList<Map<K, V>>>()
             for (map in this) {
                 val value = map[key] ?: continue
-                result.getOrPut(value) { ArrayList() }.add(map)
+                val group = result.getOrPut(value) { ArrayList() }
+                group.add(map)
             }
             return result
         }
@@ -140,7 +141,8 @@ internal class ContainedMapTree<K, V>
             for (map in this) {
                 for (key in map.keys) {
                     if (excludeKeys.contains(key)) continue
-                    result.getOrPut(key) { ArrayList() }.add(map)
+                    val group = result.getOrPut(key) { ArrayList() }
+                    group.add(map)
                 }
             }
             return result
