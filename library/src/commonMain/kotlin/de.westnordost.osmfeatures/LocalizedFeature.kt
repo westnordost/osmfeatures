@@ -20,9 +20,9 @@ class LocalizedFeature(
         get() = p.geometry
     override val name: String
         get() = names[0]
-    override val icon: String
+    override val icon: String?
         get() = p.icon
-    override val imageURL: String
+    override val imageURL: String?
         get() = p.imageURL
     override val includeCountryCodes: List<String>
         get() = p.includeCountryCodes
