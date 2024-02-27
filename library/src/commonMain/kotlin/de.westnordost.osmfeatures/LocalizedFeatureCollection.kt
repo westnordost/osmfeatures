@@ -7,5 +7,5 @@ interface LocalizedFeatureCollection {
 
     /** Returns the feature with the given id in the given locale(s) or null if it has not been
      * found (for the given locale(s))  */
-    operator fun get(id: String, locales: List<Locale?>): Feature?
+    fun get(id: String, locales: List<Locale?>): Feature?
 }

@@ -29,12 +29,12 @@ class FeatureDictionary internal constructor(
         return QueryByIdBuilder(id)
     }
 
-    private operator fun get(id: String, locales: List<Locale?>, countryCode: String?): Feature? {
-        val feature = featureCollection[id, locales]
+    private fun get(id: String, locales: List<Locale?>, countryCode: String?): Feature? {
+        val feature = featureCollection.get(id, locales)
         if (feature != null) return feature
         val countryCodes = dissectCountryCode(countryCode)
         brandFeatureCollection?.let {
-            return brandFeatureCollection[id, countryCodes]
+            return brandFeatureCollection.get(id, countryCodes)
         }
         throw NullPointerException("brandFeatureCollection is null")
     }
@@ -48,7 +48,7 @@ class FeatureDictionary internal constructor(
         return QueryByTagBuilder(tags)
     }
 
-    private operator fun get(
+    private fun get(
         tags: Map<String, String>,
         geometry: GeometryType?,
         countryCode: String?,
@@ -124,7 +124,7 @@ class FeatureDictionary internal constructor(
         return QueryByTermBuilder(term)
     }
 
-    private operator fun get(
+    private fun get(
         search: String,
         geometry: GeometryType?,
         countryCode: String?,
@@ -357,8 +357,8 @@ class FeatureDictionary internal constructor(
         private var locale: List<Locale?> = listOf(default)
         private var countryCode: String? = null
 
-        private operator fun get(id: String, locales: List<Locale?>, countryCode: String?): Feature? {
-            return this@FeatureDictionary[id, locales, countryCode]
+        private fun get(id: String, locales: List<Locale?>, countryCode: String?): Feature? {
+            return this@FeatureDictionary.get(id, locales, countryCode)
         }
 
         /**
