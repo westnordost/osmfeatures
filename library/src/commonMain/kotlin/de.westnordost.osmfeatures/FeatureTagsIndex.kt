@@ -6,11 +6,10 @@ package de.westnordost.osmfeatures
  *
  * Based on ContainedMapTree data structure, see that class.  */
 internal class FeatureTagsIndex(features: Collection<Feature>) {
-    private val featureMap: MutableMap<Map<String, String>, MutableList<Feature>>
+    private val featureMap: MutableMap<Map<String, String>, MutableList<Feature>> = HashMap(features.size)
     private val tree: ContainedMapTree<String, String>
 
     init {
-        featureMap = HashMap(features.size)
         for (feature in features) {
             val map = featureMap.getOrPut(feature.tags) { ArrayList(1) }
             map.add(feature)

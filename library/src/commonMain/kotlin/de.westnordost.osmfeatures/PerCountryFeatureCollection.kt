@@ -1,7 +1,7 @@
 package de.westnordost.osmfeatures
 
 /** A collection of features grouped by country code  */
-interface PerCountryFeatureCollection {
+internal interface PerCountryFeatureCollection {
     /** Returns all features with the given country codes. */
     fun getAll(countryCodes: List<String?>): Collection<Feature>
 

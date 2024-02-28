@@ -4,7 +4,7 @@ package de.westnordost.osmfeatures
  * Index that makes finding Features whose name/term/... starts with a given string very efficient.
  *
  * Based on the StartsWithStringTree data structure, see that class.  */
-class FeatureTermIndex(features: Collection<Feature>, getStrings: (Feature) -> List<String>) {
+internal class FeatureTermIndex(features: Collection<Feature>, getStrings: (Feature) -> List<String>) {
     private val featureMap: MutableMap<String, MutableList<Feature>> = HashMap(features.size)
     private val tree: StartsWithStringTree
 

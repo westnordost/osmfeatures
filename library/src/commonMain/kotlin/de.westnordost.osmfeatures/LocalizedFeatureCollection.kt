@@ -1,7 +1,7 @@
 package de.westnordost.osmfeatures
 
 /** A localized collection of features  */
-interface LocalizedFeatureCollection {
+internal interface LocalizedFeatureCollection {
     /** Returns all features in the given locale(s).  */
     fun getAll(locales: List<Locale?>): Collection<Feature>
 

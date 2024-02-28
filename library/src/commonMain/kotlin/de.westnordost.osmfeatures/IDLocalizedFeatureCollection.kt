@@ -7,7 +7,7 @@ import okio.use
  * The base path is defined via the given FileAccessAdapter. In the base path, it is expected that
  * there is a presets.json which includes all the features. The translations are expected to be
  * located in the same directory named like e.g. de.json, pt-BR.json etc.  */
-class IDLocalizedFeatureCollection(
+internal class IDLocalizedFeatureCollection(
     private val fileAccess: FileAccessAdapter
 ) : LocalizedFeatureCollection {
     // featureId -> Feature
