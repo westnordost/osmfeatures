@@ -3,7 +3,7 @@ package de.westnordost.osmfeatures
 /** Data class associated with the Feature interface. Represents a localized feature.
  *
  * I.e. the name and terms are specified in the given locale.  */
-class LocalizedFeature(
+data class LocalizedFeature(
     private val p: BaseFeature,
     override val locale: Locale?,
     override val names: List<String>,
