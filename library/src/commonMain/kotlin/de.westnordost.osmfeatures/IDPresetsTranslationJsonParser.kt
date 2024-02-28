@@ -13,7 +13,7 @@ import okio.Source
 class IDPresetsTranslationJsonParser {
 
     fun parse(
-        source: Source, locale: Locale?, baseFeatures: Map<String, BaseFeature>
+        source: Source, locale: String?, baseFeatures: Map<String, BaseFeature>
     ): List<LocalizedFeature> {
         val decodedObject = createFromSource(source)
         val languageKey: String = decodedObject.entries.iterator().next().key
@@ -48,7 +48,7 @@ class IDPresetsTranslationJsonParser {
         return ArrayList(localizedFeatures.values)
     }
 
-    private fun parseFeature(feature: BaseFeature?, locale: Locale?, localization: JsonObject): LocalizedFeature? {
+    private fun parseFeature(feature: BaseFeature?, locale: String?, localization: JsonObject): LocalizedFeature? {
         if (feature == null) return null
 
         val name = localization["name"]?.jsonPrimitive?.content

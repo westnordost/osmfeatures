@@ -14,20 +14,20 @@ class IDLocalizedFeatureCollection(
     private val featuresById: LinkedHashMap<String, BaseFeature>
 
     // locale -> localized feature
-    private val localizedFeaturesList: MutableMap<Locale?, List<LocalizedFeature>> = HashMap()
+    private val localizedFeaturesList: MutableMap<String?, List<LocalizedFeature>> = HashMap()
 
     // locales -> featureId -> Feature
-    private val localizedFeatures: MutableMap<List<Locale?>, LinkedHashMap<String, Feature>> = HashMap()
+    private val localizedFeatures: MutableMap<List<String?>, LinkedHashMap<String, Feature>> = HashMap()
 
     init {
         featuresById = loadFeatures().associateByTo(LinkedHashMap()) { it.id }
     }
 
-    override fun getAll(locales: List<Locale?>): Collection<Feature> {
+    override fun getAll(locales: List<String?>): Collection<Feature> {
         return getOrLoadLocalizedFeatures(locales).values
     }
 
-    override fun get(id: String, locales: List<Locale?>): Feature? {
+    override fun get(id: String, locales: List<String?>): Feature? {
         return getOrLoadLocalizedFeatures(locales)[id]
     }
 
@@ -37,15 +37,15 @@ class IDLocalizedFeatureCollection(
         }
     }
 
-    private fun getOrLoadLocalizedFeatures(locales: List<Locale?>): LinkedHashMap<String, Feature> {
+    private fun getOrLoadLocalizedFeatures(locales: List<String?>): LinkedHashMap<String, Feature> {
         return localizedFeatures.synchronizedGetOrCreate(locales, ::loadLocalizedFeatures)
     }
 
-    private fun loadLocalizedFeatures(locales: List<Locale?>): LinkedHashMap<String, Feature> {
+    private fun loadLocalizedFeatures(locales: List<String?>): LinkedHashMap<String, Feature> {
         val result = LinkedHashMap<String, Feature>(featuresById.size)
         for (locale in locales.asReversed()) {
             if (locale != null) {
-                for (localeComponent in locale.getComponents()) {
+                for (localeComponent in locale.getLocaleComponents()) {
                     val features = getOrLoadLocalizedFeaturesList(localeComponent)
                     for (feature in features) {
                         result[feature.id] = feature
@@ -58,11 +58,11 @@ class IDLocalizedFeatureCollection(
         return result
     }
 
-    private fun getOrLoadLocalizedFeaturesList(locale: Locale): List<LocalizedFeature> {
+    private fun getOrLoadLocalizedFeaturesList(locale: String): List<LocalizedFeature> {
         return localizedFeaturesList.synchronizedGetOrCreate(locale, ::loadLocalizedFeaturesList)
     }
 
-    private fun loadLocalizedFeaturesList(locale: Locale?): List<LocalizedFeature> {
+    private fun loadLocalizedFeaturesList(locale: String?): List<LocalizedFeature> {
         val filename = if (locale != null) getLocalizationFilename(locale) else "en.json"
         if (!fileAccess.exists(filename)) return emptyList()
         fileAccess.open(filename).use { source ->
@@ -73,16 +73,19 @@ class IDLocalizedFeatureCollection(
     companion object {
         private const val FEATURES_FILE = "presets.json"
 
-        private fun getLocalizationFilename(locale: Locale): String =
-            locale.languageTag + ".json"
-
-        private fun Locale.getComponents(): List<Locale> {
-            val result = ArrayList<Locale>(4)
-            result.add(Locale(language))
-            if (region != null) result.add(Locale(language, region = region))
-            if (script != null) result.add(Locale(language, script = script))
-            if (region != null && script != null) result.add(Locale(language, region = region, script = script))
-            return result
-        }
+        private fun getLocalizationFilename(locale: String): String = "$locale.json"
     }
+}
+
+private fun String.getLocaleComponents(): Sequence<String> = sequence {
+    val components = split('-')
+    val language = components.first()
+    yield(language)
+    if (components.size == 1) return@sequence
+
+    val others = components.subList(1, components.size)
+    for (other in others) {
+        yield(listOf(language, other).joinToString("-"))
+    }
+    yield(this@getLocaleComponents)
 }

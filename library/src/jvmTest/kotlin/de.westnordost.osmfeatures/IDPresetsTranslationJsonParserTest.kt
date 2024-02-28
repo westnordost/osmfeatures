@@ -14,7 +14,7 @@ class IDPresetsTranslationJsonParserTest {
         val rawTranslationsURL = URL("https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/translations/de.json")
         val translatedFeatures = IDPresetsTranslationJsonParser().parse(
             rawTranslationsURL.openStream().source(),
-            Locale("de", "DE"),
+            "de-DE",
             featureMap
         )
 

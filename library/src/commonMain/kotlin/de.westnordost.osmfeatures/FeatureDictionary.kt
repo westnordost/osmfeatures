@@ -1,23 +1,23 @@
 package de.westnordost.osmfeatures
 
-import de.westnordost.osmfeatures.Locale.Companion.default
-
 class FeatureDictionary internal constructor(
     private val featureCollection: LocalizedFeatureCollection,
     private val brandFeatureCollection: PerCountryFeatureCollection?
 ) {
     private val brandNamesIndexes: MutableMap<List<String?>, FeatureTermIndex> = HashMap()
     private val brandTagsIndexes: MutableMap<List<String?>, FeatureTagsIndex> = HashMap()
-    private val tagsIndexes: MutableMap<List<Locale?>, FeatureTagsIndex> = HashMap()
-    private val namesIndexes: MutableMap<List<Locale?>, FeatureTermIndex> = HashMap()
-    private val termsIndexes: MutableMap<List<Locale?>, FeatureTermIndex> = HashMap()
-    private val tagValuesIndexes: MutableMap<List<Locale?>, FeatureTermIndex> = HashMap()
+
+    // locale list -> index
+    private val tagsIndexes: MutableMap<List<String?>, FeatureTagsIndex> = HashMap()
+    private val namesIndexes: MutableMap<List<String?>, FeatureTermIndex> = HashMap()
+    private val termsIndexes: MutableMap<List<String?>, FeatureTermIndex> = HashMap()
+    private val tagValuesIndexes: MutableMap<List<String?>, FeatureTermIndex> = HashMap()
 
     init {
         // build indices for default locale
-        getTagsIndex(listOf(default, null))
-        getNamesIndex(listOf(default))
-        getTermsIndex(listOf(default))
+        getTagsIndex(listOf(defaultLocale(), null))
+        getNamesIndex(listOf(defaultLocale()))
+        getTermsIndex(listOf(defaultLocale()))
     }
 
     //region Get by id
@@ -27,7 +27,7 @@ class FeatureDictionary internal constructor(
 
     private fun getById(
         id: String,
-        locales: List<Locale?> = listOf(default),
+        locales: List<String?> = listOf(defaultLocale()),
         countryCode: String? = null
     ): Feature? {
         return featureCollection.get(id, locales)
@@ -44,7 +44,7 @@ class FeatureDictionary internal constructor(
     private fun getByTags(
         tags: Map<String, String>,
         geometry: GeometryType? = null,
-        locales: List<Locale?> = listOf(default),
+        locales: List<String?> = listOf(defaultLocale()),
         countryCode: String? = null,
         isSuggestion: Boolean? = null
     ): List<Feature> {
@@ -110,7 +110,7 @@ class FeatureDictionary internal constructor(
     private fun getByTerm(
         search: String,
         geometry: GeometryType?,
-        locales: List<Locale?>,
+        locales: List<String?>,
         countryCode: String?,
         isSuggestion: Boolean?
     ): Sequence<Feature> {
@@ -186,19 +186,19 @@ class FeatureDictionary internal constructor(
     //region Lazily get or create Indexes
 
     /** lazily get or create tags index for given locale(s)  */
-    private fun getTagsIndex(locales: List<Locale?>): FeatureTagsIndex {
+    private fun getTagsIndex(locales: List<String?>): FeatureTagsIndex {
         return tagsIndexes.synchronizedGetOrCreate(locales, ::createTagsIndex)
     }
 
-    private fun createTagsIndex(locales: List<Locale?>): FeatureTagsIndex {
+    private fun createTagsIndex(locales: List<String?>): FeatureTagsIndex {
         return FeatureTagsIndex(featureCollection.getAll(locales))
     }
 
     /** lazily get or create names index for given locale(s)  */
-    private fun getNamesIndex(locales: List<Locale?>): FeatureTermIndex =
+    private fun getNamesIndex(locales: List<String?>): FeatureTermIndex =
         namesIndexes.synchronizedGetOrCreate(locales, ::createNamesIndex)
 
-    private fun createNamesIndex(locales: List<Locale?>): FeatureTermIndex {
+    private fun createNamesIndex(locales: List<String?>): FeatureTermIndex {
         val features = featureCollection.getAll(locales)
         return FeatureTermIndex(features) { feature ->
             feature.getSearchableNames().toList()
@@ -206,22 +206,22 @@ class FeatureDictionary internal constructor(
     }
 
     /** lazily get or create terms index for given locale(s)  */
-    private fun getTermsIndex(locales: List<Locale?>): FeatureTermIndex {
+    private fun getTermsIndex(locales: List<String?>): FeatureTermIndex {
         return termsIndexes.synchronizedGetOrCreate(locales, ::createTermsIndex)
     }
 
-    private fun createTermsIndex(locales: List<Locale?>): FeatureTermIndex {
+    private fun createTermsIndex(locales: List<String?>): FeatureTermIndex {
         return FeatureTermIndex(featureCollection.getAll(locales)) { feature ->
             if (!feature.isSearchable) emptyList() else feature.canonicalTerms
         }
     }
 
     /** lazily get or create tag values index  */
-    private fun getTagValuesIndex(locales: List<Locale?>): FeatureTermIndex {
+    private fun getTagValuesIndex(locales: List<String?>): FeatureTermIndex {
         return tagValuesIndexes.synchronizedGetOrCreate(locales, ::createTagValuesIndex)
     }
 
-    private fun createTagValuesIndex(locales: List<Locale?>): FeatureTermIndex {
+    private fun createTagValuesIndex(locales: List<String?>): FeatureTermIndex {
         return FeatureTermIndex(featureCollection.getAll(locales)) { feature ->
             if (!feature.isSearchable) return@FeatureTermIndex emptyList<String>()
             return@FeatureTermIndex feature.tags.values.filter { it != "*" }
@@ -261,23 +261,22 @@ class FeatureDictionary internal constructor(
     //region Query builders
 
     inner class QueryByIdBuilder(private val id: String) {
-        private var locale: List<Locale?> = listOf(default)
+        private var locale: List<String?> = listOf(defaultLocale())
         private var countryCode: String? = null
 
         /**
-         * Sets the locale(s) in which to present the results.
+         * Sets the locale(s) in which to present the results as IETF language tags
          *
          * You can specify several locales in a row to each fall back to if a translation does not
-         * exist in the locale before that. For example
-         * `[new Locale("ca", "ES"), new Locale("es","ES")]`
-         * if you prefer results in Catalan, but Spanish is also fine.
+         * exist in the locale before that. For example `["ca-ES","es-ES"]` if you prefer results
+         * in Catalan, but Spanish is also fine.
          *
          * `null` means to include unlocalized results.
          *
-         * If nothing is specified, it defaults to `[Locale.getDefault(), null]`,
+         * If nothing is specified, it defaults to `[<default system locale>, null]`,
          * i.e. unlocalized results are included by default.
          */
-        fun forLocale(vararg locales: Locale?): QueryByIdBuilder {
+        fun forLocale(vararg locales: String?): QueryByIdBuilder {
             this.locale = locales.toList()
             return this
         }
@@ -296,7 +295,7 @@ class FeatureDictionary internal constructor(
 
     inner class QueryByTagBuilder(private val tags: Map<String, String>) {
         private var geometryType: GeometryType? = null
-        private var locale: List<Locale?> = listOf(default)
+        private var locale: List<String?> = listOf(defaultLocale())
         private var suggestion: Boolean? = null
         private var countryCode: String? = null
 
@@ -307,19 +306,18 @@ class FeatureDictionary internal constructor(
         }
 
         /**
-         * Sets the locale(s) in which to present the results.
+         * Sets the locale(s) in which to present the results as IETF language tags
          *
          * You can specify several locales in a row to each fall back to if a translation does not
-         * exist in the locale before that. For example
-         * `[new Locale("ca", "ES"), new Locale("es","ES")]`
-         * if you prefer results in Catalan, but Spanish is also fine.
+         * exist in the locale before that. For example `["ca-ES","es-ES"]` if you prefer results
+         * in Catalan, but Spanish is also fine.
          *
          * `null` means to include unlocalized results.
          *
-         * If nothing is specified, it defaults to `[Locale.getDefault(), null]`,
+         * If nothing is specified, it defaults to `[<default system locale>, null]`,
          * i.e. unlocalized results are included by default.
          */
-        fun forLocale(vararg locales: Locale?): QueryByTagBuilder {
+        fun forLocale(vararg locales: String?): QueryByTagBuilder {
             this.locale = locales.toList()
             return this
         }
@@ -340,7 +338,9 @@ class FeatureDictionary internal constructor(
         }
 
         /** Returns a list of dictionary entries that match or an empty list if nothing is
-         * found. <br></br>In rare cases, a set of tags may match multiple primary features, such as for
+         * found.
+         *
+         * In rare cases, a set of tags may match multiple primary features, such as for
          * tag combinations like `shop=deli` + `amenity=cafe`, so, this is why
          * it is a list.  */
         fun find(): List<Feature> = getByTags(tags, geometryType, locale, countryCode, suggestion)
@@ -348,7 +348,7 @@ class FeatureDictionary internal constructor(
 
     inner class QueryByTermBuilder(private val term: String) {
         private var geometryType: GeometryType? = null
-        private var locale: List<Locale?> = listOf(default)
+        private var locale: List<String?> = listOf(defaultLocale())
         private var suggestion: Boolean? = null
         private var limit = 50
         private var countryCode: String? = null
@@ -360,19 +360,18 @@ class FeatureDictionary internal constructor(
         }
 
         /**
-         * Sets the locale(s) in which to present the results.
+         * Sets the locale(s) in which to present the results as IETF language tags
          *
          * You can specify several locales in a row to each fall back to if a translation does not
-         * exist in the locale before that. For example
-         * `[new Locale("ca", "ES"), new Locale("es","ES")]`
-         * if you prefer results in Catalan, but Spanish is also fine.
+         * exist in the locale before that. For example `["ca-ES","es-ES"]` if you prefer results
+         * in Catalan, but Spanish is also fine.
          *
          * `null` means to include unlocalized results.
          *
-         * If nothing is specified, it defaults to `[Locale.getDefault(), null]`,
+         * If nothing is specified, it defaults to `[<default system locale>, null]`,
          * i.e. unlocalized results are included by default.
          */
-        fun forLocale(vararg locales: Locale?): QueryByTermBuilder {
+        fun forLocale(vararg locales: String?): QueryByTermBuilder {
             this.locale = locales.toList()
             return this
         }
