@@ -23,5 +23,5 @@ interface Feature {
     val canonicalNames: List<String>
     val canonicalTerms: List<String>
     val isSuggestion: Boolean
-    val locale: Locale?
+    val locale: String?
 }
