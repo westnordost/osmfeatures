@@ -7,7 +7,7 @@ interface Feature {
     val id: String
     val tags: Map<String, String>
     val geometry: List<GeometryType>
-    val name: String
+    val name: String get() = names[0]
     val icon: String?
     val imageURL: String?
 
