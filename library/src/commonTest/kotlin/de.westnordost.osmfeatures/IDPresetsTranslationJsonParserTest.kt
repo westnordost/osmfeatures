@@ -68,7 +68,7 @@ class IDPresetsTranslationJsonParserTest {
                 if (translationHttpResponse.status.value in 200..299) {
                     val translatedFeatures = IDPresetsTranslationJsonParser().parse(
                         translationHttpResponse.bodyAsText(),
-                        Locale("de", "DE"),
+                        "de-DE",
                         featureMap
                     )
                     // should not crash etc

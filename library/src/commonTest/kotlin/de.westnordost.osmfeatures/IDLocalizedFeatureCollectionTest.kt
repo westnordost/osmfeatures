@@ -112,7 +112,7 @@ class IDLocalizedFeatureCollectionTest {
         // merging scripts
         val cryllic = listOf("de-Cyrl")
         assertEquals("бацкхаус", c.get("some/id", cryllic)?.name)
-        val cryllicAustria = listOf("de-Cyrl-AT"))
+        val cryllicAustria = listOf("de-Cyrl-AT")
         assertEquals("бацкхусл", c.get("some/id", cryllicAustria)?.name)
     }
 }

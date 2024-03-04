@@ -19,7 +19,7 @@ class IDPresetsTranslationJsonParser {
         return parse(content, locale, baseFeatures)
     }
     fun parse(
-        content: String, locale: Locale?, baseFeatures: Map<String, BaseFeature>
+        content: String, locale: String?, baseFeatures: Map<String, BaseFeature>
     ): List<LocalizedFeature> {
         val decodedObject = Json.decodeFromString<JsonObject>(content)
         val languageKey: String = decodedObject.entries.iterator().next().key
