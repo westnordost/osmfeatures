@@ -1,6 +1,6 @@
 package de.westnordost.osmfeatures
 
-import de.westnordost.osmfeatures.JsonUtils.createFromSource
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -15,7 +15,13 @@ class IDPresetsTranslationJsonParser {
     fun parse(
         source: Source, locale: Locale?, baseFeatures: Map<String, BaseFeature>
     ): List<LocalizedFeature> {
-        val decodedObject = createFromSource(source)
+        val content = JsonUtils.getContent(source)
+        return parse(content, locale, baseFeatures)
+    }
+    fun parse(
+        content: String, locale: Locale?, baseFeatures: Map<String, BaseFeature>
+    ): List<LocalizedFeature> {
+        val decodedObject = Json.decodeFromString<JsonObject>(content)
         val languageKey: String = decodedObject.entries.iterator().next().key
         val languageObject = decodedObject[languageKey]
             ?: return emptyList()
@@ -25,9 +31,8 @@ class IDPresetsTranslationJsonParser {
             ?: return emptyList()
         val localizedFeatures: MutableMap<String, LocalizedFeature> = HashMap(presetsObject.size)
         presetsObject.entries.forEach { (key, value) ->
-            val id = key.intern()
-            val f = parseFeature(baseFeatures[id], locale, value.jsonObject)
-            if (f != null) localizedFeatures[id] = f
+            val f = parseFeature(baseFeatures[key], locale, value.jsonObject)
+            if (f != null) localizedFeatures[key] = f
         }
         for (baseFeature in baseFeatures.values) {
             val names = baseFeature.names

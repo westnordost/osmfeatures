@@ -25,6 +25,10 @@ class IDPresetsJsonParser {
         val decodedObject = Json.decodeFromString<JsonObject>(sink.readUtf8())
         return decodedObject.mapNotNull { (key, value) ->  parseFeature(key, value.jsonObject)}
     }
+    fun parse(content: String): List<BaseFeature> {
+        val decodedObject = Json.decodeFromString<JsonObject>(content)
+        return decodedObject.mapNotNull { (key, value) ->  parseFeature(key, value.jsonObject)}
+    }
 
     private fun parseFeature(id: String, p: JsonObject): BaseFeature? {
         val tags = parseStringMap(p["tags"]?.jsonObject)
@@ -91,7 +95,7 @@ class IDPresetsJsonParser {
             val result: MutableList<String> = ArrayList(list.size)
             for (item in list) {
                 // for example a lat,lon pair to denote a location with radius. Not supported.
-                val cc = item.uppercase().intern()
+                val cc = item.uppercase()
                 // don't need this, 001 stands for "whole world"
                 if (cc == "001") continue
                 // ISO-3166-2 codes are supported but not m49 code such as "150" or geojsons like "city_national_bank_fl.geojson"

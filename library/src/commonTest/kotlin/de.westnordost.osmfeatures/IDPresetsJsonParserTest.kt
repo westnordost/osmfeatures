@@ -1,11 +1,18 @@
 package de.westnordost.osmfeatures
 
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.request.get
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
+import kotlinx.coroutines.runBlocking
 import okio.Source
 import kotlin.test.Test
 import okio.IOException
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.test.fail
 
 class IDPresetsJsonParserTest {
     @Test
@@ -70,6 +77,24 @@ class IDPresetsJsonParserTest {
     fun load_features_no_wildcards() {
         val features: List<BaseFeature> = parse("one_preset_wildcard.json")
         assertTrue(features.isEmpty())
+    }
+
+    @Test
+    fun parse_some_real_data() {
+
+        val client = HttpClient(CIO)
+        runBlocking {
+            val httpResponse: HttpResponse = client.get("https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json")
+            if (httpResponse.status.value in 200..299) {
+                val body = httpResponse.bodyAsText()
+                val features = IDPresetsJsonParser().parse(body)
+                // should not crash etc
+                assertTrue(features.size > 1000)
+            }
+            else {
+                fail("Unable to retrieve response")
+            }
+        }
     }
 
     private fun parse(file: String): List<BaseFeature> {

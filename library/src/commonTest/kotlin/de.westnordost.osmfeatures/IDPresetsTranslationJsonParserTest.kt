@@ -5,6 +5,13 @@ import okio.IOException
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.Test
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.request.get
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
+import kotlinx.coroutines.runBlocking
+import kotlin.test.fail
 
 class IDPresetsTranslationJsonParserTest {
     @Test
@@ -46,6 +53,39 @@ class IDPresetsTranslationJsonParserTest {
         assertEquals("bar", feature?.name)
         assertEquals(listOf("bar", "one", "two", "three"), feature?.names)
         assertEquals(listOf("a", "b"), feature?.terms)
+    }
+
+    @Test
+    fun parse_some_real_data() {
+        val client = HttpClient(CIO)
+        runBlocking {
+            val httpResponse: HttpResponse = client.get("https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json")
+            if (httpResponse.status.value in 200..299) {
+                val body = httpResponse.bodyAsText()
+                val features = IDPresetsJsonParser().parse(body)
+                val featureMap = HashMap(features.associateBy { it.id })
+                val translationHttpResponse: HttpResponse = client.get("https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/translations/de.json")
+                if (translationHttpResponse.status.value in 200..299) {
+                    val translatedFeatures = IDPresetsTranslationJsonParser().parse(
+                        translationHttpResponse.bodyAsText(),
+                        Locale("de", "DE"),
+                        featureMap
+                    )
+                    // should not crash etc
+                    assertTrue(translatedFeatures.size > 1000)
+                }
+                else {
+                    fail("Unable to retrieve translation Http response")
+                }
+            }
+            else {
+                fail("Unable to retrieve response")
+            }
+        }
+
+
+
+
     }
 
     private fun parse(presetsFile: String, translationsFile: String): List<LocalizedFeature> {
