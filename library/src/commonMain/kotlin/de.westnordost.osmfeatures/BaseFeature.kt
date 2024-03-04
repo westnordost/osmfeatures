@@ -21,6 +21,6 @@ data class BaseFeature(
     override val canonicalTerms: List<String> = terms.map { it.canonicalize() }
 
     override val name: String get() = names[0]
-    override val locale: Locale? get() = null
+    override val locale: String? get() = null
     override fun toString(): String = id
 }
