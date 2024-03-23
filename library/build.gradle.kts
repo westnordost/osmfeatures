@@ -22,6 +22,7 @@ kotlin {
             implementation(libs.okio)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.normalize)
+            implementation(libs.kotlinx.coroutines)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
