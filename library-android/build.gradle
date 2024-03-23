@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-    //api (project(':library')) {
+    // api (project(':library')) {
     api ('de.westnordost:osmfeatures:5.2') {
         // it's already included in Android
         exclude group: 'org.json', module: 'json'
@@ -23,12 +23,11 @@ dependencies {
 
 android {
     compileSdkVersion 32
-
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 32
         versionCode 1
-        versionName project.version
+        versionName "1"
     }
 
     compileOptions {
@@ -37,18 +36,19 @@ android {
     }
 }
 
-task sourcesJar(type: Jar) {
+tasks.register('sourcesJar', Jar) {
     from android.sourceSets.main.java.srcDirs
     classifier = 'sources'
 }
 
-task javadoc(type: Javadoc) {
+tasks.register('javadoc', Javadoc) {
     source = android.sourceSets.main.java.srcDirs
     failOnError = false
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
 }
 
-task javadocJar(type: Jar, dependsOn: javadoc) {
+tasks.register('javadocJar', Jar) {
+    dependsOn javadoc
     from javadoc.destinationDir
     classifier = 'javadoc'
 }

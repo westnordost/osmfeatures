@@ -1,0 +1,10 @@
+{ "xx": { "presets" : {
+  "presets": {
+    "some/id": {
+      "name": "Bäckerei"
+    },
+    "another/id": {
+      "name": "Gullideckel"
+    }
+  }
+}}}
