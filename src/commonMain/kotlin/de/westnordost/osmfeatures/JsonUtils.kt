@@ -1,9 +1,8 @@
 package de.westnordost.osmfeatures
 
+import kotlinx.io.Source
+import kotlinx.io.readString
 import kotlinx.serialization.json.*
-import okio.Buffer
-import okio.Source
-import okio.buffer
 
 internal object JsonUtils {
 
@@ -15,14 +14,9 @@ internal object JsonUtils {
         if (map == null) return HashMap(1)
         return map.map { (key, value) -> key to value.jsonPrimitive.content}.toMap().toMutableMap()
     }
-
-    // this is only necessary because Android uses some old version of org.json where
-    // new JSONObject(new JSONTokener(inputStream)) is not defined...
-
-    fun getContent(source: Source): String {
-        val sink = Buffer()
-        source.buffer().readAll(sink)
-
-        return sink.readUtf8()
-    }
 }
+
+// TODO This can hopefully be replaced with a function from kotlinx-serialization soon
+@OptIn(ExperimentalStdlibApi::class)
+internal inline fun <reified T> Json.decodeFromSource(source: Source): T =
+    decodeFromString(source.use { it.readString() })

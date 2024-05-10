@@ -1,5 +1,7 @@
 package de.westnordost.osmfeatures
 
+import kotlinx.io.files.FileSystem
+
 class FeatureDictionary internal constructor(
     private val featureCollection: LocalizedFeatureCollection,
     private val brandFeatureCollection: PerCountryFeatureCollection?
@@ -408,16 +410,20 @@ class FeatureDictionary internal constructor(
 
     companion object {
 
-        /** Create a new FeatureDictionary which gets its data from the given directory. Optionally,
-         * a path to brand presets can be specified.  */
-        /** Create a new FeatureDictionary which gets its data from the given directory.  */
-        fun create(presetsBasePath: String, brandPresetsBasePath: String? = null) =
-            FeatureDictionary(
-                featureCollection = IDLocalizedFeatureCollection(FileSystemAccess(presetsBasePath)),
-                brandFeatureCollection = brandPresetsBasePath?.let {
-                    IDBrandPresetsFeatureCollection(FileSystemAccess(brandPresetsBasePath))
+        /** Create a new FeatureDictionary which gets its data from the given directory.
+         *  Optionally, a path to brand presets can be specified.  */
+        fun create(
+            fileSystem: FileSystem,
+            presetsBasePath: String,
+            brandPresetsBasePath: String? = null
+        ) = FeatureDictionary(
+            featureCollection =
+                IDLocalizedFeatureCollection(FileSystemAccess(fileSystem, presetsBasePath)),
+            brandFeatureCollection =
+                brandPresetsBasePath?.let {
+                    IDBrandPresetsFeatureCollection(FileSystemAccess(fileSystem, brandPresetsBasePath))
                 }
-            )
+        )
     }
 }
 

@@ -29,8 +29,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-                implementation("com.squareup.okio:okio:3.7.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-io-core:0.3.4")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
                 implementation("com.doist.x:normalize:1.0.5")
             }
@@ -53,7 +52,7 @@ android {
     namespace = "de.westnordost.osmfeatures"
     compileSdk = 33
     defaultConfig {
-        minSdk = 9
+        minSdk = 21
     }
 }
 

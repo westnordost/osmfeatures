@@ -3,7 +3,7 @@ package de.westnordost.osmfeatures
 import java.net.URL
 import okio.source
 
-class LivePresetDataAccessAdapter : FileAccessAdapter {
+class LivePresetDataAccessAdapter : ResourceAccessAdapter {
 
     override fun exists(name: String): Boolean =
         name in listOf("presets.json", "de.json", "en.json", "en-GB.json")

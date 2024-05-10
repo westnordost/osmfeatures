@@ -1,23 +1,24 @@
 package de.westnordost.osmfeatures
 
-import okio.FileSystem
-import okio.Path.Companion.toPath
-import okio.Source
+import kotlinx.io.Source
+import kotlinx.io.buffered
+import kotlinx.io.files.FileSystem
+import kotlinx.io.files.Path
 
-expect fun fileSystem(): FileSystem
-
-class FileSystemAccess(private val basePath: String) : FileAccessAdapter {
-    private val fs: FileSystem = fileSystem()
+class FileSystemAccess(
+    private val fileSystem: FileSystem,
+    private val basePath: String
+) : ResourceAccessAdapter {
 
     init {
-        fs.metadataOrNull(basePath.toPath())?.let {
-            require(it.isDirectory) { "$basePath is not a directory" }
-        }
+        val metadata = fileSystem.metadataOrNull(Path(basePath))
+        require(metadata != null) { "$basePath does not exist" }
+        require(metadata.isDirectory) { "$basePath is not a directory" }
     }
 
     override fun exists(name: String): Boolean =
-        fs.exists(("$basePath/$name").toPath())
+        fileSystem.exists(Path(basePath, name))
 
     override fun open(name: String): Source =
-        fs.source(("$basePath/$name".toPath()))
+        fileSystem.source(Path(basePath, name)).buffered()
 }

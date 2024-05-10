@@ -1,7 +1,5 @@
 package de.westnordost.osmfeatures
 
-import okio.use
-
 /** Non-localized feature collection sourcing from (NSI) iD presets defined in JSON.
  *
  * The base path is defined via the given FileAccessAdapter. In the base path, it is expected that
@@ -9,7 +7,7 @@ import okio.use
  * more files like e.g. presets-DE.json, presets-US-NY.json into the directory which will be loaded
  * lazily on demand  */
 internal class IDBrandPresetsFeatureCollection(
-    private val fileAccess: FileAccessAdapter
+    private val fileAccess: ResourceAccessAdapter
 ) : PerCountryFeatureCollection {
     // countryCode -> featureId -> Feature
     private val featuresByIdByCountryCode = LinkedHashMap<String?, LinkedHashMap<String, Feature>>(320)
@@ -40,6 +38,7 @@ internal class IDBrandPresetsFeatureCollection(
         }
     }
 
+    @OptIn(ExperimentalStdlibApi::class)
     private fun loadFeatures(countryCode: String?): List<BaseFeature> {
         val filename = getPresetsFileName(countryCode)
         if (!fileAccess.exists(filename)) return emptyList()

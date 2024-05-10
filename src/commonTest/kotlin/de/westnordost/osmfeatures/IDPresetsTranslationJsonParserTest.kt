@@ -1,7 +1,5 @@
 package de.westnordost.osmfeatures
 
-import okio.Source
-import okio.IOException
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.Test
@@ -10,6 +8,11 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
+import kotlinx.io.IOException
+import kotlinx.io.Source
+import kotlinx.io.buffered
+import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
 import kotlin.test.fail
 
 class IDPresetsTranslationJsonParserTest {
@@ -82,23 +85,16 @@ class IDPresetsTranslationJsonParserTest {
     }
 
     private fun parse(presetsFile: String, translationsFile: String): List<LocalizedFeature> {
-        return try {
-            val baseFeatures: List<BaseFeature> =
-                IDPresetsJsonParser().parse(getSource(presetsFile))
-            val featureMap = HashMap(baseFeatures.associateBy { it.id })
-            IDPresetsTranslationJsonParser().parse(
-                getSource(translationsFile),
-                "en",
-                featureMap
-            )
-        } catch (e: IOException) {
-            throw RuntimeException()
+        val baseFeatures = read(presetsFile) {
+            IDPresetsJsonParser().parse(it)
+        }.associateBy { it.id }
+
+        return read(translationsFile) {
+            IDPresetsTranslationJsonParser().parse(it, "en", baseFeatures)
         }
     }
 
-    @Throws(IOException::class)
-    private fun getSource(file: String): Source {
-        val fileSystemAccess = FileSystemAccess("src/commonTest/resources")
-        return fileSystemAccess.open(file)
-    }
+    @OptIn(ExperimentalStdlibApi::class)
+    private fun <R> read(file: String, block: (Source) -> R): R =
+        SystemFileSystem.source(Path("src/commonTest/resources", file)).buffered().use { block(it) }
 }

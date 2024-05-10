@@ -1,8 +1,8 @@
 package de.westnordost.osmfeatures
 
-import okio.Source
+import kotlinx.io.Source
 
-interface FileAccessAdapter {
+interface ResourceAccessAdapter {
     fun exists(name: String): Boolean
 
     fun open(name: String): Source

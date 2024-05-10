@@ -5,9 +5,11 @@ import io.ktor.client.engine.cio.CIO
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
-import okio.Source
+import kotlinx.io.Source
+import kotlinx.io.buffered
+import kotlinx.io.files.Path
+import kotlinx.io.files.SystemFileSystem
 import kotlin.test.Test
-import okio.IOException
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -94,17 +96,10 @@ class IDPresetsJsonParserTest {
             }
     }
 
-    private fun parse(file: String): List<BaseFeature> {
-        return try {
-            IDPresetsJsonParser().parse(getSource(file))
-        } catch (e: IOException) {
-            throw RuntimeException()
-        }
-    }
+    private fun parse(file: String): List<BaseFeature> =
+        read(file) { IDPresetsJsonParser().parse(it) }
 
-    @Throws(IOException::class)
-    private fun getSource(file: String): Source {
-        val fileSystemAccess = FileSystemAccess("src/commonTest/resources")
-        return fileSystemAccess.open(file)
-    }
+    @OptIn(ExperimentalStdlibApi::class)
+    private fun <R> read(file: String, block: (Source) -> R): R =
+        SystemFileSystem.source(Path("src/commonTest/resources", file)).buffered().use { block(it) }
 }

@@ -1,10 +1,10 @@
 package de.westnordost.osmfeatures
 
+import kotlinx.io.Source
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import okio.Source
 
 /** Parses a file from
  * https://github.com/openstreetmap/id-tagging-schema/tree/main/dist/translations
@@ -13,17 +13,20 @@ import okio.Source
 class IDPresetsTranslationJsonParser {
 
     fun parse(
-        source: Source, locale: String?, baseFeatures: Map<String, BaseFeature>
-    ): List<LocalizedFeature> {
-        val content = JsonUtils.getContent(source)
-        return parse(content, locale, baseFeatures)
-    }
-    fun parse(
         content: String, locale: String?, baseFeatures: Map<String, BaseFeature>
+    ): List<LocalizedFeature> =
+        parse(Json.decodeFromString<JsonObject>(content), locale, baseFeatures)
+
+    fun parse(
+        source: Source, locale: String?, baseFeatures: Map<String, BaseFeature>
+    ): List<LocalizedFeature> =
+        parse(Json.decodeFromSource<JsonObject>(source), locale, baseFeatures)
+
+    private fun parse(
+        json: JsonObject, locale: String?, baseFeatures: Map<String, BaseFeature>
     ): List<LocalizedFeature> {
-        val decodedObject = Json.decodeFromString<JsonObject>(content)
-        val languageKey = decodedObject.entries.iterator().next().key
-        val languageObject = decodedObject[languageKey]
+        val languageKey = json.entries.iterator().next().key
+        val languageObject = json[languageKey]
             ?: return emptyList()
         val presetsContainerObject = languageObject.jsonObject["presets"]
             ?: return emptyList()

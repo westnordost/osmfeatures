@@ -2,27 +2,22 @@ package de.westnordost.osmfeatures
 
 import de.westnordost.osmfeatures.JsonUtils.parseList
 import de.westnordost.osmfeatures.JsonUtils.parseStringMap
+import kotlinx.io.Source
 import kotlinx.serialization.json.*
-import okio.Buffer
-import okio.Source
-import okio.buffer
 
 /** Parses this file
  * [...](https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json)
  * into map of id -> Feature.  */
 class IDPresetsJsonParser(private var isSuggestion: Boolean = false) {
-    fun parse(source: Source): List<BaseFeature> {
-        val sink = Buffer()
-        source.buffer().readAll(sink)
 
-        val decodedObject = Json.decodeFromString<JsonObject>(sink.readUtf8())
-        return decodedObject.mapNotNull { (key, value) ->  parseFeature(key, value.jsonObject)}
-    }
+    fun parse(source: Source): List<BaseFeature> =
+        parse(Json.decodeFromSource<JsonObject>(source))
 
-    fun parse(content: String): List<BaseFeature> {
-        val decodedObject = Json.decodeFromString<JsonObject>(content)
-        return decodedObject.mapNotNull { (key, value) ->  parseFeature(key, value.jsonObject)}
-    }
+    fun parse(content: String): List<BaseFeature> =
+        parse(Json.decodeFromString<JsonObject>(content))
+
+    private fun parse(json: JsonObject): List<BaseFeature> =
+        json.mapNotNull { (key, value) ->  parseFeature(key, value.jsonObject) }
 
     private fun parseFeature(id: String, p: JsonObject): BaseFeature? {
         val tags = parseStringMap(p["tags"]?.jsonObject)

@@ -1,26 +1,26 @@
 package de.westnordost.osmfeatures
 
-import okio.Source
+import kotlinx.io.Source
 import kotlin.test.*
 
 class IDLocalizedFeatureCollectionTest {
     @Test
     fun features_not_found_produces_runtime_exception() {
         assertFails {
-            IDLocalizedFeatureCollection(object : FileAccessAdapter {
-                override fun exists(name: String): Boolean = false
-                override fun open(name: String): Source = throw Exception()
+            IDLocalizedFeatureCollection(object : ResourceAccessAdapter {
+                override fun exists(name: String) = false
+                override fun open(name: String) = throw Exception()
             })
         }
     }
 
     @Test
     fun load_features_and_two_localizations() {
-        val c = IDLocalizedFeatureCollection(object : FileAccessAdapter {
-            override fun exists(name: String): Boolean =
+        val c = IDLocalizedFeatureCollection(object : ResourceAccessAdapter {
+            override fun exists(name: String) =
                 name in listOf("presets.json", "en.json", "de.json")
 
-            override fun open(name: String): Source = when (name) {
+            override fun open(name: String) = when (name) {
                 "presets.json" -> getSource("some_presets_min.json")
                 "en.json" -> getSource("localizations_en.json")
                 "de.json" -> getSource("localizations_de.json")
@@ -70,15 +70,14 @@ class IDLocalizedFeatureCollectionTest {
 
     @Test
     fun load_features_and_merge_localizations() {
-        val c = IDLocalizedFeatureCollection(object : FileAccessAdapter {
-            override fun exists(name: String): Boolean =
-                name in listOf(
-                    "presets.json",
-                    "de-AT.json",
-                    "de.json",
-                    "de-Cyrl.json",
-                    "de-Cyrl-AT.json"
-                )
+        val c = IDLocalizedFeatureCollection(object : ResourceAccessAdapter {
+            override fun exists(name: String) = name in listOf(
+                "presets.json",
+                "de-AT.json",
+                "de.json",
+                "de-Cyrl.json",
+                "de-Cyrl-AT.json"
+            )
 
             override fun open(name: String): Source = when (name) {
                 "presets.json" -> getSource("some_presets_min.json")
