@@ -8,15 +8,16 @@ expect fun fileSystem(): FileSystem
 
 class FileSystemAccess(private val basePath: String) : FileAccessAdapter {
     private val fs: FileSystem = fileSystem()
+
     init {
-        fs.metadataOrNull(basePath.toPath())?.let { require(it.isDirectory) { "$basePath is not a directory" } }
+        fs.metadataOrNull(basePath.toPath())?.let {
+            require(it.isDirectory) { "$basePath is not a directory" }
+        }
     }
 
-    override fun exists(name: String): Boolean {
+    override fun exists(name: String): Boolean =
+        fs.exists(("$basePath/$name").toPath())
 
-        return fs.exists(("$basePath/$name").toPath())
-    }
-    override fun open(name: String): Source {
-        return fs.source(("$basePath/$name".toPath()))
-    }
+    override fun open(name: String): Source =
+        fs.source(("$basePath/$name".toPath()))
 }

@@ -10,14 +10,7 @@ import okio.buffer
 /** Parses this file
  * [...](https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json)
  * into map of id -> Feature.  */
-class IDPresetsJsonParser {
-    private var isSuggestion = false
-
-    constructor()
-
-    constructor(isSuggestion: Boolean) {
-        this.isSuggestion = isSuggestion
-    }
+class IDPresetsJsonParser(private var isSuggestion: Boolean = false) {
     fun parse(source: Source): List<BaseFeature> {
         val sink = Buffer()
         source.buffer().readAll(sink)
@@ -25,6 +18,7 @@ class IDPresetsJsonParser {
         val decodedObject = Json.decodeFromString<JsonObject>(sink.readUtf8())
         return decodedObject.mapNotNull { (key, value) ->  parseFeature(key, value.jsonObject)}
     }
+
     fun parse(content: String): List<BaseFeature> {
         val decodedObject = Json.decodeFromString<JsonObject>(content)
         return decodedObject.mapNotNull { (key, value) ->  parseFeature(key, value.jsonObject)}
@@ -39,9 +33,8 @@ class IDPresetsJsonParser {
         // also dropping features with empty tags (generic point, line, relation)
         if (tags.isEmpty()) return null
 
-        val geometry = parseList(
-            p["geometry"]?.jsonArray
-        ) { GeometryType.valueOf(((it as JsonPrimitive).content).uppercase())
+        val geometry = parseList(p["geometry"]?.jsonArray) {
+            GeometryType.valueOf(((it as JsonPrimitive).content).uppercase())
         }
 
         val name = p["name"]?.jsonPrimitive?.content ?: ""
@@ -64,48 +57,49 @@ class IDPresetsJsonParser {
             excludeCountryCodes = ArrayList(0)
         }
 
-        val searchable = p["searchable"]?.jsonPrimitive?.booleanOrNull?: true
-        val matchScore = p["matchScore"]?.jsonPrimitive?.floatOrNull?: 1.0f
-        val addTags = p["addTags"]?.let { parseStringMap(it.jsonObject)}?: tags
-        val removeTags = p["removeTags"]?.let { parseStringMap(it.jsonObject)}?: addTags
+        val searchable = p["searchable"]?.jsonPrimitive?.booleanOrNull ?: true
+        val matchScore = p["matchScore"]?.jsonPrimitive?.floatOrNull ?: 1.0f
+        val addTags = p["addTags"]?.let { parseStringMap(it.jsonObject)} ?: tags
+        val removeTags = p["removeTags"]?.let { parseStringMap(it.jsonObject)} ?: addTags
 
         return BaseFeature(
-                id,
-                tags,
-                geometry,
-                icon, imageURL,
-                names,
-                terms,
-                includeCountryCodes,
-                excludeCountryCodes,
-                searchable, matchScore, isSuggestion,
-                addTags,
-                removeTags
+            id = id,
+            tags = tags,
+            geometry = geometry,
+            icon = icon,
+            imageURL = imageURL,
+            names = names,
+            terms = terms,
+            includeCountryCodes = includeCountryCodes,
+            excludeCountryCodes = excludeCountryCodes,
+            isSearchable = searchable,
+            matchScore = matchScore,
+            isSuggestion = isSuggestion,
+            addTags = addTags,
+            removeTags = removeTags
         )
     }
 
-    companion object {
-        private fun parseCountryCodes(jsonList: JsonArray?): List<String>? {
-            if(jsonList?.any { it is JsonArray } == true) {
-                return null
-            }
-            val list = parseList(jsonList) { it.jsonPrimitive.content }
-            val result: MutableList<String> = ArrayList(list.size)
-            for (item in list) {
-                // for example a lat,lon pair to denote a location with radius. Not supported.
-                val cc = item.uppercase()
-                // don't need this, 001 stands for "whole world"
-                if (cc == "001") continue
-                // ISO-3166-2 codes are supported but not m49 code such as "150" or geojsons like "city_national_bank_fl.geojson"
-                if (!cc.matches("[A-Z]{2}(-[A-Z0-9]{1,3})?".toRegex())) return null
-                result.add(cc)
-            }
-            return result
+    private fun parseCountryCodes(jsonList: JsonArray?): List<String>? {
+        if(jsonList?.any { it is JsonArray } == true) {
+            return null
         }
+        val list = parseList(jsonList) { it.jsonPrimitive.content }
+        val result = ArrayList<String>(list.size)
+        for (item in list) {
+            // for example a lat,lon pair to denote a location with radius. Not supported.
+            val cc = item.uppercase()
+            // don't need this, 001 stands for "whole world"
+            if (cc == "001") continue
+            // ISO-3166-2 codes are supported but not m49 code such as "150" or geojsons like "city_national_bank_fl.geojson"
+            if (!cc.matches("[A-Z]{2}(-[A-Z0-9]{1,3})?".toRegex())) return null
+            result.add(cc)
+        }
+        return result
+    }
 
-        private fun anyKeyOrValueContainsWildcard(map: Map<String, String>): Boolean {
-            return map.any { (key, value) ->  key.contains("*") || value.contains("*")}
-        }
+    private fun anyKeyOrValueContainsWildcard(map: Map<String, String>): Boolean {
+        return map.any { (key, value) ->  key.contains("*") || value.contains("*")}
     }
 }
 

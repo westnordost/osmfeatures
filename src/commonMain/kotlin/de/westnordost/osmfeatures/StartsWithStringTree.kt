@@ -81,9 +81,7 @@ constructor(
 
         /** returns the given strings grouped by their nth character. Strings whose length is shorter
          * or equal to nth go into the "null" group.  */
-        private fun Collection<String>.groupedByNthCharacter(
-            nth: Int
-        ): Map<Char?, Collection<String>> {
+        private fun Collection<String>.groupedByNthCharacter(nth: Int): Map<Char?, Collection<String>> {
             val result = HashMap<Char?, MutableCollection<String>>()
             for (string in this) {
                 val c = if (string.length > nth) string[nth] else null

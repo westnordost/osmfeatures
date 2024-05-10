@@ -12,7 +12,7 @@ internal class IDBrandPresetsFeatureCollection(
     private val fileAccess: FileAccessAdapter
 ) : PerCountryFeatureCollection {
     // countryCode -> featureId -> Feature
-    private val featuresByIdByCountryCode: MutableMap<String?, LinkedHashMap<String, Feature>> = LinkedHashMap(320)
+    private val featuresByIdByCountryCode = LinkedHashMap<String?, LinkedHashMap<String, Feature>>(320)
 
     init {
         getOrLoadPerCountryFeatures(null)
@@ -48,8 +48,6 @@ internal class IDBrandPresetsFeatureCollection(
         }
     }
 
-    companion object {
-        private fun getPresetsFileName(countryCode: String?): String =
-            if (countryCode == null) "presets.json" else "presets-$countryCode.json"
-    }
+    private fun getPresetsFileName(countryCode: String?): String =
+        if (countryCode == null) "presets.json" else "presets-$countryCode.json"
 }

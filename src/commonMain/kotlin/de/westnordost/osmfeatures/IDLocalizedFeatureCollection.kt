@@ -54,7 +54,7 @@ internal class IDLocalizedFeatureCollection(
             } else {
                 result.putAll(featuresById)
             }
-}
+        }
         return result
     }
 

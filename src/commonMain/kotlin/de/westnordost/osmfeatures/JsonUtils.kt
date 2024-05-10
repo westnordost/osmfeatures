@@ -4,6 +4,7 @@ import kotlinx.serialization.json.*
 import okio.Buffer
 import okio.Source
 import okio.buffer
+
 internal object JsonUtils {
 
     fun <T> parseList(array: JsonArray?, t: (JsonElement) -> T): List<T> {

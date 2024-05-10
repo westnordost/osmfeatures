@@ -5,7 +5,8 @@ package de.westnordost.osmfeatures
  *
  * Based on the StartsWithStringTree data structure, see that class.  */
 internal class FeatureTermIndex(features: Collection<Feature>, getStrings: (Feature) -> List<String>) {
-    private val featureMap: MutableMap<String, MutableList<Feature>> = HashMap(features.size)
+    // name/term/... -> features
+    private val featureMap = HashMap<String, MutableList<Feature>>(features.size)
     private val tree: StartsWithStringTree
 
     init {
@@ -21,7 +22,7 @@ internal class FeatureTermIndex(features: Collection<Feature>, getStrings: (Feat
     fun getAll(startsWith: String): Set<Feature> {
         val result = HashSet<Feature>()
         for (string in tree.getAll(startsWith)) {
-            val fs: List<Feature>? = featureMap[string]
+            val fs = featureMap[string]
             if (fs != null) result.addAll(fs)
         }
         return result

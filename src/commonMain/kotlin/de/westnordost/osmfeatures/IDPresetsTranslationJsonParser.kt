@@ -22,14 +22,14 @@ class IDPresetsTranslationJsonParser {
         content: String, locale: String?, baseFeatures: Map<String, BaseFeature>
     ): List<LocalizedFeature> {
         val decodedObject = Json.decodeFromString<JsonObject>(content)
-        val languageKey: String = decodedObject.entries.iterator().next().key
+        val languageKey = decodedObject.entries.iterator().next().key
         val languageObject = decodedObject[languageKey]
             ?: return emptyList()
         val presetsContainerObject = languageObject.jsonObject["presets"]
             ?: return emptyList()
         val presetsObject = presetsContainerObject.jsonObject["presets"]?.jsonObject
             ?: return emptyList()
-        val localizedFeatures: MutableMap<String, LocalizedFeature> = HashMap(presetsObject.size)
+        val localizedFeatures = HashMap<String, LocalizedFeature>(presetsObject.size)
         presetsObject.entries.forEach { (key, value) ->
             val f = parseFeature(baseFeatures[key], locale, value.jsonObject)
             if (f != null) localizedFeatures[key] = f
@@ -71,23 +71,20 @@ class IDPresetsTranslationJsonParser {
         terms.removeAll(names)
 
         return LocalizedFeature(
-            feature,
-            locale,
-            names,
-            terms
+            p = feature,
+            locale = locale,
+            names = names,
+            terms = terms
         )
     }
+}
 
+private fun parseCommaSeparatedList(str: String?): Array<String> {
+    if (str.isNullOrEmpty()) return emptyArray()
+    return str.split("\\s*,+\\s*".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+}
 
-    companion object {
-        fun parseCommaSeparatedList(str: String?): Array<String> {
-            if (str.isNullOrEmpty()) return emptyArray()
-            return str.split("\\s*,+\\s*".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-        }
-
-        fun parseNewlineSeparatedList(str: String?): Array<String> {
-            if (str.isNullOrEmpty()) return emptyArray()
-            return str.split("\\s*[\\r\\n]+\\s*".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-        }
-    }
+private fun parseNewlineSeparatedList(str: String?): Array<String> {
+    if (str.isNullOrEmpty()) return emptyArray()
+    return str.split("\\s*[\\r\\n]+\\s*".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
 }

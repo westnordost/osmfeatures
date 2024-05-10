@@ -7,7 +7,6 @@ import kotlin.test.assertNull
 
 class FeatureDictionaryTest {
 
-
     private val bakery = feature( // unlocalized shop=bakery
         id = "shop/bakery",
         tags = mapOf("shop" to "bakery"),
