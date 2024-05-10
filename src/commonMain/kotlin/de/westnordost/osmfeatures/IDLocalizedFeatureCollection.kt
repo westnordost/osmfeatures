@@ -11,11 +11,11 @@ internal class IDLocalizedFeatureCollection(
     // featureId -> Feature
     private val featuresById: LinkedHashMap<String, BaseFeature>
 
-    // locale -> localized feature
-    private val localizedFeaturesList: MutableMap<String?, List<LocalizedFeature>> = HashMap()
+    // locale -> lazy { localized features }
+    private val localizedFeaturesList = HashMap<String?, Lazy<List<LocalizedFeature>>>()
 
-    // locales -> featureId -> Feature
-    private val localizedFeatures: MutableMap<List<String?>, LinkedHashMap<String, Feature>> = HashMap()
+    // locales -> lazy { featureId -> Feature }
+    private val localizedFeatures = HashMap<List<String?>, Lazy<LinkedHashMap<String, Feature>>>()
 
     init {
         featuresById = loadFeatures().associateByTo(LinkedHashMap()) { it.id }
@@ -30,15 +30,11 @@ internal class IDLocalizedFeatureCollection(
     }
 
     @OptIn(ExperimentalStdlibApi::class)
-    private fun loadFeatures(): List<BaseFeature> {
-        return fileAccess.open(FEATURES_FILE).use { source ->
-            IDPresetsJsonParser().parse(source)
-        }
-    }
+    private fun loadFeatures(): List<BaseFeature> =
+        fileAccess.open(FEATURES_FILE).use { IDPresetsJsonParser().parse(it) }
 
-    private fun getOrLoadLocalizedFeatures(locales: List<String?>): LinkedHashMap<String, Feature> {
-        return localizedFeatures.synchronizedGetOrCreate(locales, ::loadLocalizedFeatures)
-    }
+    private fun getOrLoadLocalizedFeatures(locales: List<String?>): LinkedHashMap<String, Feature> =
+        localizedFeatures.getOrPut(locales) { lazy { loadLocalizedFeatures(locales) } }.value
 
     private fun loadLocalizedFeatures(locales: List<String?>): LinkedHashMap<String, Feature> {
         val result = LinkedHashMap<String, Feature>(featuresById.size)
@@ -57,16 +53,15 @@ internal class IDLocalizedFeatureCollection(
         return result
     }
 
-    private fun getOrLoadLocalizedFeaturesList(locale: String): List<LocalizedFeature> {
-        return localizedFeaturesList.synchronizedGetOrCreate(locale, ::loadLocalizedFeaturesList)
-    }
+    private fun getOrLoadLocalizedFeaturesList(locale: String): List<LocalizedFeature> =
+        localizedFeaturesList.getOrPut(locale) { lazy { loadLocalizedFeaturesList(locale) } }.value
 
     @OptIn(ExperimentalStdlibApi::class)
     private fun loadLocalizedFeaturesList(locale: String?): List<LocalizedFeature> {
         val filename = if (locale != null) getLocalizationFilename(locale) else "en.json"
         if (!fileAccess.exists(filename)) return emptyList()
-        fileAccess.open(filename).use { source ->
-            return IDPresetsTranslationJsonParser().parse(source, locale, featuresById)
+        return fileAccess.open(filename).use { source ->
+            IDPresetsTranslationJsonParser().parse(source, locale, featuresById)
         }
     }
 

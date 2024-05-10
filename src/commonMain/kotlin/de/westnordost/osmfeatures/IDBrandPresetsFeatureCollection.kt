@@ -9,8 +9,8 @@ package de.westnordost.osmfeatures
 internal class IDBrandPresetsFeatureCollection(
     private val fileAccess: ResourceAccessAdapter
 ) : PerCountryFeatureCollection {
-    // countryCode -> featureId -> Feature
-    private val featuresByIdByCountryCode = LinkedHashMap<String?, LinkedHashMap<String, Feature>>(320)
+    // countryCode -> lazy { featureId -> Feature }
+    private val featuresByIdByCountryCode = LinkedHashMap<String?, Lazy<LinkedHashMap<String, Feature>>>(320)
 
     init {
         getOrLoadPerCountryFeatures(null)
@@ -32,11 +32,10 @@ internal class IDBrandPresetsFeatureCollection(
         return null
     }
 
-    private fun getOrLoadPerCountryFeatures(countryCode: String?): LinkedHashMap<String, Feature> {
-        return featuresByIdByCountryCode.synchronizedGetOrCreate(countryCode) {
-            loadFeatures(countryCode).associateByTo(LinkedHashMap()) { it.id }
-        }
-    }
+    private fun getOrLoadPerCountryFeatures(countryCode: String?): LinkedHashMap<String, Feature> =
+        featuresByIdByCountryCode.getOrPut(countryCode) {
+            lazy { loadFeatures(countryCode).associateByTo(LinkedHashMap()) { it.id } }
+        }.value
 
     @OptIn(ExperimentalStdlibApi::class)
     private fun loadFeatures(countryCode: String?): List<BaseFeature> {

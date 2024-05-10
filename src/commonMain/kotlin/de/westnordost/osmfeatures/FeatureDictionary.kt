@@ -6,14 +6,14 @@ class FeatureDictionary internal constructor(
     private val featureCollection: LocalizedFeatureCollection,
     private val brandFeatureCollection: PerCountryFeatureCollection?
 ) {
-    private val brandNamesIndexes: MutableMap<List<String?>, FeatureTermIndex> = HashMap()
-    private val brandTagsIndexes: MutableMap<List<String?>, FeatureTagsIndex> = HashMap()
+    private val brandNamesIndexes = HashMap<List<String?>, Lazy<FeatureTermIndex>>()
+    private val brandTagsIndexes = HashMap<List<String?>, Lazy<FeatureTagsIndex>>()
 
     // locale list -> index
-    private val tagsIndexes: MutableMap<List<String?>, FeatureTagsIndex> = HashMap()
-    private val namesIndexes: MutableMap<List<String?>, FeatureTermIndex> = HashMap()
-    private val termsIndexes: MutableMap<List<String?>, FeatureTermIndex> = HashMap()
-    private val tagValuesIndexes: MutableMap<List<String?>, FeatureTermIndex> = HashMap()
+    private val tagsIndexes = HashMap<List<String?>, Lazy<FeatureTagsIndex>>()
+    private val namesIndexes = HashMap<List<String?>, Lazy<FeatureTermIndex>>()
+    private val termsIndexes = HashMap<List<String?>, Lazy<FeatureTermIndex>>()
+    private val tagValuesIndexes = HashMap<List<String?>, Lazy<FeatureTermIndex>>()
 
     init {
         // build indices for default locale
@@ -188,75 +188,66 @@ class FeatureDictionary internal constructor(
     //region Lazily get or create Indexes
 
     /** lazily get or create tags index for given locale(s)  */
-    private fun getTagsIndex(locales: List<String?>): FeatureTagsIndex {
-        return tagsIndexes.synchronizedGetOrCreate(locales, ::createTagsIndex)
-    }
+    private fun getTagsIndex(locales: List<String?>): FeatureTagsIndex =
+        tagsIndexes.getOrPut(locales) { lazy { createTagsIndex(locales) } }.value
 
-    private fun createTagsIndex(locales: List<String?>): FeatureTagsIndex {
-        return FeatureTagsIndex(featureCollection.getAll(locales))
-    }
+    private fun createTagsIndex(locales: List<String?>): FeatureTagsIndex =
+        FeatureTagsIndex(featureCollection.getAll(locales))
 
     /** lazily get or create names index for given locale(s)  */
     private fun getNamesIndex(locales: List<String?>): FeatureTermIndex =
-        namesIndexes.synchronizedGetOrCreate(locales, ::createNamesIndex)
+        namesIndexes.getOrPut(locales) { lazy { createNamesIndex(locales) } }.value
 
-    private fun createNamesIndex(locales: List<String?>): FeatureTermIndex {
-        val features = featureCollection.getAll(locales)
-        return FeatureTermIndex(features) { feature ->
+    private fun createNamesIndex(locales: List<String?>): FeatureTermIndex =
+        FeatureTermIndex(featureCollection.getAll(locales)) { feature ->
             feature.getSearchableNames().toList()
         }
-    }
 
     /** lazily get or create terms index for given locale(s)  */
-    private fun getTermsIndex(locales: List<String?>): FeatureTermIndex {
-        return termsIndexes.synchronizedGetOrCreate(locales, ::createTermsIndex)
-    }
+    private fun getTermsIndex(locales: List<String?>): FeatureTermIndex =
+        termsIndexes.getOrPut(locales) { lazy { createTermsIndex(locales) } }.value
 
-    private fun createTermsIndex(locales: List<String?>): FeatureTermIndex {
-        return FeatureTermIndex(featureCollection.getAll(locales)) { feature ->
+    private fun createTermsIndex(locales: List<String?>): FeatureTermIndex =
+        FeatureTermIndex(featureCollection.getAll(locales)) { feature ->
             if (!feature.isSearchable) emptyList() else feature.canonicalTerms
         }
-    }
 
     /** lazily get or create tag values index  */
-    private fun getTagValuesIndex(locales: List<String?>): FeatureTermIndex {
-        return tagValuesIndexes.synchronizedGetOrCreate(locales, ::createTagValuesIndex)
-    }
+    private fun getTagValuesIndex(locales: List<String?>): FeatureTermIndex =
+        tagValuesIndexes.getOrPut(locales) { lazy { createTagValuesIndex(locales) } }.value
 
-    private fun createTagValuesIndex(locales: List<String?>): FeatureTermIndex {
-        return FeatureTermIndex(featureCollection.getAll(locales)) { feature ->
-            if (!feature.isSearchable) return@FeatureTermIndex emptyList<String>()
-            return@FeatureTermIndex feature.tags.values.filter { it != "*" }
+    private fun createTagValuesIndex(locales: List<String?>): FeatureTermIndex =
+        FeatureTermIndex(featureCollection.getAll(locales)) { feature ->
+            if (!feature.isSearchable) {
+                emptyList()
+            } else {
+                feature.tags.values.filter { it != "*" }
+            }
         }
-    }
 
     /** lazily get or create brand names index for country  */
-    private fun getBrandNamesIndex(countryCodes: List<String?>): FeatureTermIndex {
-        return brandNamesIndexes.synchronizedGetOrCreate(countryCodes, ::createBrandNamesIndex)
-    }
+    private fun getBrandNamesIndex(countryCodes: List<String?>): FeatureTermIndex =
+        brandNamesIndexes.getOrPut(countryCodes) { lazy { createBrandNamesIndex(countryCodes) } }.value
 
-    private fun createBrandNamesIndex(countryCodes: List<String?>): FeatureTermIndex {
-        return if (brandFeatureCollection == null) {
+    private fun createBrandNamesIndex(countryCodes: List<String?>): FeatureTermIndex =
+        if (brandFeatureCollection == null) {
             FeatureTermIndex(emptyList()) { emptyList() }
         } else {
             FeatureTermIndex(brandFeatureCollection.getAll(countryCodes)) { feature ->
                 if (!feature.isSearchable) emptyList() else feature.canonicalNames
             }
         }
-    }
 
     /** lazily get or create tags index for the given countries  */
-    private fun getBrandTagsIndex(countryCodes: List<String?>): FeatureTagsIndex {
-        return brandTagsIndexes.synchronizedGetOrCreate(countryCodes, ::createBrandTagsIndex)
-    }
+    private fun getBrandTagsIndex(countryCodes: List<String?>): FeatureTagsIndex =
+        brandTagsIndexes.getOrPut(countryCodes) { lazy { createBrandTagsIndex(countryCodes) } }.value
 
-    private fun createBrandTagsIndex(countryCodes: List<String?>): FeatureTagsIndex {
-        return if (brandFeatureCollection == null) {
+    private fun createBrandTagsIndex(countryCodes: List<String?>): FeatureTagsIndex =
+        if (brandFeatureCollection == null) {
             FeatureTagsIndex(emptyList())
         } else {
             FeatureTagsIndex(brandFeatureCollection.getAll(countryCodes))
         }
-    }
 
     //endregion
 
@@ -409,7 +400,6 @@ class FeatureDictionary internal constructor(
     //endregion
 
     companion object {
-
         /** Create a new FeatureDictionary which gets its data from the given directory.
          *  Optionally, a path to brand presets can be specified.  */
         fun create(
