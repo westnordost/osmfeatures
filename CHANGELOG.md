@@ -1,5 +1,9 @@
 # Changelog
 
+# 6.0.0
+
+- The library is now a Kotlin Multiplatform library. This is a breaking API change.
+
 # 5.2
 
 - Add support placeholders for preset names (breaking change in [v5.0.0](https://github.com/ideditor/schema-builder/blob/main/CHANGELOG.md#510) of iD presets schema)
