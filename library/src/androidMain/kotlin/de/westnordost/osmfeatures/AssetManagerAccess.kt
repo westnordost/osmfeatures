@@ -5,13 +5,14 @@ import okio.Source
 import okio.source
 import java.io.File
 
-class AssetManagerAccess(private val assetManager: AssetManager, private val basePath: String): FileAccessAdapter {
-    override fun exists(name: String): Boolean {
-        val files: Array<String> = assetManager.list(basePath) ?: return false
-        return files.contains(name)
-    }
+internal class AssetManagerAccess(
+    private val assetManager: AssetManager,
+    private val basePath: String
+): FileAccessAdapter {
 
-    override fun open(name: String): Source {
-        return assetManager.open(basePath + File.separator + name).source()
-    }
+    override fun exists(name: String): Boolean =
+        assetManager.list(basePath)?.contains(name) ?: false
+
+    override fun open(name: String): Source =
+        assetManager.open(basePath + File.separator + name).source()
 }
