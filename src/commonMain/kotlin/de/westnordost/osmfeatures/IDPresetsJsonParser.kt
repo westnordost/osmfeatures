@@ -8,7 +8,7 @@ import kotlinx.serialization.json.*
 /** Parses this file
  * [...](https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json)
  * into map of id -> Feature.  */
-class IDPresetsJsonParser(private var isSuggestion: Boolean = false) {
+internal class IDPresetsJsonParser(private var isSuggestion: Boolean = false) {
 
     fun parse(source: Source): List<BaseFeature> =
         parse(Json.decodeFromSource<JsonObject>(source))

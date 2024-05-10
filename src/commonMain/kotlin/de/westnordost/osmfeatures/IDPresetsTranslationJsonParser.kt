@@ -10,7 +10,7 @@ import kotlinx.serialization.json.jsonPrimitive
  * https://github.com/openstreetmap/id-tagging-schema/tree/main/dist/translations
  * , given the base features are already parsed.
  */
-class IDPresetsTranslationJsonParser {
+internal class IDPresetsTranslationJsonParser {
 
     fun parse(
         content: String, locale: String?, baseFeatures: Map<String, BaseFeature>
