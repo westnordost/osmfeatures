@@ -33,7 +33,8 @@ constructor(
         buildTree(strings, 0, maxDepth.coerceAtLeast(0), minContainerSize.coerceAtLeast(1))
 
     /** Get all strings which start with the given string  */
-    fun getAll(startsWith: String): List<String> = root.getAll(startsWith, 0)
+    fun getAll(startsWith: String): List<String> =
+        root.getAll(startsWith, 0)
 
     private class Node(val children: Map<Char, Node>, val strings: Collection<String>) {
 

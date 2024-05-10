@@ -48,7 +48,8 @@ internal class ContainedMapTree<K, V>
         buildTree(maps, emptyList(), maxDepth.coerceAtLeast(0), minContainerSize)
 
     /** Get all maps whose entries are completely contained by the given map  */
-    fun getAll(map: Map<K, V>): List<Map<K, V>> = root.getAll(map)
+    fun getAll(map: Map<K, V>): List<Map<K, V>> =
+        root.getAll(map)
 
     private class Node<K, V>(
         /** key -> (value -> Node)  */
