@@ -1,7 +1,5 @@
 package de.westnordost.osmfeatures
 
-import de.westnordost.osmfeatures.JsonUtils.parseList
-import de.westnordost.osmfeatures.JsonUtils.parseStringMap
 import kotlinx.io.Source
 import kotlinx.serialization.json.*
 
@@ -20,7 +18,7 @@ internal class IDPresetsJsonParser(private var isSuggestion: Boolean = false) {
         json.mapNotNull { (key, value) ->  parseFeature(key, value.jsonObject) }
 
     private fun parseFeature(id: String, p: JsonObject): BaseFeature? {
-        val tags = parseStringMap(p["tags"]?.jsonObject)
+        val tags = p["tags"]?.jsonObject?.mapValues { it.value.jsonPrimitive.content }.orEmpty()
         // drop features with * in key or value of tags (for now), because they never describe
         // a concrete thing, but some category of things.
         // TODO maybe drop this limitation
@@ -28,34 +26,34 @@ internal class IDPresetsJsonParser(private var isSuggestion: Boolean = false) {
         // also dropping features with empty tags (generic point, line, relation)
         if (tags.isEmpty()) return null
 
-        val geometry = parseList(p["geometry"]?.jsonArray) {
-            GeometryType.valueOf(((it as JsonPrimitive).content).uppercase())
-        }
+        val geometry = p["geometry"]?.jsonArray?.map {
+            GeometryType.valueOf(it.jsonPrimitive.content.uppercase())
+        }.orEmpty()
 
-        val name = p["name"]?.jsonPrimitive?.content ?: ""
-        val icon = p["icon"]?.jsonPrimitive?.content
-        val imageURL = p["imageURL"]?.jsonPrimitive?.content
-        val names = parseList(p["aliases"]?.jsonArray) { it.jsonPrimitive.content }.toMutableList()
-        names.add(0, name)
-        val terms = parseList(p["terms"]?.jsonArray) { it.jsonPrimitive.content }
+        val name = p["name"]?.jsonPrimitive?.contentOrNull ?: ""
+        val icon = p["icon"]?.jsonPrimitive?.contentOrNull
+        val imageURL = p["imageURL"]?.jsonPrimitive?.contentOrNull
+        val names = buildList {
+            add(name)
+            addAll(p["aliases"]?.jsonArray?.map { it.jsonPrimitive.content }.orEmpty())
+        }
+        val terms = p["terms"]?.jsonArray?.map { it.jsonPrimitive.content }.orEmpty()
 
         val locationSet = p["locationSet"]?.jsonObject
         val includeCountryCodes: List<String>?
         val excludeCountryCodes: List<String>?
         if (locationSet != null) {
-            includeCountryCodes = parseCountryCodes(locationSet["include"]?.jsonArray)
-            if (includeCountryCodes == null) return null
-            excludeCountryCodes = parseCountryCodes(locationSet["exclude"]?.jsonArray)
-            if (excludeCountryCodes == null) return null
+            includeCountryCodes = locationSet["include"]?.jsonArray?.parseCountryCodes() ?: return null
+            excludeCountryCodes = locationSet["exclude"]?.jsonArray?.parseCountryCodes() ?: return null
         } else {
-            includeCountryCodes = ArrayList(0)
-            excludeCountryCodes = ArrayList(0)
+            includeCountryCodes = emptyList()
+            excludeCountryCodes = emptyList()
         }
 
         val searchable = p["searchable"]?.jsonPrimitive?.booleanOrNull ?: true
         val matchScore = p["matchScore"]?.jsonPrimitive?.floatOrNull ?: 1.0f
-        val addTags = p["addTags"]?.let { parseStringMap(it.jsonObject)} ?: tags
-        val removeTags = p["removeTags"]?.let { parseStringMap(it.jsonObject)} ?: addTags
+        val addTags = p["addTags"]?.jsonObject?.mapValues { it.value.jsonPrimitive.content } ?: tags
+        val removeTags = p["removeTags"]?.jsonObject?.mapValues { it.value.jsonPrimitive.content } ?: addTags
 
         return BaseFeature(
             id = id,
@@ -75,14 +73,13 @@ internal class IDPresetsJsonParser(private var isSuggestion: Boolean = false) {
         )
     }
 
-    private fun parseCountryCodes(jsonList: JsonArray?): List<String>? {
-        if(jsonList?.any { it is JsonArray } == true) {
-            return null
-        }
-        val list = parseList(jsonList) { it.jsonPrimitive.content }
+    private fun JsonArray.parseCountryCodes(): List<String>? {
+        // for example a lat,lon pair to denote a location with radius. Not supported.
+        if (any { it is JsonArray }) return null
+
+        val list = map { it.jsonPrimitive.content }
         val result = ArrayList<String>(list.size)
         for (item in list) {
-            // for example a lat,lon pair to denote a location with radius. Not supported.
             val cc = item.uppercase()
             // don't need this, 001 stands for "whole world"
             if (cc == "001") continue

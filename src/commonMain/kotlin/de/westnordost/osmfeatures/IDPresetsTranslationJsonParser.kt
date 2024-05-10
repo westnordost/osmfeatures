@@ -1,17 +1,14 @@
 package de.westnordost.osmfeatures
 
 import kotlinx.io.Source
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.*
 
 /** Parses a file from
  * https://github.com/openstreetmap/id-tagging-schema/tree/main/dist/translations
  * , given the base features are already parsed.
  */
 internal class IDPresetsTranslationJsonParser {
-
+    // TODO locale nullable does not make sense?!
     fun parse(
         content: String, locale: String?, baseFeatures: Map<String, BaseFeature>
     ): List<LocalizedFeature> =
@@ -25,53 +22,57 @@ internal class IDPresetsTranslationJsonParser {
     private fun parse(
         json: JsonObject, locale: String?, baseFeatures: Map<String, BaseFeature>
     ): List<LocalizedFeature> {
-        val languageKey = json.entries.iterator().next().key
-        val languageObject = json[languageKey]
+        val translations = json.jsonObject.entries.firstOrNull()?.value?.jsonObject
+        val presetsObject = translations
+            ?.get("presets")?.jsonObject
+            ?.get("presets")?.jsonObject
             ?: return emptyList()
-        val presetsContainerObject = languageObject.jsonObject["presets"]
-            ?: return emptyList()
-        val presetsObject = presetsContainerObject.jsonObject["presets"]?.jsonObject
-            ?: return emptyList()
+
         val localizedFeatures = HashMap<String, LocalizedFeature>(presetsObject.size)
         presetsObject.entries.forEach { (key, value) ->
             val f = parseFeature(baseFeatures[key], locale, value.jsonObject)
             if (f != null) localizedFeatures[key] = f
         }
+
         for (baseFeature in baseFeatures.values) {
             val names = baseFeature.names
             if (names.isEmpty()) continue
-            val name = names[0]
+            val name = names.first()
             val isPlaceholder = name.startsWith("{") && name.endsWith("}")
             if (!isPlaceholder) continue
             val placeholderId = name.substring(1, name.length - 1)
             val localizedFeature = localizedFeatures[placeholderId] ?: continue
             localizedFeatures[baseFeature.id] = LocalizedFeature(
-                baseFeature,
-                locale,
-                localizedFeature.names,
-                localizedFeature.terms
+                p = baseFeature,
+                locale = locale,
+                names = localizedFeature.names,
+                terms = localizedFeature.terms
             )
         }
 
-        return ArrayList(localizedFeatures.values)
+        return localizedFeatures.values.toList()
     }
 
     private fun parseFeature(feature: BaseFeature?, locale: String?, localization: JsonObject): LocalizedFeature? {
         if (feature == null) return null
 
-        val name = localization["name"]?.jsonPrimitive?.content
-        if (name.isNullOrEmpty()) return null
+        val name = localization["name"]?.jsonPrimitive?.contentOrNull.orEmpty()
 
-        val namesArray = parseNewlineSeparatedList(localization["aliases"]?.jsonPrimitive?.content)
-        val names: MutableList<String> = ArrayList(namesArray.size + 1)
-        names.addAll(namesArray)
-        names.remove(name)
-        names.add(0, name)
+        val aliases = localization["aliases"]?.jsonPrimitive?.content
+            .orEmpty()
+            .lineSequence()
 
-        val termsArray = parseCommaSeparatedList(localization["terms"]?.jsonPrimitive?.content)
-        val terms: MutableList<String> = ArrayList(termsArray.size)
-        terms.addAll(termsArray)
-        terms.removeAll(names)
+        val names = (sequenceOf(name) + aliases)
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .toList()
+
+        val terms = localization["terms"]?.jsonPrimitive?.content
+            .orEmpty()
+            .splitToSequence(",")
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .toList()
 
         return LocalizedFeature(
             p = feature,
@@ -80,14 +81,4 @@ internal class IDPresetsTranslationJsonParser {
             terms = terms
         )
     }
-}
-
-private fun parseCommaSeparatedList(str: String?): Array<String> {
-    if (str.isNullOrEmpty()) return emptyArray()
-    return str.split("\\s*,+\\s*".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-}
-
-private fun parseNewlineSeparatedList(str: String?): Array<String> {
-    if (str.isNullOrEmpty()) return emptyArray()
-    return str.split("\\s*[\\r\\n]+\\s*".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
 }
