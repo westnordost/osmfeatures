@@ -6,7 +6,7 @@ import kotlinx.serialization.json.*
 /** Parses this file
  * [...](https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json)
  * into map of id -> Feature.  */
-internal class IDPresetsJsonParser(private var isSuggestion: Boolean = false) {
+internal class IDPresetsJsonParser(private val isSuggestion: Boolean = false) {
 
     fun parse(source: Source): List<BaseFeature> =
         parse(Json.decodeFromSource<JsonObject>(source))
@@ -22,7 +22,7 @@ internal class IDPresetsJsonParser(private var isSuggestion: Boolean = false) {
         // drop features with * in key or value of tags (for now), because they never describe
         // a concrete thing, but some category of things.
         // TODO maybe drop this limitation
-        if (anyKeyOrValueContainsWildcard(tags)) return null
+        if (tags.anyKeyOrValueContainsWildcard()) return null
         // also dropping features with empty tags (generic point, line, relation)
         if (tags.isEmpty()) return null
 
@@ -72,27 +72,24 @@ internal class IDPresetsJsonParser(private var isSuggestion: Boolean = false) {
             removeTags = removeTags
         )
     }
-
-    private fun JsonArray.parseCountryCodes(): List<String>? {
-        // for example a lat,lon pair to denote a location with radius. Not supported.
-        if (any { it is JsonArray }) return null
-
-        val list = map { it.jsonPrimitive.content }
-        val result = ArrayList<String>(list.size)
-        for (item in list) {
-            val cc = item.uppercase()
-            // don't need this, 001 stands for "whole world"
-            if (cc == "001") continue
-            // ISO-3166-2 codes are supported but not m49 code such as "150" or geojsons like "city_national_bank_fl.geojson"
-            if (!cc.matches("[A-Z]{2}(-[A-Z0-9]{1,3})?".toRegex())) return null
-            result.add(cc)
-        }
-        return result
-    }
-
-    private fun anyKeyOrValueContainsWildcard(map: Map<String, String>): Boolean {
-        return map.any { (key, value) ->  key.contains("*") || value.contains("*")}
-    }
 }
 
+private fun JsonArray.parseCountryCodes(): List<String>? {
+    // for example a lat,lon pair to denote a location with radius. Not supported.
+    if (any { it is JsonArray }) return null
 
+    val list = map { it.jsonPrimitive.content }
+    val result = ArrayList<String>(list.size)
+    for (item in list) {
+        val cc = item.uppercase()
+        // don't need this, 001 stands for "whole world"
+        if (cc == "001") continue
+        // ISO-3166-2 codes are supported but not m49 code such as "150" or geojsons like "city_national_bank_fl.geojson"
+        if (!cc.matches("[A-Z]{2}(-[A-Z0-9]{1,3})?".toRegex())) return null
+        result.add(cc)
+    }
+    return result
+}
+
+private fun Map<String, String>.anyKeyOrValueContainsWildcard(): Boolean =
+    any { (key, value) ->  key.contains("*") || value.contains("*") }

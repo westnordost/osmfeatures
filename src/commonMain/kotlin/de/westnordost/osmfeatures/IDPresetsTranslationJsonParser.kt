@@ -23,21 +23,18 @@ internal class IDPresetsTranslationJsonParser {
         json: JsonObject, locale: String?, baseFeatures: Map<String, BaseFeature>
     ): List<LocalizedFeature> {
         val translations = json.jsonObject.entries.firstOrNull()?.value?.jsonObject
-        val presetsObject = translations
             ?.get("presets")?.jsonObject
             ?.get("presets")?.jsonObject
             ?: return emptyList()
 
-        val localizedFeatures = HashMap<String, LocalizedFeature>(presetsObject.size)
-        presetsObject.entries.forEach { (key, value) ->
+        val localizedFeatures = HashMap<String, LocalizedFeature>(translations.size)
+        translations.entries.forEach { (key, value) ->
             val f = parseFeature(baseFeatures[key], locale, value.jsonObject)
             if (f != null) localizedFeatures[key] = f
         }
 
         for (baseFeature in baseFeatures.values) {
-            val names = baseFeature.names
-            if (names.isEmpty()) continue
-            val name = names.first()
+            val name = baseFeature.names.firstOrNull() ?: continue
             val isPlaceholder = name.startsWith("{") && name.endsWith("}")
             if (!isPlaceholder) continue
             val placeholderId = name.substring(1, name.length - 1)
