@@ -8,7 +8,6 @@ import kotlinx.serialization.json.*
  * , given the base features are already parsed.
  */
 internal class IDPresetsTranslationJsonParser {
-    // TODO locale nullable does not make sense?!
     fun parse(
         content: String, locale: String?, baseFeatures: Map<String, BaseFeature>
     ): List<LocalizedFeature> =
