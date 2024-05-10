@@ -29,12 +29,11 @@ class FeatureDictionary internal constructor(
 
     private fun getById(
         id: String,
-        locales: List<String?> = listOf(defaultLocale()),
+        locales: List<String?>? = null,
         countryCode: String? = null
-    ): Feature? {
-        return featureCollection.get(id, locales)
+    ): Feature? =
+        featureCollection.get(id, locales ?: listOf(defaultLocale(), null))
             ?: brandFeatureCollection?.get(id, dissectCountryCode(countryCode))
-    }
 
     //endregion
 
@@ -46,15 +45,17 @@ class FeatureDictionary internal constructor(
     private fun getByTags(
         tags: Map<String, String>,
         geometry: GeometryType? = null,
-        locales: List<String?> = listOf(defaultLocale()),
+        locales: List<String?>? = null,
         countryCode: String? = null,
         isSuggestion: Boolean? = null
     ): List<Feature> {
         if (tags.isEmpty()) return emptyList()
 
-        val foundFeatures: MutableList<Feature> = mutableListOf()
+        val localesOrDefault = locales ?: listOf(defaultLocale(), null)
+
+        val foundFeatures = mutableListOf<Feature>()
         if (isSuggestion == null || !isSuggestion) {
-            foundFeatures.addAll(getTagsIndex(locales).getAll(tags))
+            foundFeatures.addAll(getTagsIndex(localesOrDefault).getAll(tags))
         }
         if (isSuggestion == null || isSuggestion) {
             val countryCodes = dissectCountryCode(countryCode)
@@ -81,7 +82,7 @@ class FeatureDictionary internal constructor(
             }
 
             // 2. if search is not limited by locale, return matches not limited by locale first
-            if (locales.size == 1 && locales[0] == null) {
+            if (localesOrDefault.size == 1 && localesOrDefault[0] == null) {
                 val localeOrder = (
                     (b.includeCountryCodes.isEmpty() && b.excludeCountryCodes.isEmpty()).toInt()
                     - (a.includeCountryCodes.isEmpty() && a.excludeCountryCodes.isEmpty()).toInt()
@@ -112,11 +113,13 @@ class FeatureDictionary internal constructor(
     private fun getByTerm(
         search: String,
         geometry: GeometryType?,
-        locales: List<String?>,
+        locales: List<String?>?,
         countryCode: String?,
         isSuggestion: Boolean?
     ): Sequence<Feature> {
         val canonicalSearch = search.canonicalize()
+
+        val localesOrDefault = locales ?: listOf(defaultLocale(), null)
 
         val sortNames = Comparator { a: Feature, b: Feature ->
             // 1. exact matches first
@@ -156,7 +159,7 @@ class FeatureDictionary internal constructor(
             if (isSuggestion == null || !isSuggestion) {
                 // a. matches with presets first
                 yieldAll(
-                    getNamesIndex(locales).getAll(canonicalSearch).sortedWith(sortNames)
+                    getNamesIndex(localesOrDefault).getAll(canonicalSearch).sortedWith(sortNames)
                 )
             }
             if (isSuggestion == null || isSuggestion) {
@@ -169,13 +172,13 @@ class FeatureDictionary internal constructor(
             if (isSuggestion == null || !isSuggestion) {
                 // c. matches with terms third
                 yieldAll(
-                    getTermsIndex(locales).getAll(canonicalSearch).sortedWith(sortMatchScore)
+                    getTermsIndex(localesOrDefault).getAll(canonicalSearch).sortedWith(sortMatchScore)
                 )
             }
             if (isSuggestion == null || !isSuggestion) {
                 // d. matches with tag values fourth
                 yieldAll(
-                    getTagValuesIndex(locales).getAll(canonicalSearch).sortedWith(sortMatchScore)
+                    getTagValuesIndex(localesOrDefault).getAll(canonicalSearch).sortedWith(sortMatchScore)
                 )
             }
         }
@@ -254,7 +257,7 @@ class FeatureDictionary internal constructor(
     //region Query builders
 
     inner class QueryByIdBuilder(private val id: String) {
-        private var locale: List<String?> = listOf(defaultLocale())
+        private var locale: List<String?>? = null
         private var countryCode: String? = null
 
         /**
@@ -288,7 +291,7 @@ class FeatureDictionary internal constructor(
 
     inner class QueryByTagBuilder(private val tags: Map<String, String>) {
         private var geometryType: GeometryType? = null
-        private var locale: List<String?> = listOf(defaultLocale())
+        private var locale: List<String?>? = null
         private var suggestion: Boolean? = null
         private var countryCode: String? = null
 
@@ -341,7 +344,7 @@ class FeatureDictionary internal constructor(
 
     inner class QueryByTermBuilder(private val term: String) {
         private var geometryType: GeometryType? = null
-        private var locale: List<String?> = listOf(defaultLocale())
+        private var locale: List<String?>? = null
         private var suggestion: Boolean? = null
         private var limit = 50
         private var countryCode: String? = null

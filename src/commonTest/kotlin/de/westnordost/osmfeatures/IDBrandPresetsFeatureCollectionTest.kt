@@ -1,6 +1,5 @@
 package de.westnordost.osmfeatures
 
-import kotlinx.io.Source
 import kotlin.test.assertEquals
 import kotlin.test.Test
 
@@ -9,7 +8,7 @@ class IDBrandPresetsFeatureCollectionTest {
     fun load_brands() {
         val c = IDBrandPresetsFeatureCollection(object : ResourceAccessAdapter {
             override fun exists(name: String) = name == "presets.json"
-            override fun open(name: String) = getSource("brand_presets_min.json")
+            override fun open(name: String) = resource("brand_presets_min.json")
         })
         assertEquals(
             setOf("Duckworths", "Megamall"),
@@ -25,7 +24,7 @@ class IDBrandPresetsFeatureCollectionTest {
     fun load_brands_by_country() {
         val c = IDBrandPresetsFeatureCollection(object : ResourceAccessAdapter {
             override fun exists(name: String) = name == "presets-DE.json"
-            override fun open(name: String) = getSource("brand_presets_min2.json")
+            override fun open(name: String) = resource("brand_presets_min2.json")
         })
         assertEquals(
             setOf("Talespin"),
@@ -35,6 +34,3 @@ class IDBrandPresetsFeatureCollectionTest {
         assertEquals(true, c.get("yet_another/brand", listOf("DE"))?.isSuggestion)
     }
 }
-
-private fun getSource(file: String): Source =
-    FileSystemAccess("src/commonTest/resources").open(file)

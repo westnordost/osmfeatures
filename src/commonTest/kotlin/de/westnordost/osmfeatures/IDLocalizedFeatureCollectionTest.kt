@@ -1,6 +1,5 @@
 package de.westnordost.osmfeatures
 
-import kotlinx.io.Source
 import kotlin.test.*
 
 class IDLocalizedFeatureCollectionTest {
@@ -21,9 +20,9 @@ class IDLocalizedFeatureCollectionTest {
                 name in listOf("presets.json", "en.json", "de.json")
 
             override fun open(name: String) = when (name) {
-                "presets.json" -> getSource("some_presets_min.json")
-                "en.json" -> getSource("localizations_en.json")
-                "de.json" -> getSource("localizations_de.json")
+                "presets.json" -> resource("some_presets_min.json")
+                "en.json" -> resource("localizations_en.json")
+                "de.json" -> resource("localizations_de.json")
                 else -> throw Exception("File not found")
             }
         })
@@ -79,12 +78,12 @@ class IDLocalizedFeatureCollectionTest {
                 "de-Cyrl-AT.json"
             )
 
-            override fun open(name: String): Source = when (name) {
-                "presets.json" -> getSource("some_presets_min.json")
-                "de-AT.json" -> getSource("localizations_de-AT.json")
-                "de.json" -> getSource("localizations_de.json")
-                "de-Cyrl-AT.json" -> getSource("localizations_de-Cyrl-AT.json")
-                "de-Cyrl.json" -> getSource("localizations_de-Cyrl.json")
+            override fun open(name: String) = when (name) {
+                "presets.json" -> resource("some_presets_min.json")
+                "de-AT.json" -> resource("localizations_de-AT.json")
+                "de.json" -> resource("localizations_de.json")
+                "de-Cyrl-AT.json" -> resource("localizations_de-Cyrl-AT.json")
+                "de-Cyrl.json" -> resource("localizations_de-Cyrl.json")
                 else -> throw Exception("File not found")
             }
         })
@@ -115,6 +114,3 @@ class IDLocalizedFeatureCollectionTest {
         assertEquals("бацкхусл", c.get("some/id", cryllicAustria)?.name)
     }
 }
-
-private fun getSource(file: String): Source =
-    FileSystemAccess("src/commonTest/resources").open(file)

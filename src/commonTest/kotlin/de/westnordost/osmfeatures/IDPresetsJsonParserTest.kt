@@ -3,24 +3,20 @@ package de.westnordost.osmfeatures
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.request.get
-import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
-import kotlinx.io.Source
-import kotlinx.io.buffered
-import kotlinx.io.files.Path
-import kotlinx.io.files.SystemFileSystem
+import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import kotlin.test.fail
 
 class IDPresetsJsonParserTest {
     @Test
     fun load_features_only() {
-        val features: List<BaseFeature> = parse("one_preset_full.json")
+        val features = parseResource("one_preset_full.json")
         assertEquals(1, features.size)
-        val feature: Feature = features[0]
+
+        val feature = features[0]
         assertEquals("some/id", feature.id)
         assertEquals(mapOf("a" to "b", "c" to "d"), feature.tags)
         assertEquals(
@@ -30,7 +26,8 @@ class IDPresetsJsonParserTest {
                 GeometryType.LINE,
                 GeometryType.AREA,
                 GeometryType.RELATION
-            ), feature.geometry
+            ),
+            feature.geometry
         )
         assertEquals(listOf("DE", "GB"), feature.includeCountryCodes)
         assertEquals(listOf("IT"), feature.excludeCountryCodes)
@@ -47,9 +44,10 @@ class IDPresetsJsonParserTest {
 
     @Test
     fun load_features_only_defaults() {
-        val features: List<BaseFeature> = parse("one_preset_min.json")
+        val features = parseResource("one_preset_min.json")
         assertEquals(1, features.size)
-        val feature: Feature = features[0]
+
+        val feature = features[0]
         assertEquals("some/id", feature.id)
         assertEquals(mapOf("a" to "b", "c" to "d"), feature.tags)
         assertEquals(listOf(GeometryType.POINT), feature.geometry)
@@ -68,7 +66,7 @@ class IDPresetsJsonParserTest {
 
     @Test
     fun load_features_unsupported_location_set() {
-        val features: List<BaseFeature> = parse("one_preset_unsupported_location_set.json")
+        val features = parseResource("one_preset_unsupported_location_set.json")
         assertEquals(2, features.size)
         assertEquals("some/ok", features[0].id)
         assertEquals("another/ok", features[1].id)
@@ -76,30 +74,23 @@ class IDPresetsJsonParserTest {
 
     @Test
     fun load_features_no_wildcards() {
-        val features: List<BaseFeature> = parse("one_preset_wildcard.json")
+        val features = parseResource("one_preset_wildcard.json")
         assertTrue(features.isEmpty())
     }
 
     @Test
-    fun parse_some_real_data() {
+    fun parse_some_real_data() = runBlocking {
+        val client = HttpClient(CIO) { expectSuccess = true }
 
-        val client = HttpClient(CIO)
-            val httpResponse: HttpResponse = client.get("https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json")
-            if (httpResponse.status.value in 200..299) {
-                val body = httpResponse.bodyAsText()
-                val features = IDPresetsJsonParser().parse(body)
-                // should not crash etc
-                assertTrue(features.size > 1000)
-            }
-            else {
-                fail("Unable to retrieve response")
-            }
+        val presets = client
+            .get("https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json")
+            .bodyAsText()
+
+        val features = IDPresetsJsonParser().parse(presets)
+        // should not crash etc
+        assertTrue(features.size > 1000)
     }
 
-    private fun parse(file: String): List<BaseFeature> =
-        read(file) { IDPresetsJsonParser().parse(it) }
-
-    @OptIn(ExperimentalStdlibApi::class)
-    private fun <R> read(file: String, block: (Source) -> R): R =
-        SystemFileSystem.source(Path("src/commonTest/resources", file)).buffered().use { block(it) }
+    private fun parseResource(file: String): List<BaseFeature> =
+        useResource(file) { IDPresetsJsonParser().parse(it) }
 }
