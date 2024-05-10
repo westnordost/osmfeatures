@@ -29,7 +29,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("org.jetbrains.kotlinx:kotlinx-io-core:0.3.4")
+                api("org.jetbrains.kotlinx:kotlinx-io-core:0.3.4")
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
                 implementation("com.doist.x:normalize:1.0.5")
             }
