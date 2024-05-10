@@ -3,16 +3,16 @@ pluginManagement {
         google()
         gradlePluginPortal()
         mavenCentral()
-
     }
 }
 
 dependencyResolutionManagement {
     repositories {
         google()
+        gradlePluginPortal()
         mavenCentral()
     }
 }
 
-rootProject.name = "de.westnordost.osmfeatures"
+rootProject.name = "osmfeatures"
 include(":library")

@@ -5,7 +5,6 @@ import io.ktor.client.engine.cio.CIO
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
-import kotlinx.coroutines.runBlocking
 import okio.Source
 import kotlin.test.Test
 import okio.IOException
@@ -83,7 +82,6 @@ class IDPresetsJsonParserTest {
     fun parse_some_real_data() {
 
         val client = HttpClient(CIO)
-        runBlocking {
             val httpResponse: HttpResponse = client.get("https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json")
             if (httpResponse.status.value in 200..299) {
                 val body = httpResponse.bodyAsText()
@@ -94,7 +92,6 @@ class IDPresetsJsonParserTest {
             else {
                 fail("Unable to retrieve response")
             }
-        }
     }
 
     private fun parse(file: String): List<BaseFeature> {

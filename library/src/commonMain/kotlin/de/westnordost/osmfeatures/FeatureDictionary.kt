@@ -1,9 +1,5 @@
 package de.westnordost.osmfeatures
 
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
-
 class FeatureDictionary internal constructor(
     private val featureCollection: LocalizedFeatureCollection,
     private val brandFeatureCollection: PerCountryFeatureCollection?
@@ -227,9 +223,6 @@ class FeatureDictionary internal constructor(
 
     private fun createTagValuesIndex(locales: List<String?>): FeatureTermIndex {
         return FeatureTermIndex(featureCollection.getAll(locales)) { feature ->
-            runBlocking {
-                delay(2000)
-            }
             if (!feature.isSearchable) return@FeatureTermIndex emptyList<String>()
             return@FeatureTermIndex feature.tags.values.filter { it != "*" }
         }
