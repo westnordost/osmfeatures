@@ -6,6 +6,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.Buffer
+import kotlinx.io.IOException
 import kotlinx.io.Source
 
 class LivePresetDataAccessAdapter : ResourceAccessAdapter {
@@ -16,6 +17,7 @@ class LivePresetDataAccessAdapter : ResourceAccessAdapter {
     override fun exists(name: String): Boolean =
         name in listOf("presets.json", "de.json", "en.json", "en-GB.json")
 
+    @Throws(IOException::class)
     override fun open(name: String): Source {
         val url = when(name) {
             "presets.json" -> "$baseUrl/presets.json"

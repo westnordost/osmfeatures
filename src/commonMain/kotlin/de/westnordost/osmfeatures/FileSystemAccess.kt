@@ -1,5 +1,6 @@
 package de.westnordost.osmfeatures
 
+import kotlinx.io.IOException
 import kotlinx.io.Source
 import kotlinx.io.buffered
 import kotlinx.io.files.FileSystem
@@ -19,6 +20,7 @@ class FileSystemAccess(
     override fun exists(name: String): Boolean =
         fileSystem.exists(Path(basePath, name))
 
+    @Throws(IOException::class)
     override fun open(name: String): Source =
         fileSystem.source(Path(basePath, name)).buffered()
 }
