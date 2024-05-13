@@ -24,29 +24,90 @@ class FeatureDictionary internal constructor(
 
     //region Get by id
 
-    /** Find feature by id */
+    /** Builder to find a feature by id. See [getById] */
     fun byId(id: String) = QueryByIdBuilder(id)
 
-    private fun getById(
+    /**
+     *  Returns the feature associated with the given id or `null` if it does not exist
+     *
+     *  @param id
+     *  feature id
+     *
+     *  @param locales
+     *  Optional. List of IETF language tags of languages in which the result should be localized.
+     *
+     *  Several languages can be specified to each fall back to if a translation does not exist in
+     *  the locale before that. For example, specify `listOf("ca-ES","es", null)` if results in
+     *  Catalan are preferred, Spanish is also fine or otherwise use unlocalized results (`null`).
+     *
+     *  Defaults to `listOf(<default system locale>, null)`, i.e. unlocalized results are
+     *  included by default. (Brand features are usually not localized.)
+     *
+     *  @param country
+     *  Optional. ISO 3166-1 alpha-2 country code (e.g. "US") or the ISO 3166-2 (e.g. "US-NY") of
+     *  the country/state the element is in.
+     *  If `null`, will only return matches that are *not* county-specific.
+     * */
+    fun getById(
         id: String,
         locales: List<String?>? = null,
-        countryCode: String? = null
+        country: String? = null
     ): Feature? =
         featureCollection.get(id, locales ?: listOf(defaultLocale(), null))
-            ?: brandFeatureCollection?.get(id, dissectCountryCode(countryCode))
+            ?: brandFeatureCollection?.get(id, dissectCountryCode(country))
 
     //endregion
 
     //region Query by tags
 
-    /** Find matches by a set of tags  */
+    /** Builder to find matches by a set of tags. See [getByTags] */
     fun byTags(tags: Map<String, String>) = QueryByTagBuilder(tags)
 
-    private fun getByTags(
+    /**
+     *  Search for features by a set of tags.
+     *
+     *  @param tags feature tags
+     *
+     *  @param geometry
+     *  Optional. If not `null`, only returns features that match the given geometry type.
+     *
+     *  @param locales
+     *  Optional. List of IETF language tags of languages in which the result should be localized.
+     *
+     *  Several languages can be specified to each fall back to if a translation does not exist in
+     *  the locale before that. For example, specify `listOf("ca-ES","es", null)` if results in
+     *  Catalan are preferred, Spanish is also fine or otherwise use unlocalized results (`null`).
+     *
+     *  Defaults to `listOf(<default system locale>, null)`, i.e. unlocalized results are
+     *  included by default. (Brand features are usually not localized.)
+     *
+     *  @param country
+     *  Optional. ISO 3166-1 alpha-2 country code (e.g. "US") or the ISO 3166-2 (e.g. "US-NY") of
+     *  the country/state the element is in.
+     *  If `null`, will only return matches that are *not* county-specific.
+     *
+     *  @param isSuggestion
+     *  Optional. `true` to *only* include suggestions, `false` to *not* include suggestions
+     *  or `null` to include any in the result.
+     *  Suggestions are brands, like 7-Eleven, Santander etc.
+     *
+     *  @return
+     *  A list of dictionary entries that match the given tags or an empty list if nothing is found.
+     *
+     *  For a set of tags that match a less specific feature and a more specific feature, only the
+     *  more specific feature is returned.
+     *  E.g. `amenity=doctors` + `healthcare:speciality=cardiology` matches *only* a Cardiologist,
+     *  not a Doctor's Office in general.
+     *
+     *  In rare cases, a set of tags may match multiple primary features, such as for
+     *  tag combinations like `shop=deli` + `amenity=cafe`. This somewhat frowned upon tagging
+     *  practice is the only reason why this method returns a list.
+     * */
+    fun getByTags(
         tags: Map<String, String>,
-        geometry: GeometryType? = null,
         locales: List<String?>? = null,
-        countryCode: String? = null,
+        country: String? = null,
+        geometry: GeometryType? = null,
         isSuggestion: Boolean? = null
     ): List<Feature> {
         if (tags.isEmpty()) return emptyList()
@@ -58,10 +119,10 @@ class FeatureDictionary internal constructor(
             foundFeatures.addAll(getTagsIndex(localesOrDefault).getAll(tags))
         }
         if (isSuggestion == null || isSuggestion) {
-            val countryCodes = dissectCountryCode(countryCode)
+            val countryCodes = dissectCountryCode(country)
             foundFeatures.addAll(getBrandTagsIndex(countryCodes).getAll(tags))
         }
-        foundFeatures.removeAll { !it.matches(geometry, countryCode) }
+        foundFeatures.removeAll { !it.matches(geometry, country) }
 
         if (foundFeatures.size > 1) {
             // only return of each category the most specific thing. I.e. will return
@@ -107,15 +168,50 @@ class FeatureDictionary internal constructor(
 
     //region Query by term
 
-    /** Find matches by given search word  */
+    /** Builder to find matches by given search word. See [getByTerm] */
     fun byTerm(term: String) = QueryByTermBuilder(term)
 
-    private fun getByTerm(
+    /**
+     *  Search for features by a search term.
+     *
+     *  @param search The search term
+     *
+     *  @param geometry
+     *  Optional. If not `null`, only returns features that match the given geometry type.
+     *
+     *  @param locales
+     *  Optional. List of IETF language tags of languages in which the result should be localized.
+     *
+     *  Several languages can be specified to each fall back to if a translation does not exist in
+     *  the locale before that. For example, specify `listOf("ca-ES","es", null)` if results in
+     *  Catalan are preferred, Spanish is also fine or otherwise use unlocalized results (`null`).
+     *
+     *  Defaults to `listOf(<default system locale>, null)`, i.e. unlocalized results are
+     *  included by default. (Brand features are usually not localized.)
+     *
+     *  @param country
+     *  Optional. ISO 3166-1 alpha-2 country code (e.g. "US") or the ISO 3166-2 (e.g. "US-NY") of
+     *  the country/state the element is in.
+     *  If `null`, will only return matches that are *not* county-specific.
+     *
+     *  @param isSuggestion
+     *  Optional. `true` to *only* include suggestions, `false` to *not* include suggestions
+     *  or `null` to include any in the result.
+     *  Suggestions are brands, like 7-Eleven, Santander etc.
+     *
+     *  @return
+     *  A sequence of dictionary entries that match the search, or an empty sequence list if nothing
+     *  is found.
+     *
+     *  Results are broadly sorted in this order: Matches with names, then with brand names, then
+     *  with terms (keywords), then with tag values.
+     * */
+    fun getByTerm(
         search: String,
-        geometry: GeometryType?,
-        locales: List<String?>?,
-        countryCode: String?,
-        isSuggestion: Boolean?
+        locales: List<String?>? = null,
+        country: String? = null,
+        geometry: GeometryType? = null,
+        isSuggestion: Boolean? = null
     ): Sequence<Feature> {
         val canonicalSearch = search.canonicalize()
 
@@ -164,7 +260,7 @@ class FeatureDictionary internal constructor(
             }
             if (isSuggestion == null || isSuggestion) {
                 // b. matches with brand names second
-                val countryCodes = dissectCountryCode(countryCode)
+                val countryCodes = dissectCountryCode(country)
                 yieldAll(
                     getBrandNamesIndex(countryCodes).getAll(canonicalSearch).sortedWith(sortNames)
                 )
@@ -183,7 +279,7 @@ class FeatureDictionary internal constructor(
             }
         }
         .distinct()
-        .filter { it.matches(geometry, countryCode) }
+        .filter { it.matches(geometry, country) }
     }
 
     //endregion
@@ -257,148 +353,59 @@ class FeatureDictionary internal constructor(
     //region Query builders
 
     inner class QueryByIdBuilder(private val id: String) {
-        private var locale: List<String?>? = null
-        private var countryCode: String? = null
+        private var locales: List<String?>? = null
+        private var country: String? = null
 
-        /**
-         * Sets the locale(s) in which to present the results as IETF language tags
-         *
-         * You can specify several locales in a row to each fall back to if a translation does not
-         * exist in the locale before that. For example `["ca-ES","es-ES"]` if you prefer results
-         * in Catalan, but Spanish is also fine.
-         *
-         * `null` means to include unlocalized results.
-         *
-         * If nothing is specified, it defaults to `[<default system locale>, null]`,
-         * i.e. unlocalized results are included by default.
-         */
-        fun forLocale(vararg locales: String?): QueryByIdBuilder {
-            this.locale = locales.toList()
-            return this
-        }
+        fun forLocale(vararg locales: String?): QueryByIdBuilder =
+            apply { this.locales = locales.toList() }
 
-        /** the ISO 3166-1 alpha-2 country code (e.g. "US") or the ISO 3166-2 (e.g. "US-NY") of the
-         * country/state the element is in. If not specified, will only return matches that are not
-         * county-specific.  */
-        fun inCountry(countryCode: String?): QueryByIdBuilder {
-            this.countryCode = countryCode
-            return this
-        }
+        fun inCountry(country: String?): QueryByIdBuilder =
+            apply { this.country = country }
 
-        /** Returns the feature associated with the given id or `null` if it does not exist  */
-        fun get(): Feature? = getById(id, locale, countryCode)
+        fun get(): Feature? = getById(id, locales, country)
     }
 
     inner class QueryByTagBuilder(private val tags: Map<String, String>) {
-        private var geometryType: GeometryType? = null
-        private var locale: List<String?>? = null
-        private var suggestion: Boolean? = null
-        private var countryCode: String? = null
+        private var geometry: GeometryType? = null
+        private var locales: List<String?>? = null
+        private var isSuggestion: Boolean? = null
+        private var country: String? = null
 
-        /** Sets for which geometry type to look. If not set or `null`, any will match.  */
-        fun forGeometry(geometryType: GeometryType): QueryByTagBuilder {
-            this.geometryType = geometryType
-            return this
-        }
+        fun forGeometry(geometry: GeometryType): QueryByTagBuilder =
+            apply { this.geometry = geometry }
 
-        /**
-         * Sets the locale(s) in which to present the results as IETF language tags
-         *
-         * You can specify several locales in a row to each fall back to if a translation does not
-         * exist in the locale before that. For example `["ca-ES","es-ES"]` if you prefer results
-         * in Catalan, but Spanish is also fine.
-         *
-         * `null` means to include unlocalized results.
-         *
-         * If nothing is specified, it defaults to `[<default system locale>, null]`,
-         * i.e. unlocalized results are included by default.
-         */
-        fun forLocale(vararg locales: String?): QueryByTagBuilder {
-            this.locale = locales.toList()
-            return this
-        }
+        fun forLocale(vararg locales: String?): QueryByTagBuilder =
+            apply { this.locales = locales.toList() }
 
-        /** the ISO 3166-1 alpha-2 country code (e.g. "US") or the ISO 3166-2 (e.g. "US-NY") of the
-         * country/state the element is in. If not specified, will only return matches that are not
-         * county-specific.  */
-        fun inCountry(countryCode: String?): QueryByTagBuilder {
-            this.countryCode = countryCode
-            return this
-        }
+        fun inCountry(country: String?): QueryByTagBuilder =
+            apply { this.country = country }
 
-        /** Set whether to only include suggestions (=true) or to not include suggestions (=false).
-         * Suggestions are brands, like 7-Eleven.  */
-        fun isSuggestion(suggestion: Boolean?): QueryByTagBuilder {
-            this.suggestion = suggestion
-            return this
-        }
+        fun isSuggestion(isSuggestion: Boolean?): QueryByTagBuilder =
+            apply { this.isSuggestion = isSuggestion }
 
-        /** Returns a list of dictionary entries that match or an empty list if nothing is
-         * found.
-         *
-         * In rare cases, a set of tags may match multiple primary features, such as for
-         * tag combinations like `shop=deli` + `amenity=cafe`, so, this is why
-         * it is a list.  */
-        fun find(): List<Feature> = getByTags(tags, geometryType, locale, countryCode, suggestion)
+        fun find(): List<Feature> = getByTags(tags, locales, country, geometry, isSuggestion)
     }
 
     inner class QueryByTermBuilder(private val term: String) {
-        private var geometryType: GeometryType? = null
-        private var locale: List<String?>? = null
-        private var suggestion: Boolean? = null
-        private var limit = 50
-        private var countryCode: String? = null
+        private var geometry: GeometryType? = null
+        private var locales: List<String?>? = null
+        private var isSuggestion: Boolean? = null
+        private var country: String? = null
 
-        /** Sets for which geometry type to look. If not set or `null`, any will match.  */
-        fun forGeometry(geometryType: GeometryType): QueryByTermBuilder {
-            this.geometryType = geometryType
-            return this
-        }
+        fun forGeometry(geometryType: GeometryType): QueryByTermBuilder =
+            apply { this.geometry = geometryType }
 
-        /**
-         * Sets the locale(s) in which to present the results as IETF language tags
-         *
-         * You can specify several locales in a row to each fall back to if a translation does not
-         * exist in the locale before that. For example `["ca-ES","es-ES"]` if you prefer results
-         * in Catalan, but Spanish is also fine.
-         *
-         * `null` means to include unlocalized results.
-         *
-         * If nothing is specified, it defaults to `[<default system locale>, null]`,
-         * i.e. unlocalized results are included by default.
-         */
-        fun forLocale(vararg locales: String?): QueryByTermBuilder {
-            this.locale = locales.toList()
-            return this
-        }
+        fun forLocale(vararg locales: String?): QueryByTermBuilder =
+            apply { this.locales = locales.toList() }
 
-        /** the ISO 3166-1 alpha-2 country code (e.g. "US") or the ISO 3166-2 (e.g. "US-NY") of the
-         * country/state the element is in. If not specified, will only return matches that are not
-         * county-specific.  */
-        fun inCountry(countryCode: String?): QueryByTermBuilder {
-            this.countryCode = countryCode
-            return this
-        }
+        fun inCountry(countryCode: String?): QueryByTermBuilder =
+            apply { this.country = countryCode }
 
-        /** Set whether to only include suggestions (=true) or to not include suggestions (=false).
-         * Suggestions are brands, like 7-Eleven.  */
-        fun isSuggestion(suggestion: Boolean?): QueryByTermBuilder {
-            this.suggestion = suggestion
-            return this
-        }
+        fun isSuggestion(suggestion: Boolean?): QueryByTermBuilder =
+            apply { this.isSuggestion = suggestion }
 
-        /** limit how many results to return at most. Default is 50, -1 for unlimited.  */
-        fun limit(limit: Int): QueryByTermBuilder {
-            this.limit = limit
-            return this
-        }
-
-        /** Returns a list of dictionary entries that match or an empty list if nothing is
-         * found. <br></br>
-         * Results are sorted mainly in this order: Matches with names, with brand names, then
-         * matches with terms (keywords).  */
-        fun find(): List<Feature> =
-            getByTerm(term, geometryType, locale, countryCode, suggestion).take(limit).toList()
+        fun find(): Sequence<Feature> =
+            getByTerm(term, locales, country, geometry, isSuggestion)
     }
     //endregion
 

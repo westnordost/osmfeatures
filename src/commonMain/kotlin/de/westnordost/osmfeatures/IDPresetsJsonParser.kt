@@ -24,7 +24,6 @@ internal class IDPresetsJsonParser(private val isSuggestion: Boolean = false) {
         val tags = p["tags"]?.jsonObject?.mapValues { it.value.jsonPrimitive.content }.orEmpty()
         // drop features with * in key or value of tags (for now), because they never describe
         // a concrete thing, but some category of things.
-        // TODO maybe drop this limitation
         if (tags.anyKeyOrValueContainsWildcard()) return null
         // also dropping features with empty tags (generic point, line, relation)
         if (tags.isEmpty()) return null
@@ -44,10 +43,10 @@ internal class IDPresetsJsonParser(private val isSuggestion: Boolean = false) {
 
         val include = p["locationSet"]?.jsonObject?.get("include")?.jsonArray
         val exclude = p["locationSet"]?.jsonObject?.get("exclude")?.jsonArray
-        val includeCountryCodes: List<String> =
+        val includeCountryCodes =
             if (include != null) include.parseCountryCodes() ?: return null
             else emptyList()
-        val excludeCountryCodes: List<String> =
+        val excludeCountryCodes =
             if (exclude != null) exclude.parseCountryCodes() ?: return null
             else emptyList()
 
