@@ -311,14 +311,17 @@ class FeatureDictionaryTest {
     
     @Test
     fun find_no_entry_by_name() {
-        assertEquals(emptyList(), dictionary(bakery).byTerm("Supermarkt").find())
+        assertEquals(
+            emptyList(),
+            dictionary(bakery).byTerm("Supermarkt").find().toList()
+        )
     }
 
     @Test
     fun find_no_entry_by_name_because_wrong_geometry() {
         assertEquals(
             emptyList(),
-            dictionary(bakery).byTerm("Bäckerei").forGeometry(GeometryType.LINE).find()
+            dictionary(bakery).byTerm("Bäckerei").forGeometry(GeometryType.LINE).find().toList()
         )
     }
 
@@ -327,25 +330,28 @@ class FeatureDictionaryTest {
         val dictionary = dictionary(ditsch, ditschRussian)
         assertEquals(
             emptyList(),
-            dictionary.byTerm("Ditsch").find()
+            dictionary.byTerm("Ditsch").find().toList()
         )
         assertEquals(
             emptyList(),
-            dictionary.byTerm("Ditsch").inCountry("FR").find()
+            dictionary.byTerm("Ditsch").inCountry("FR").find().toList()
         ) // not in France
         assertEquals(
             emptyList(),
-            dictionary.byTerm("Ditsch").inCountry("AT-9").find()
+            dictionary.byTerm("Ditsch").inCountry("AT-9").find().toList()
         ) // in all of AT but not Vienna
         assertEquals(
             emptyList(),
-            dictionary.byTerm("Дитсч").inCountry("UA").find()
+            dictionary.byTerm("Дитсч").inCountry("UA").find().toList()
         ) // only on the Krim
     }
 
     @Test
     fun find_no_non_searchable_entry_by_name() {
-        assertEquals(emptyList(), dictionary(scheisshaus).byTerm("Scheißhaus").find())
+        assertEquals(
+            emptyList(),
+            dictionary(scheisshaus).byTerm("Scheißhaus").find().toList()
+        )
     }
 
     @Test
@@ -355,7 +361,9 @@ class FeatureDictionaryTest {
             dictionary(bakery)
                 .byTerm("Bäckerei")
                 .forLocale(null)
-                .find())
+                .find()
+                .toList()
+        )
     }
 
     @Test
@@ -367,33 +375,43 @@ class FeatureDictionaryTest {
                 .forLocale(null)
                 .forGeometry(GeometryType.POINT)
                 .find()
+                .toList()
         )
     }
 
     @Test
     fun find_entry_by_name_with_correct_country() {
         val dictionary = dictionary(ditsch, ditschRussian, bakery)
-        assertEquals(listOf(ditsch), dictionary.byTerm("Ditsch").inCountry("DE").find())
-        assertEquals(listOf(ditsch), dictionary.byTerm("Ditsch").inCountry("DE-TH").find())
-        assertEquals(listOf(ditsch), dictionary.byTerm("Ditsch").inCountry("AT").find())
-        assertEquals(listOf(ditsch), dictionary.byTerm("Ditsch").inCountry("AT-5").find())
-        assertEquals(listOf(ditschRussian), dictionary.byTerm("Дитсч").inCountry("UA-43").find())
-        assertEquals(listOf(ditschRussian), dictionary.byTerm("Дитсч").inCountry("RU-KHA").find())
+        assertEquals(listOf(ditsch), dictionary.byTerm("Ditsch").inCountry("DE").find().toList())
+        assertEquals(listOf(ditsch), dictionary.byTerm("Ditsch").inCountry("DE-TH").find().toList())
+        assertEquals(listOf(ditsch), dictionary.byTerm("Ditsch").inCountry("AT").find().toList())
+        assertEquals(listOf(ditsch), dictionary.byTerm("Ditsch").inCountry("AT-5").find().toList())
+        assertEquals(listOf(ditschRussian), dictionary.byTerm("Дитсч").inCountry("UA-43").find().toList())
+        assertEquals(listOf(ditschRussian), dictionary.byTerm("Дитсч").inCountry("RU-KHA").find().toList())
     }
 
     @Test
     fun find_entry_by_name_case_insensitive() {
-        assertEquals(listOf(bakery), dictionary(bakery).byTerm("BÄCkErEI").forLocale(null).find())
+        assertEquals(
+            listOf(bakery),
+            dictionary(bakery).byTerm("BÄCkErEI").forLocale(null).find().toList()
+        )
     }
 
     @Test
     fun find_entry_by_name_diacritics_insensitive() {
-        assertEquals(listOf(bakery), dictionary(bakery).byTerm("Backérèi").forLocale(null).find())
+        assertEquals(
+            listOf(bakery),
+            dictionary(bakery).byTerm("Backérèi").forLocale(null).find().toList()
+        )
     }
 
     @Test
     fun find_entry_by_term() {
-        assertEquals(listOf(bakery), dictionary(bakery).byTerm("bro").forLocale(null).find())
+        assertEquals(
+            listOf(bakery),
+            dictionary(bakery).byTerm("bro").forLocale(null).find().toList()
+        )
     }
 
     @Test
@@ -401,30 +419,36 @@ class FeatureDictionaryTest {
         val dictionary = dictionary(liquor_store)
         assertEquals(
             listOf(liquor_store),
-            dictionary.byTerm("Alcohol").forLocale("en-GB").find()
+            dictionary.byTerm("Alcohol").forLocale("en-GB").find().toList()
         )
         assertEquals(
             listOf(liquor_store),
-            dictionary.byTerm("Off licence (Alcohol Shop)").forLocale("en-GB").find()
+            dictionary.byTerm("Off licence (Alcohol Shop)").forLocale("en-GB").find().toList()
         )
         assertEquals(
             listOf(liquor_store),
-            dictionary.byTerm("Off Licence").forLocale("en-GB").find()
+            dictionary.byTerm("Off Licence").forLocale("en-GB").find().toList()
         )
         assertEquals(
             listOf(liquor_store),
-            dictionary.byTerm("Off Licence (Alco").forLocale("en-GB").find()
+            dictionary.byTerm("Off Licence (Alco").forLocale("en-GB").find().toList()
         )
     }
 
     @Test
     fun find_entry_by_term_case_insensitive() {
-        assertEquals(listOf(bakery), dictionary(bakery).byTerm("BRO").forLocale(null).find())
+        assertEquals(
+            listOf(bakery),
+            dictionary(bakery).byTerm("BRO").forLocale(null).find().toList()
+        )
     }
 
     @Test
     fun find_entry_by_term_diacritics_insensitive() {
-        assertEquals(listOf(bakery), dictionary(bakery).byTerm("bró").forLocale(null).find())
+        assertEquals(
+            listOf(bakery),
+            dictionary(bakery).byTerm("bró").forLocale(null).find().toList()
+        )
     }
 
     @Test
@@ -440,19 +464,6 @@ class FeatureDictionaryTest {
     }
 
     @Test
-    fun find_multiple_entries_by_name_but_respect_limit() {
-        assertEquals(
-            1,
-            dictionary(second_hand_car_dealer, car_dealer)
-                .byTerm("auto")
-                .forLocale("de")
-                .limit(1)
-                .find()
-                .size
-        )
-    }
-
-    @Test
     fun find_only_brands_by_name_finds_no_normal_entries() {
         assertEquals(
             0,
@@ -461,7 +472,7 @@ class FeatureDictionaryTest {
                 .forLocale(null)
                 .isSuggestion(true)
                 .find()
-                .size
+                .count()
         )
     }
 
@@ -474,6 +485,7 @@ class FeatureDictionaryTest {
                 .forLocale(null)
                 .isSuggestion(false)
                 .find()
+                .toList()
         )
     }
 
@@ -481,7 +493,7 @@ class FeatureDictionaryTest {
     fun find_no_entry_by_term_because_wrong_locale() {
         assertEquals(
             emptyList(),
-            dictionary(bakery).byTerm("Bäck").forLocale("it").find()
+            dictionary(bakery).byTerm("Bäck").forLocale("it").find().toList()
         )
     }
 
@@ -489,17 +501,17 @@ class FeatureDictionaryTest {
     fun find_entry_by_term_because_fallback_locale() {
         assertEquals(
             listOf(bakery),
-            dictionary(bakery).byTerm("Bäck").forLocale("it", null).find()
+            dictionary(bakery).byTerm("Bäck").forLocale("it", null).find().toList()
         )
     }
 
     @Test
     fun find_multi_word_brand_feature() {
         val dictionary = dictionary(deutsche_bank)
-        assertEquals(listOf(deutsche_bank), dictionary.byTerm("Deutsche Ba").find())
-        assertEquals(listOf(deutsche_bank), dictionary.byTerm("Deut").find())
+        assertEquals(listOf(deutsche_bank), dictionary.byTerm("Deutsche Ba").find().toList())
+        assertEquals(listOf(deutsche_bank), dictionary.byTerm("Deut").find().toList())
         // by-word only for non-brand features
-        assertTrue(dictionary.byTerm("Ban").find().isEmpty())
+        assertEquals(0, dictionary.byTerm("Ban").find().count())
     }
 
     @Test
@@ -507,32 +519,32 @@ class FeatureDictionaryTest {
         val dictionary = dictionary(miniature_train_shop)
         assertEquals(
             listOf(miniature_train_shop),
-            dictionary.byTerm("mini").forLocale(null).find()
+            dictionary.byTerm("mini").forLocale(null).find().toList()
         )
         assertEquals(
             listOf(miniature_train_shop),
-            dictionary.byTerm("train").forLocale(null).find()
+            dictionary.byTerm("train").forLocale(null).find().toList()
         )
         assertEquals(
             listOf(miniature_train_shop),
-            dictionary.byTerm("shop").forLocale(null).find()
+            dictionary.byTerm("shop").forLocale(null).find().toList()
         )
         assertEquals(
             listOf(miniature_train_shop),
-            dictionary.byTerm("Miniature Trai").forLocale(null).find()
+            dictionary.byTerm("Miniature Trai").forLocale(null).find().toList()
         )
         assertEquals(
             listOf(miniature_train_shop),
-            dictionary.byTerm("Miniature Train Shop").forLocale(null).find()
+            dictionary.byTerm("Miniature Train Shop").forLocale(null).find().toList()
         )
-        assertTrue(dictionary.byTerm("Train Sho").forLocale(null).find().isEmpty())
+        assertEquals(0, dictionary.byTerm("Train Sho").forLocale(null).find().count())
     }
 
     @Test
     fun find_entry_by_tag_value() {
         assertEquals(
             listOf(panetteria),
-            dictionary(panetteria).byTerm("bakery").forLocale("it").find()
+            dictionary(panetteria).byTerm("bakery").forLocale("it").find().toList()
         )
     }
 
@@ -607,7 +619,7 @@ class FeatureDictionaryTest {
                 // casino,       // not included: "Spielbank" does not start with "bank"
                 // deutsche_bank // not included: "Deutsche Bank" does not start with "bank" and is a brand
             ),
-            dictionary.byTerm("Bank").forLocale(null).find()
+            dictionary.byTerm("Bank").forLocale(null).find().toList()
         )
     }
 
@@ -644,8 +656,8 @@ class FeatureDictionaryTest {
             .forLocale("de", null)
             .inCountry("DE")
             .find()
-        assertEquals(1, byTerm.size)
-        assertEquals(lush, byTerm[0])
+        assertEquals(1, byTerm.count())
+        assertEquals(lush, byTerm.first())
 
         val byId = dictionary
             .byId("shop/cosmetics/lush-a08666")
@@ -680,8 +692,8 @@ class FeatureDictionaryTest {
             .byTerm("Chinese Res")
             .forLocale("en")
             .find()
-        assertEquals(1, matches3.size)
-        assertEquals("Chinese Restaurant", matches3[0].name)
+        assertEquals(1, matches3.count())
+        assertEquals("Chinese Restaurant", matches3.first().name)
     }
 }
 
