@@ -5,7 +5,7 @@ import kotlinx.serialization.json.*
 
 /** Parses this file
  * [...](https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json)
- * into map of id -> Feature.  */
+ * into list of Features.  */
 internal class IDPresetsJsonParser(private val isSuggestion: Boolean = false) {
 
     fun parse(source: Source): List<BaseFeature> =
@@ -14,8 +14,11 @@ internal class IDPresetsJsonParser(private val isSuggestion: Boolean = false) {
     fun parse(content: String): List<BaseFeature> =
         parse(Json.decodeFromString<JsonObject>(content))
 
-    private fun parse(json: JsonObject): List<BaseFeature> =
-        json.mapNotNull { (key, value) ->  parseFeature(key, value.jsonObject) }
+    private fun parse(json: JsonObject): List<BaseFeature> {
+        // the presets in the nsi presets are one level down (in preset object)
+        val root = json["presets"]?.jsonObject ?: json
+        return root.mapNotNull { (key, value) -> parseFeature(key, value.jsonObject) }
+    }
 
     private fun parseFeature(id: String, p: JsonObject): BaseFeature? {
         val tags = p["tags"]?.jsonObject?.mapValues { it.value.jsonPrimitive.content }.orEmpty()
@@ -39,16 +42,14 @@ internal class IDPresetsJsonParser(private val isSuggestion: Boolean = false) {
         }
         val terms = p["terms"]?.jsonArray?.map { it.jsonPrimitive.content }.orEmpty()
 
-        val locationSet = p["locationSet"]?.jsonObject
-        val includeCountryCodes: List<String>?
-        val excludeCountryCodes: List<String>?
-        if (locationSet != null) {
-            includeCountryCodes = locationSet["include"]?.jsonArray?.parseCountryCodes() ?: return null
-            excludeCountryCodes = locationSet["exclude"]?.jsonArray?.parseCountryCodes() ?: return null
-        } else {
-            includeCountryCodes = emptyList()
-            excludeCountryCodes = emptyList()
-        }
+        val include = p["locationSet"]?.jsonObject?.get("include")?.jsonArray
+        val exclude = p["locationSet"]?.jsonObject?.get("exclude")?.jsonArray
+        val includeCountryCodes: List<String> =
+            if (include != null) include.parseCountryCodes() ?: return null
+            else emptyList()
+        val excludeCountryCodes: List<String> =
+            if (exclude != null) exclude.parseCountryCodes() ?: return null
+            else emptyList()
 
         val searchable = p["searchable"]?.jsonPrimitive?.booleanOrNull ?: true
         val matchScore = p["matchScore"]?.jsonPrimitive?.floatOrNull ?: 1.0f

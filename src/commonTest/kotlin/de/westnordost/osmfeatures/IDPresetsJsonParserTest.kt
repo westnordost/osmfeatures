@@ -101,7 +101,7 @@ class IDPresetsJsonParserTest {
 
         val features = IDPresetsJsonParser().parse(presets)
         // should not crash etc
-        assertTrue(features.size > 1000)
+        assertTrue(features.size > 20000)
     }
 
     private fun parseResource(file: String): List<BaseFeature> =
