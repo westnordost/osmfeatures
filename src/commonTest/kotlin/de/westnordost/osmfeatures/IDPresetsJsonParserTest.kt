@@ -79,11 +79,24 @@ class IDPresetsJsonParserTest {
     }
 
     @Test
-    fun parse_some_real_data() = runBlocking {
+    fun parse_real_data() = runBlocking {
         val client = HttpClient(CIO) { expectSuccess = true }
 
         val presets = client
             .get("https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json")
+            .bodyAsText()
+
+        val features = IDPresetsJsonParser().parse(presets)
+        // should not crash etc
+        assertTrue(features.size > 1000)
+    }
+
+    @Test
+    fun parse_real_brand_data() = runBlocking {
+        val client = HttpClient(CIO) { expectSuccess = true }
+
+        val presets = client
+            .get("https://github.com/osmlab/name-suggestion-index/raw/main/dist/presets/nsi-id-presets.json")
             .bodyAsText()
 
         val features = IDPresetsJsonParser().parse(presets)
