@@ -74,6 +74,8 @@ internal class IDPresetsJsonParser(private val isSuggestion: Boolean = false) {
     }
 }
 
+private val ISO3166_2 = Regex("[A-Z]{2}(-[A-Z0-9]{1,3})?")
+
 private fun JsonArray.parseCountryCodes(): List<String>? {
     // for example a lat,lon pair to denote a location with radius. Not supported.
     if (any { it is JsonArray }) return null
@@ -85,7 +87,7 @@ private fun JsonArray.parseCountryCodes(): List<String>? {
         // don't need this, 001 stands for "whole world"
         if (cc == "001") continue
         // ISO-3166-2 codes are supported but not m49 code such as "150" or geojsons like "city_national_bank_fl.geojson"
-        if (!cc.matches("[A-Z]{2}(-[A-Z0-9]{1,3})?".toRegex())) return null
+        if (!cc.matches(ISO3166_2)) return null
         result.add(cc)
     }
     return result
