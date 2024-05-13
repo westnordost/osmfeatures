@@ -446,7 +446,8 @@ private fun Feature.getSearchableNames(): Sequence<String> = sequence {
 }
 
 private fun isInCountryCodes(countryCode: String, countryCodes: List<String>): Boolean =
-    countryCode in countryCodes || countryCode.substringBefore('-') in countryCodes.map { it }
+    countryCode in countryCodes ||
+    countryCode.substringBefore('-') in countryCodes
 
 private fun getParentCategoryIds(id: String): Sequence<String> = sequence {
     var lastIndex = id.length
