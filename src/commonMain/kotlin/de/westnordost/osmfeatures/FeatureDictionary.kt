@@ -18,8 +18,8 @@ class FeatureDictionary internal constructor(
     init {
         // build indices for default locale
         getTagsIndex(listOf(defaultLocale(), null))
-        getNamesIndex(listOf(defaultLocale()))
-        getTermsIndex(listOf(defaultLocale()))
+        getNamesIndex(listOf(defaultLocale(), null))
+        getTermsIndex(listOf(defaultLocale(), null))
     }
 
     //region Get by id
