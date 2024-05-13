@@ -44,14 +44,17 @@ val dictionary = FeatureDictionary.create(assetManager, "path/within/assets/fold
 
 If brand features from the [name suggestion index](https://github.com/osmlab/name-suggestion-index) should be included in the dictionary, you can specify the path to these presets as a third parameter. These will be loaded on-demand depending on for which countries you search for.
 
+Translations will also be loaded on demand when first querying features using a certain locale.
+
 ### Find matches by tags
 
 ```kotlin
-val matches: List<Feature> = dictionary
-    .byTags(mapOf("amenity" to "bench")) // look for features that have the given tags
-    .forGeometry(GeometryType.POINT)     // limit the search to features that may be points
-    .forLocale("de")                     // show results in German only, don't fall back to English or unlocalized results
-    .find()
+val matches = dictionary.getByTags(
+    tags = mapOf("amenity" to "bench"), // look for features that have the given tags
+    locales = listOf("de"),             // show results in German only, don't fall back to English or unlocalized results
+    geometry = GeometryType.POINT,      // limit the search to features that may be points
+)                     
+
 
 // prints "Parkbank" (or something like this)
 // or null if no preset for amenity=bench exists that is localized to German
@@ -61,25 +64,38 @@ println(matches[0]?.getName())
 ### Find matches by search word
 
 ```kotlin
-val matches: List<Feature> = dictionary
-    .byTerm("Bank")                  // look for features matching "Bank"
-    .forGeometry(GeometryType.AREA)  // limit the search to features that may be areas
-    .forLocale("de", null)           // show results in German or fall back to unlocalized results
+val matches = dictionary.getByTerm(
+    term = "Bank",                   // look for features matching "Bank"
+    locales = listOf("de", null),    // show results in German or fall back to unlocalized results
                                      // (brand features are usually not localized)
-    .inCountry("DE")                 // also include things (brands) that only exist in Germany
-    .limit(10)                       // return at most 10 entries
-    .find()
-// result list will have matches with at least amenity=bank, but not amenity=bench because it is a point-feature
+    country = "DE",                  // also include things (brands) that only exist in Germany
+    geometry = GeometryType.AREA,    // limit the search to features that may be areas
+)
+// result sequence will have matches with at least amenity=bank, but not amenity=bench because it is a point-feature
 // if the dictionary contains also brand presets, e.g. "Deutsche Bank" will certainly also be amongst the results
 ```
 
 ### Find by id
 
 ```kotlin
-val match: Feature? = dictionary
-    .byId("amenity/bank")
-    .forLocale("de", "en-US", null)  // show results in German, otherwise fall back to American 
-                                     // English or otherwise unlocalized results
-    .inCountry("DE")                 // also include things (brands) that only exist in Germany
-    .get()
+val match = dictionary.getById(
+    id = "amenity/bank",
+    locales = listOf("de", "en-US", null), // show results in German, otherwise fall back to American 
+                                           // English or otherwise unlocalized results
+    country = "DE",                        // also include things (brands) that only exist in Germany
+)
 ```
+
+### Builders
+
+For a more convenient interface on Java, the above functions continue to be available as builders, 
+e.g.
+
+```java
+List<Feature> matches = dictionary
+    .byTags(Map.of("amenity", "bench"))
+    .forGeometry(GeometryType.POINT)
+    .forLocale("de")
+    .find();
+```
+
