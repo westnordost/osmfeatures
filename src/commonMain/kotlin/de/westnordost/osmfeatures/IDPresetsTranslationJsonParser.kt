@@ -9,17 +9,17 @@ import kotlinx.serialization.json.*
  */
 internal class IDPresetsTranslationJsonParser {
     fun parse(
-        content: String, locale: String?, baseFeatures: Map<String, BaseFeature>
+        content: String, language: String?, baseFeatures: Map<String, BaseFeature>
     ): List<LocalizedFeature> =
-        parse(Json.decodeFromString<JsonObject>(content), locale, baseFeatures)
+        parse(Json.decodeFromString<JsonObject>(content), language, baseFeatures)
 
     fun parse(
-        source: Source, locale: String?, baseFeatures: Map<String, BaseFeature>
+        source: Source, language: String?, baseFeatures: Map<String, BaseFeature>
     ): List<LocalizedFeature> =
-        parse(Json.decodeFromSource<JsonObject>(source), locale, baseFeatures)
+        parse(Json.decodeFromSource<JsonObject>(source), language, baseFeatures)
 
     private fun parse(
-        json: JsonObject, locale: String?, baseFeatures: Map<String, BaseFeature>
+        json: JsonObject, language: String?, baseFeatures: Map<String, BaseFeature>
     ): List<LocalizedFeature> {
         val translations = json.jsonObject.entries.firstOrNull()?.value?.jsonObject
             ?.get("presets")?.jsonObject
@@ -28,7 +28,7 @@ internal class IDPresetsTranslationJsonParser {
 
         val localizedFeatures = HashMap<String, LocalizedFeature>(translations.size)
         translations.entries.forEach { (key, value) ->
-            val f = parseFeature(baseFeatures[key], locale, value.jsonObject)
+            val f = parseFeature(baseFeatures[key], language, value.jsonObject)
             if (f != null) localizedFeatures[key] = f
         }
 
@@ -40,7 +40,7 @@ internal class IDPresetsTranslationJsonParser {
             val localizedFeature = localizedFeatures[placeholderId] ?: continue
             localizedFeatures[baseFeature.id] = LocalizedFeature(
                 p = baseFeature,
-                locale = locale,
+                language = language,
                 names = localizedFeature.names,
                 terms = localizedFeature.terms
             )
@@ -49,7 +49,7 @@ internal class IDPresetsTranslationJsonParser {
         return localizedFeatures.values.toList()
     }
 
-    private fun parseFeature(feature: BaseFeature?, locale: String?, localization: JsonObject): LocalizedFeature? {
+    private fun parseFeature(feature: BaseFeature?, language: String?, localization: JsonObject): LocalizedFeature? {
         if (feature == null) return null
 
         val name = localization["name"]?.jsonPrimitive?.contentOrNull.orEmpty()
@@ -72,7 +72,7 @@ internal class IDPresetsTranslationJsonParser {
 
         return LocalizedFeature(
             p = feature,
-            locale = locale,
+            language = language,
             names = names,
             terms = terms
         )

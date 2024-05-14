@@ -12,7 +12,7 @@ It is currently used in [StreetComplete](https://github.com/streetcomplete/stree
 
 ## Usage
 
-Add [de.westnordost:osmfeatures:6.0.0](https://mvnrepository.com/artifact/de.westnordost/osmfeatures/5.2) as a Maven dependency or download the jar from there.
+Add [de.westnordost:osmfeatures:6.0](https://mvnrepository.com/artifact/de.westnordost/osmfeatures/6.0) as a Maven dependency or download the jar from there.
 
 ### Get the data
 
@@ -44,14 +44,14 @@ val dictionary = FeatureDictionary.create(assetManager, "path/within/assets/fold
 
 If brand features from the [name suggestion index](https://github.com/osmlab/name-suggestion-index) should be included in the dictionary, you can specify the path to these presets as a third parameter. These will be loaded on-demand depending on for which countries you search for.
 
-Translations will also be loaded on demand when first querying features using a certain locale.
+Translations will also be loaded on demand when first querying features using a certain language.
 
 ### Find matches by tags
 
 ```kotlin
 val matches = dictionary.getByTags(
     tags = mapOf("amenity" to "bench"), // look for features that have the given tags
-    locales = listOf("de"),             // show results in German only, don't fall back to English or unlocalized results
+    languages = listOf("de"),           // show results in German only, don't fall back to English or unlocalized results
     geometry = GeometryType.POINT,      // limit the search to features that may be points
 )                     
 
@@ -66,7 +66,7 @@ println(matches[0]?.getName())
 ```kotlin
 val matches = dictionary.getByTerm(
     term = "Bank",                   // look for features matching "Bank"
-    locales = listOf("de", null),    // show results in German or fall back to unlocalized results
+    languages = listOf("de", null),  // show results in German or fall back to unlocalized results
                                      // (brand features are usually not localized)
     country = "DE",                  // also include things (brands) that only exist in Germany
     geometry = GeometryType.AREA,    // limit the search to features that may be areas
@@ -80,9 +80,9 @@ val matches = dictionary.getByTerm(
 ```kotlin
 val match = dictionary.getById(
     id = "amenity/bank",
-    locales = listOf("de", "en-US", null), // show results in German, otherwise fall back to American 
-                                           // English or otherwise unlocalized results
-    country = "DE",                        // also include things (brands) that only exist in Germany
+    languages = listOf("de", "en-US", null), // show results in German, otherwise fall back to American 
+                                             // English or otherwise unlocalized results
+    country = "DE",                          // also include things (brands) that only exist in Germany
 )
 ```
 
@@ -95,7 +95,7 @@ e.g.
 List<Feature> matches = dictionary
     .byTags(Map.of("amenity", "bench"))
     .forGeometry(GeometryType.POINT)
-    .forLocale("de")
+    .inLanguage("de")
     .find();
 ```
 

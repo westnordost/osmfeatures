@@ -3,12 +3,12 @@ package de.westnordost.osmfeatures
 
 class TestLocalizedFeatureCollection(private val features: List<Feature>) : LocalizedFeatureCollection {
 
-    override fun getAll(locales: List<String?>): Collection<Feature> =
-        features.filter { locales.contains(it.locale) }
+    override fun getAll(languages: List<String?>): Collection<Feature> =
+        features.filter { languages.contains(it.language) }
 
-    override fun get(id: String, locales: List<String?>): Feature? {
+    override fun get(id: String, languages: List<String?>): Feature? {
         val feature = features.find { it.id == id } ?: return null
-        if (!locales.contains(feature.locale)) return null
+        if (!languages.contains(feature.language)) return null
         return feature
     }
 }

@@ -9,17 +9,17 @@ class FeatureDictionary internal constructor(
     private val brandNamesIndexes = HashMap<List<String?>, Lazy<FeatureTermIndex>>()
     private val brandTagsIndexes = HashMap<List<String?>, Lazy<FeatureTagsIndex>>()
 
-    // locale list -> index
+    // language list -> index
     private val tagsIndexes = HashMap<List<String?>, Lazy<FeatureTagsIndex>>()
     private val namesIndexes = HashMap<List<String?>, Lazy<FeatureTermIndex>>()
     private val termsIndexes = HashMap<List<String?>, Lazy<FeatureTermIndex>>()
     private val tagValuesIndexes = HashMap<List<String?>, Lazy<FeatureTermIndex>>()
 
     init {
-        // build indices for default locale
-        getTagsIndex(listOf(defaultLocale(), null))
-        getNamesIndex(listOf(defaultLocale(), null))
-        getTermsIndex(listOf(defaultLocale(), null))
+        // build indices for default language
+        getTagsIndex(listOf(defaultLanguage(), null))
+        getNamesIndex(listOf(defaultLanguage(), null))
+        getTermsIndex(listOf(defaultLanguage(), null))
     }
 
     //region Get by id
@@ -33,14 +33,14 @@ class FeatureDictionary internal constructor(
      *  @param id
      *  feature id
      *
-     *  @param locales
+     *  @param languages
      *  Optional. List of IETF language tags of languages in which the result should be localized.
      *
      *  Several languages can be specified to each fall back to if a translation does not exist in
-     *  the locale before that. For example, specify `listOf("ca-ES","es", null)` if results in
+     *  the language before that. For example, specify `listOf("ca-ES","es", null)` if results in
      *  Catalan are preferred, Spanish is also fine or otherwise use unlocalized results (`null`).
      *
-     *  Defaults to `listOf(<default system locale>, null)`, i.e. unlocalized results are
+     *  Defaults to `listOf(<default system language>, null)`, i.e. unlocalized results are
      *  included by default. (Brand features are usually not localized.)
      *
      *  @param country
@@ -50,10 +50,10 @@ class FeatureDictionary internal constructor(
      * */
     fun getById(
         id: String,
-        locales: List<String?>? = null,
+        languages: List<String?>? = null,
         country: String? = null
     ): Feature? =
-        featureCollection.get(id, locales ?: listOf(defaultLocale(), null))
+        featureCollection.get(id, languages ?: listOf(defaultLanguage(), null))
             ?: brandFeatureCollection?.get(id, dissectCountryCode(country))
 
     //endregion
@@ -71,14 +71,14 @@ class FeatureDictionary internal constructor(
      *  @param geometry
      *  Optional. If not `null`, only returns features that match the given geometry type.
      *
-     *  @param locales
+     *  @param languages
      *  Optional. List of IETF language tags of languages in which the result should be localized.
      *
      *  Several languages can be specified to each fall back to if a translation does not exist in
-     *  the locale before that. For example, specify `listOf("ca-ES","es", null)` if results in
+     *  the language before that. For example, specify `listOf("ca-ES","es", null)` if results in
      *  Catalan are preferred, Spanish is also fine or otherwise use unlocalized results (`null`).
      *
-     *  Defaults to `listOf(<default system locale>, null)`, i.e. unlocalized results are
+     *  Defaults to `listOf(<default system language>, null)`, i.e. unlocalized results are
      *  included by default. (Brand features are usually not localized.)
      *
      *  @param country
@@ -105,18 +105,18 @@ class FeatureDictionary internal constructor(
      * */
     fun getByTags(
         tags: Map<String, String>,
-        locales: List<String?>? = null,
+        languages: List<String?>? = null,
         country: String? = null,
         geometry: GeometryType? = null,
         isSuggestion: Boolean? = null
     ): List<Feature> {
         if (tags.isEmpty()) return emptyList()
 
-        val localesOrDefault = locales ?: listOf(defaultLocale(), null)
+        val languagesOrDefault = languages ?: listOf(defaultLanguage(), null)
 
         val foundFeatures = mutableListOf<Feature>()
         if (isSuggestion == null || !isSuggestion) {
-            foundFeatures.addAll(getTagsIndex(localesOrDefault).getAll(tags))
+            foundFeatures.addAll(getTagsIndex(languagesOrDefault).getAll(tags))
         }
         if (isSuggestion == null || isSuggestion) {
             val countryCodes = dissectCountryCode(country)
@@ -142,13 +142,13 @@ class FeatureDictionary internal constructor(
                 return@Comparator tagOrder
             }
 
-            // 2. if search is not limited by locale, return matches not limited by locale first
-            if (localesOrDefault.size == 1 && localesOrDefault[0] == null) {
-                val localeOrder = (
+            // 2. if search is not limited by language, return matches not limited by language first
+            if (languagesOrDefault.size == 1 && languagesOrDefault[0] == null) {
+                val languageOrder = (
                     (b.includeCountryCodes.isEmpty() && b.excludeCountryCodes.isEmpty()).toInt()
                     - (a.includeCountryCodes.isEmpty() && a.excludeCountryCodes.isEmpty()).toInt()
                 )
-                if (localeOrder != 0) return@Comparator localeOrder
+                if (languageOrder != 0) return@Comparator languageOrder
             }
 
             // 3. features with more matching tags in addTags first
@@ -179,14 +179,14 @@ class FeatureDictionary internal constructor(
      *  @param geometry
      *  Optional. If not `null`, only returns features that match the given geometry type.
      *
-     *  @param locales
+     *  @param languages
      *  Optional. List of IETF language tags of languages in which the result should be localized.
      *
      *  Several languages can be specified to each fall back to if a translation does not exist in
-     *  the locale before that. For example, specify `listOf("ca-ES","es", null)` if results in
+     *  the language before that. For example, specify `listOf("ca-ES","es", null)` if results in
      *  Catalan are preferred, Spanish is also fine or otherwise use unlocalized results (`null`).
      *
-     *  Defaults to `listOf(<default system locale>, null)`, i.e. unlocalized results are
+     *  Defaults to `listOf(<default system language>, null)`, i.e. unlocalized results are
      *  included by default. (Brand features are usually not localized.)
      *
      *  @param country
@@ -208,14 +208,14 @@ class FeatureDictionary internal constructor(
      * */
     fun getByTerm(
         search: String,
-        locales: List<String?>? = null,
+        languages: List<String?>? = null,
         country: String? = null,
         geometry: GeometryType? = null,
         isSuggestion: Boolean? = null
     ): Sequence<Feature> {
         val canonicalSearch = search.canonicalize()
 
-        val localesOrDefault = locales ?: listOf(defaultLocale(), null)
+        val languagesOrDefault = languages ?: listOf(defaultLanguage(), null)
 
         val sortNames = Comparator { a: Feature, b: Feature ->
             // 1. exact matches first
@@ -255,7 +255,7 @@ class FeatureDictionary internal constructor(
             if (isSuggestion == null || !isSuggestion) {
                 // a. matches with presets first
                 yieldAll(
-                    getNamesIndex(localesOrDefault).getAll(canonicalSearch).sortedWith(sortNames)
+                    getNamesIndex(languagesOrDefault).getAll(canonicalSearch).sortedWith(sortNames)
                 )
             }
             if (isSuggestion == null || isSuggestion) {
@@ -268,13 +268,13 @@ class FeatureDictionary internal constructor(
             if (isSuggestion == null || !isSuggestion) {
                 // c. matches with terms third
                 yieldAll(
-                    getTermsIndex(localesOrDefault).getAll(canonicalSearch).sortedWith(sortMatchScore)
+                    getTermsIndex(languagesOrDefault).getAll(canonicalSearch).sortedWith(sortMatchScore)
                 )
             }
             if (isSuggestion == null || !isSuggestion) {
                 // d. matches with tag values fourth
                 yieldAll(
-                    getTagValuesIndex(localesOrDefault).getAll(canonicalSearch).sortedWith(sortMatchScore)
+                    getTagValuesIndex(languagesOrDefault).getAll(canonicalSearch).sortedWith(sortMatchScore)
                 )
             }
         }
@@ -286,37 +286,37 @@ class FeatureDictionary internal constructor(
 
     //region Lazily get or create Indexes
 
-    /** lazily get or create tags index for given locale(s)  */
-    private fun getTagsIndex(locales: List<String?>): FeatureTagsIndex =
-        tagsIndexes.getOrPut(locales) { lazy { createTagsIndex(locales) } }.value
+    /** lazily get or create tags index for given language(s)  */
+    private fun getTagsIndex(languages: List<String?>): FeatureTagsIndex =
+        tagsIndexes.getOrPut(languages) { lazy { createTagsIndex(languages) } }.value
 
-    private fun createTagsIndex(locales: List<String?>): FeatureTagsIndex =
-        FeatureTagsIndex(featureCollection.getAll(locales))
+    private fun createTagsIndex(languages: List<String?>): FeatureTagsIndex =
+        FeatureTagsIndex(featureCollection.getAll(languages))
 
-    /** lazily get or create names index for given locale(s)  */
-    private fun getNamesIndex(locales: List<String?>): FeatureTermIndex =
-        namesIndexes.getOrPut(locales) { lazy { createNamesIndex(locales) } }.value
+    /** lazily get or create names index for given language(s)  */
+    private fun getNamesIndex(languages: List<String?>): FeatureTermIndex =
+        namesIndexes.getOrPut(languages) { lazy { createNamesIndex(languages) } }.value
 
-    private fun createNamesIndex(locales: List<String?>): FeatureTermIndex =
-        FeatureTermIndex(featureCollection.getAll(locales)) { feature ->
+    private fun createNamesIndex(languages: List<String?>): FeatureTermIndex =
+        FeatureTermIndex(featureCollection.getAll(languages)) { feature ->
             feature.getSearchableNames().toList()
         }
 
-    /** lazily get or create terms index for given locale(s)  */
-    private fun getTermsIndex(locales: List<String?>): FeatureTermIndex =
-        termsIndexes.getOrPut(locales) { lazy { createTermsIndex(locales) } }.value
+    /** lazily get or create terms index for given language(s)  */
+    private fun getTermsIndex(languages: List<String?>): FeatureTermIndex =
+        termsIndexes.getOrPut(languages) { lazy { createTermsIndex(languages) } }.value
 
-    private fun createTermsIndex(locales: List<String?>): FeatureTermIndex =
-        FeatureTermIndex(featureCollection.getAll(locales)) { feature ->
+    private fun createTermsIndex(languages: List<String?>): FeatureTermIndex =
+        FeatureTermIndex(featureCollection.getAll(languages)) { feature ->
             if (!feature.isSearchable) emptyList() else feature.canonicalTerms
         }
 
     /** lazily get or create tag values index  */
-    private fun getTagValuesIndex(locales: List<String?>): FeatureTermIndex =
-        tagValuesIndexes.getOrPut(locales) { lazy { createTagValuesIndex(locales) } }.value
+    private fun getTagValuesIndex(languages: List<String?>): FeatureTermIndex =
+        tagValuesIndexes.getOrPut(languages) { lazy { createTagValuesIndex(languages) } }.value
 
-    private fun createTagValuesIndex(locales: List<String?>): FeatureTermIndex =
-        FeatureTermIndex(featureCollection.getAll(locales)) { feature ->
+    private fun createTagValuesIndex(languages: List<String?>): FeatureTermIndex =
+        FeatureTermIndex(featureCollection.getAll(languages)) { feature ->
             if (!feature.isSearchable) {
                 emptyList()
             } else {
@@ -353,29 +353,29 @@ class FeatureDictionary internal constructor(
     //region Query builders
 
     inner class QueryByIdBuilder(private val id: String) {
-        private var locales: List<String?>? = null
+        private var languages: List<String?>? = null
         private var country: String? = null
 
-        fun forLocale(vararg locales: String?): QueryByIdBuilder =
-            apply { this.locales = locales.toList() }
+        fun inLanguage(vararg languages: String?): QueryByIdBuilder =
+            apply { this.languages = languages.toList() }
 
         fun inCountry(country: String?): QueryByIdBuilder =
             apply { this.country = country }
 
-        fun get(): Feature? = getById(id, locales, country)
+        fun get(): Feature? = getById(id, languages, country)
     }
 
     inner class QueryByTagBuilder(private val tags: Map<String, String>) {
         private var geometry: GeometryType? = null
-        private var locales: List<String?>? = null
+        private var languages: List<String?>? = null
         private var isSuggestion: Boolean? = null
         private var country: String? = null
 
         fun forGeometry(geometry: GeometryType): QueryByTagBuilder =
             apply { this.geometry = geometry }
 
-        fun forLocale(vararg locales: String?): QueryByTagBuilder =
-            apply { this.locales = locales.toList() }
+        fun inLanguage(vararg languages: String?): QueryByTagBuilder =
+            apply { this.languages = languages.toList() }
 
         fun inCountry(country: String?): QueryByTagBuilder =
             apply { this.country = country }
@@ -383,20 +383,20 @@ class FeatureDictionary internal constructor(
         fun isSuggestion(isSuggestion: Boolean?): QueryByTagBuilder =
             apply { this.isSuggestion = isSuggestion }
 
-        fun find(): List<Feature> = getByTags(tags, locales, country, geometry, isSuggestion)
+        fun find(): List<Feature> = getByTags(tags, languages, country, geometry, isSuggestion)
     }
 
     inner class QueryByTermBuilder(private val term: String) {
         private var geometry: GeometryType? = null
-        private var locales: List<String?>? = null
+        private var languages: List<String?>? = null
         private var isSuggestion: Boolean? = null
         private var country: String? = null
 
         fun forGeometry(geometryType: GeometryType): QueryByTermBuilder =
             apply { this.geometry = geometryType }
 
-        fun forLocale(vararg locales: String?): QueryByTermBuilder =
-            apply { this.locales = locales.toList() }
+        fun inLanguage(vararg languages: String?): QueryByTermBuilder =
+            apply { this.languages = languages.toList() }
 
         fun inCountry(countryCode: String?): QueryByTermBuilder =
             apply { this.country = countryCode }
@@ -405,7 +405,7 @@ class FeatureDictionary internal constructor(
             apply { this.isSuggestion = suggestion }
 
         fun find(): Sequence<Feature> =
-            getByTerm(term, locales, country, geometry, isSuggestion)
+            getByTerm(term, languages, country, geometry, isSuggestion)
     }
     //endregion
 

@@ -20,6 +20,6 @@ data class BaseFeature(
     override val canonicalNames: List<String> = names.map { it.canonicalize() }
     override val canonicalTerms: List<String> = terms.map { it.canonicalize() }
 
-    override val locale: String? get() = null
+    override val language: String? get() = null
     override fun toString(): String = id
 }

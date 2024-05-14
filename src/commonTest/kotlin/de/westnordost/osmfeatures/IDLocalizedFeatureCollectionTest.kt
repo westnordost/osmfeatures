@@ -53,18 +53,18 @@ class IDLocalizedFeatureCollectionTest {
         assertNull(c.get("yet/another/id", germany))
 
         // getting features through fallback chain
-        val locales = listOf("en", "de-DE", null)
-        val fallbackFeatures = c.getAll(locales)
+        val languages = listOf("en", "de-DE", null)
+        val fallbackFeatures = c.getAll(languages)
         assertEquals(
             setOf("Bakery", "Gullideckel", "test"),
             fallbackFeatures.map { it.name }.toSet()
         )
-        assertEquals("Bakery", c.get("some/id", locales)?.name)
-        assertEquals("Gullideckel", c.get("another/id", locales)?.name)
-        assertEquals("test", c.get("yet/another/id", locales)?.name)
-        assertEquals("en", c.get("some/id", locales)?.locale)
-        assertEquals("de", c.get("another/id", locales)?.locale)
-        assertNull(c.get("yet/another/id", locales)?.locale)
+        assertEquals("Bakery", c.get("some/id", languages)?.name)
+        assertEquals("Gullideckel", c.get("another/id", languages)?.name)
+        assertEquals("test", c.get("yet/another/id", languages)?.name)
+        assertEquals("en", c.get("some/id", languages)?.language)
+        assertEquals("de", c.get("another/id", languages)?.language)
+        assertNull(c.get("yet/another/id", languages)?.language)
     }
 
     @Test

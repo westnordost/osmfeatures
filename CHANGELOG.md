@@ -1,6 +1,6 @@
 # Changelog
 
-# 6.0.0
+# 6.0
 
 The library is now a Kotlin Multiplatform library. This is a breaking API change. There is also no separate artifact for Android anymore. 
 
