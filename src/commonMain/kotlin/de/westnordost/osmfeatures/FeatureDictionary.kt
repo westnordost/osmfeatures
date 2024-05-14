@@ -352,7 +352,7 @@ class FeatureDictionary internal constructor(
 
     //region Query builders
 
-    inner class QueryByIdBuilder(private val id: String) {
+    inner class QueryByIdBuilder internal constructor(private val id: String) {
         private var languages: List<String?>? = null
         private var country: String? = null
 
@@ -365,7 +365,7 @@ class FeatureDictionary internal constructor(
         fun get(): Feature? = getById(id, languages, country)
     }
 
-    inner class QueryByTagBuilder(private val tags: Map<String, String>) {
+    inner class QueryByTagBuilder internal constructor(private val tags: Map<String, String>) {
         private var geometry: GeometryType? = null
         private var languages: List<String?>? = null
         private var isSuggestion: Boolean? = null
@@ -386,7 +386,7 @@ class FeatureDictionary internal constructor(
         fun find(): List<Feature> = getByTags(tags, languages, country, geometry, isSuggestion)
     }
 
-    inner class QueryByTermBuilder(private val term: String) {
+    inner class QueryByTermBuilder internal constructor(private val term: String) {
         private var geometry: GeometryType? = null
         private var languages: List<String?>? = null
         private var isSuggestion: Boolean? = null
