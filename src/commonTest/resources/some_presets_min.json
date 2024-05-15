@@ -1,0 +1,17 @@
+{
+  "some/id": {
+    "name": "test",
+    "tags": { "a": "b", "c": "d" },
+    "geometry": ["point"]
+  },
+  "another/id": {
+    "name": "test",
+    "tags": { "a": "b", "c": "d" },
+    "geometry": ["point"]
+  },
+  "yet/another/id": {
+    "name": "test",
+    "tags": { "a": "b", "c": "d" },
+    "geometry": ["point"]
+  }
+}
