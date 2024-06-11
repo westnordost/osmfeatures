@@ -85,7 +85,10 @@ private fun String.getLanguageComponents(): Sequence<String> = sequence {
     yield(this@getLanguageComponents)
 }
 
-/** If a localized feature has no names and fallbacks are available, apply those. */
+/** If a localized feature has no names or no terms and fallbacks are available, apply those. */
 private fun LocalizedFeature.withFallback(fallback: Feature?) =
-    if (names.isEmpty() && fallback?.names != null) copy(names = fallback.names)
-    else this
+    if (fallback == null) this
+    else copy(
+        names = names.ifEmpty { fallback.names },
+        terms = terms.ifEmpty { fallback.terms },
+    )
