@@ -1,5 +1,10 @@
 # Changelog
 
+# 6.1
+
+- Fix crash when single presets were translated only partially for a dialect (#26), by @logan12358
+- Aliases and terms of presets in the parent language are now merged into any dialects (#26)
+
 # 6.0
 
 The library is now a Kotlin Multiplatform library. This is a breaking API change. There is also no separate artifact for Android anymore. 

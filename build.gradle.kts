@@ -1,6 +1,6 @@
 plugins {
-    kotlin("multiplatform") version "1.9.24"
-    id("com.android.library") version "8.2.0"
+    kotlin("multiplatform") version "2.0.0"
+    id("com.android.library") version "8.3.0"
     id("org.jetbrains.dokka") version "1.9.20"
 
     id("maven-publish")
@@ -9,7 +9,7 @@ plugins {
 
 kotlin {
     group = "de.westnordost"
-    version = "6.0"
+    version = "6.1"
 
     jvm()
     androidTarget {
@@ -30,9 +30,9 @@ kotlin {
         commonMain {
             dependencies {
                 // multiplatform file access
-                api("org.jetbrains.kotlinx:kotlinx-io-core:0.3.4")
+                api("org.jetbrains.kotlinx:kotlinx-io-core:0.4.0")
                 // parsing the preset.json
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.0")
                 // for stripping diacritics correctly
                 implementation("com.doist.x:normalize:1.0.5")
             }
@@ -45,7 +45,7 @@ kotlin {
                 implementation("io.ktor:ktor-client-core:2.3.11")
                 implementation("io.ktor:ktor-client-cio:2.3.11")
                 // ktor-client is a suspending API, so we need coroutines too
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0-RC")
             }
         }
     }
