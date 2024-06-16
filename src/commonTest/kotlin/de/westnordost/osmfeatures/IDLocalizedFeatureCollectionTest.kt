@@ -104,11 +104,11 @@ class IDLocalizedFeatureCollectionTest {
             setOf("Backhusl", "Gullideckel", "Brückle"),
             austrianFeatures.map { it.name }.toSet()
         )
-        assertEquals(listOf("Backhusl", "alias 1"), c.get("some/id", austria)?.names)
+        assertEquals(listOf("Backhusl", "Bäckerei", "Konditorei"), c.get("some/id", austria)?.names)
         assertEquals(listOf("Gullideckel"), c.get("another/id", austria)?.names)
-        assertEquals(listOf("Brückle", "alias 2"), c.get("yet/another/id", austria)?.names)
-        assertEquals(listOf("foo"), c.get("some/id", austria)?.terms)
-        assertEquals(listOf("baz"), c.get("another/id", austria)?.terms)
+        assertEquals(listOf("Brückle", "Drüberrüber"), c.get("yet/another/id", austria)?.names)
+        assertEquals(listOf("brot"), c.get("some/id", austria)?.terms)
+        assertEquals(listOf("ninja", "turtles"), c.get("another/id", austria)?.terms)
         assertEquals(emptyList(), c.get("yet/another/id", austria)?.terms)
 
         // merging scripts

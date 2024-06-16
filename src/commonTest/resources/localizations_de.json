@@ -2,12 +2,12 @@
   "presets": {
     "some/id": {
       "name": "Bäckerei",
-      "aliases": "alias 1",
-      "terms": "foo"
+      "aliases": "Konditorei",
+      "terms": "brot"
     },
     "another/id": {
       "name": "Gullideckel",
-      "terms": "bar"
+      "terms": "turtles"
     }
   }
 }}}
