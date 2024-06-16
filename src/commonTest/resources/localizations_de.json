@@ -1,10 +1,13 @@
 { "xx": { "presets" : {
   "presets": {
     "some/id": {
-      "name": "Bäckerei"
+      "name": "Bäckerei",
+      "aliases": "alias 1",
+      "terms": "foo"
     },
     "another/id": {
-      "name": "Gullideckel"
+      "name": "Gullideckel",
+      "terms": "bar"
     }
   }
 }}}

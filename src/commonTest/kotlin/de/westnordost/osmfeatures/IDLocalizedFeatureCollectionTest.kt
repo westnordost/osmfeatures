@@ -97,15 +97,19 @@ class IDLocalizedFeatureCollectionTest {
         assertNull(c.get("yet/another/id", german))
 
         // merging de-AT and de
+        // this exercises the case where only `name` or only `terms` is translated
         val austria = listOf("de-AT")
         val austrianFeatures = c.getAll(austria)
         assertEquals(
             setOf("Backhusl", "Gullideckel", "Brückle"),
             austrianFeatures.map { it.name }.toSet()
         )
-        assertEquals("Backhusl", c.get("some/id", austria)?.name)
-        assertEquals("Gullideckel", c.get("another/id", austria)?.name)
-        assertEquals("Brückle", c.get("yet/another/id", austria)?.name)
+        assertEquals(listOf("Backhusl", "alias 1"), c.get("some/id", austria)?.names)
+        assertEquals(listOf("Gullideckel"), c.get("another/id", austria)?.names)
+        assertEquals(listOf("Brückle", "alias 2"), c.get("yet/another/id", austria)?.names)
+        assertEquals(listOf("foo"), c.get("some/id", austria)?.terms)
+        assertEquals(listOf("baz"), c.get("another/id", austria)?.terms)
+        assertEquals(emptyList(), c.get("yet/another/id", austria)?.terms)
 
         // merging scripts
         val cryllic = listOf("de-Cyrl")

@@ -3,8 +3,12 @@
     "some/id": {
       "name": "Backhusl"
     },
+    "another/id": {
+      "terms": "baz"
+    },
     "yet/another/id": {
-      "name": "Brückle"
+      "name": "Brückle",
+      "aliases": "alias 2"
     }
   }
 }}}

@@ -43,7 +43,7 @@ internal class IDLocalizedFeatureCollection(
                 for (languageComponent in language.getLanguageComponents()) {
                     val features = getOrLoadLocalizedFeaturesList(languageComponent)
                     for (feature in features) {
-                        result[feature.id] = feature
+                        result[feature.id] = feature.withFallback(result[feature.id])
                     }
                 }
             } else {
@@ -83,4 +83,24 @@ private fun String.getLanguageComponents(): Sequence<String> = sequence {
         yield(listOf(language, other).joinToString("-"))
     }
     yield(this@getLanguageComponents)
+}
+
+/** If a localized feature is missing a name, aliases, or terms and fallbacks are available, apply those. */
+private fun LocalizedFeature.withFallback(fallback: Feature?): Feature {
+    if (fallback == null) return this
+
+    val newNames = when (names.size) {
+        // We have no names, use name and aliases from fallback
+        0 -> fallback.names
+        // We have a name but not aliases, use aliases from fallback if present
+        1 -> if (fallback.names.size > 1) names + fallback.names.drop(1) else names
+        // We have a name and aliases, don't use anything from fallback
+        else -> names
+    }
+
+    val newTerms = terms.ifEmpty { fallback.terms }
+
+    if (names == newNames && terms == newTerms) return this
+
+    return copy(names = newNames, terms = newTerms);
 }
