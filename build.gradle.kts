@@ -33,6 +33,7 @@ kotlin {
                 api("org.jetbrains.kotlinx:kotlinx-io-core:0.5.4")
                 // parsing the preset.json
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-io:1.7.3")
                 // for stripping diacritics correctly
                 implementation("com.doist.x:normalize:1.0.5")
             }

@@ -1,13 +1,16 @@
 package de.westnordost.osmfeatures
 
 import kotlinx.io.Source
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.*
+import kotlinx.serialization.json.io.decodeFromSource
 
 /** Parses this file
  * [...](https://raw.githubusercontent.com/openstreetmap/id-tagging-schema/main/dist/presets.json)
  * into list of Features.  */
 internal class IDPresetsJsonParser(private val isSuggestion: Boolean = false) {
 
+    @OptIn(ExperimentalSerializationApi::class)
     fun parse(source: Source): List<BaseFeature> =
         parse(Json.decodeFromSource<JsonObject>(source))
 
