@@ -46,7 +46,7 @@ class FeatureDictionary internal constructor(
      *  @param country
      *  Optional. ISO 3166-1 alpha-2 country code (e.g. "US") or the ISO 3166-2 (e.g. "US-NY") of
      *  the country/state the element is in.
-     *  If `null`, will only return matches that are *not* county-specific.
+     *  If `null`, will only return matches that are *not* country-specific.
      * */
     fun getById(
         id: String,
@@ -84,7 +84,7 @@ class FeatureDictionary internal constructor(
      *  @param country
      *  Optional. ISO 3166-1 alpha-2 country code (e.g. "US") or the ISO 3166-2 (e.g. "US-NY") of
      *  the country/state the element is in.
-     *  If `null`, will only return matches that are *not* county-specific.
+     *  If `null`, will only return matches that are *not* country-specific.
      *
      *  @param isSuggestion
      *  Optional. `true` to *only* include suggestions, `false` to *not* include suggestions
@@ -192,7 +192,7 @@ class FeatureDictionary internal constructor(
      *  @param country
      *  Optional. ISO 3166-1 alpha-2 country code (e.g. "US") or the ISO 3166-2 (e.g. "US-NY") of
      *  the country/state the element is in.
-     *  If `null`, will only return matches that are *not* county-specific.
+     *  If `null`, will only return matches that are *not* country-specific.
      *
      *  @param isSuggestion
      *  Optional. `true` to *only* include suggestions, `false` to *not* include suggestions
