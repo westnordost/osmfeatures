@@ -37,7 +37,6 @@ internal class IDBrandPresetsFeatureCollection(
             lazy { loadFeatures(countryCode).associateByTo(LinkedHashMap()) { it.id } }
         }.value
 
-    @OptIn(ExperimentalStdlibApi::class)
     private fun loadFeatures(countryCode: String?): List<BaseFeature> {
         val filename = getPresetsFileName(countryCode)
         if (!fileAccess.exists(filename)) return emptyList()

@@ -1,6 +1,6 @@
 plugins {
-    kotlin("multiplatform") version "2.0.0"
-    id("com.android.library") version "8.3.0"
+    kotlin("multiplatform") version "2.0.21"
+    id("com.android.library") version "8.7.1"
     id("org.jetbrains.dokka") version "1.9.20"
 
     id("maven-publish")
@@ -30,9 +30,9 @@ kotlin {
         commonMain {
             dependencies {
                 // multiplatform file access
-                api("org.jetbrains.kotlinx:kotlinx-io-core:0.4.0")
+                api("org.jetbrains.kotlinx:kotlinx-io-core:0.5.4")
                 // parsing the preset.json
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
                 // for stripping diacritics correctly
                 implementation("com.doist.x:normalize:1.0.5")
             }
@@ -42,10 +42,10 @@ kotlin {
                 implementation(kotlin("test"))
                 // we are pulling some current preset json from the iD preset repo to see if parsing
                 // does at least not crash and return something
-                implementation("io.ktor:ktor-client-core:2.3.11")
-                implementation("io.ktor:ktor-client-cio:2.3.11")
+                implementation("io.ktor:ktor-client-core:2.3.12")
+                implementation("io.ktor:ktor-client-cio:2.3.12")
                 // ktor-client is a suspending API, so we need coroutines too
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0-RC")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
             }
         }
     }
@@ -54,7 +54,7 @@ kotlin {
 
 android {
     namespace = "de.westnordost.osmfeatures"
-    compileSdk = 33
+    compileSdk = 34
     defaultConfig {
         minSdk = 21
     }

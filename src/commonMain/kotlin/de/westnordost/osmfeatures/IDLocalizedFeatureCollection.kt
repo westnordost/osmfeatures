@@ -29,7 +29,6 @@ internal class IDLocalizedFeatureCollection(
         return getOrLoadLocalizedFeatures(languages)[id]
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
     private fun loadFeatures(): List<BaseFeature> =
         fileAccess.open(FEATURES_FILE).use { IDPresetsJsonParser().parse(it) }
 
@@ -56,7 +55,6 @@ internal class IDLocalizedFeatureCollection(
     private fun getOrLoadLocalizedFeaturesList(language: String): List<LocalizedFeature> =
         localizedFeaturesList.getOrPut(language) { lazy { loadLocalizedFeaturesList(language) } }.value
 
-    @OptIn(ExperimentalStdlibApi::class)
     private fun loadLocalizedFeaturesList(language: String?): List<LocalizedFeature> {
         val filename = if (language != null) getLocalizationFilename(language) else "en.json"
         if (!fileAccess.exists(filename)) return emptyList()
