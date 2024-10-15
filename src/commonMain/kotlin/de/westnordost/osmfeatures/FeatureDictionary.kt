@@ -122,7 +122,7 @@ class FeatureDictionary internal constructor(
             val countryCodes = dissectCountryCode(country)
             foundFeatures.addAll(getBrandTagsIndex(countryCodes).getAll(tags))
         }
-        foundFeatures.removeAll { !it.matches(geometry, country) }
+        foundFeatures.removeAll { !it.matches(geometry) || !it.matches(country) }
 
         if (foundFeatures.size > 1) {
             // only return of each category the most specific thing. I.e. will return
@@ -279,7 +279,7 @@ class FeatureDictionary internal constructor(
             }
         }
         .distinct()
-        .filter { it.matches(geometry, country) }
+        .filter { it.matches(geometry) && it.matches(country) }
     }
 
     //endregion
@@ -429,8 +429,7 @@ class FeatureDictionary internal constructor(
 
 //region Utility / Filter functions
 
-private fun Feature.matches(geometry: GeometryType?, countryCode: String?): Boolean {
-    if (geometry != null && !this.geometry.contains(geometry)) return false
+private fun Feature.matches(countryCode: String?): Boolean {
     if (includeCountryCodes.isNotEmpty() || excludeCountryCodes.isNotEmpty()) {
         if (countryCode == null) return false
         if (
@@ -441,6 +440,9 @@ private fun Feature.matches(geometry: GeometryType?, countryCode: String?): Bool
     }
     return true
 }
+
+private fun Feature.matches(geometry: GeometryType?): Boolean =
+    !(geometry != null && !this.geometry.contains(geometry))
 
 private fun Feature.getSearchableNames(): Sequence<String> = sequence {
     if (!isSearchable) return@sequence
