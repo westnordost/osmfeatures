@@ -136,6 +136,18 @@ class FeatureDictionaryTest {
         tags = mapOf("shop" to "miniature_train"),
         names = listOf("Miniature Train Shop"),
     )
+    private val postbox = feature(
+        id = "amenity/post_box",
+        tags = mapOf("amenity" to "post_box"),
+        names = listOf("Post box"),
+        excludeCountryCodes = listOf("US"),
+    )
+    private val postboxUS = feature(
+        id = "amenity/post_box/post_box-US",
+        tags = mapOf("amenity" to "post_box"),
+        names = listOf("Post box in US"),
+        includeCountryCodes = listOf("US"),
+    )
 
     //region by tags
     
@@ -301,6 +313,26 @@ class FeatureDictionaryTest {
                 .byTags(mapOf("shop" to "car", "second_hand" to "only"))
                 .inLanguage("de", null)
                 .find()
+        )
+    }
+
+    @Test
+    fun find_country_specific_feature_by_tags() {
+        val dictionary = dictionary(postbox, postboxUS)
+
+        assertEquals(
+            listOf(),
+            dictionary.getByTags(mapOf("amenity" to "post_box"), country = null)
+        )
+
+        assertEquals(
+            listOf(postbox),
+            dictionary.getByTags(mapOf("amenity" to "post_box"), country = "DE")
+        )
+
+        assertEquals(
+            listOf(postboxUS),
+            dictionary.getByTags(mapOf("amenity" to "post_box"), country = "US")
         )
     }
 
@@ -547,6 +579,26 @@ class FeatureDictionaryTest {
         )
     }
 
+    @Test
+    fun find_country_specific_feature_by_term() {
+        val dictionary = dictionary(postbox, postboxUS)
+
+        assertEquals(
+            listOf(),
+            dictionary.getByTerm("Post", country = null).toList()
+        )
+
+        assertEquals(
+            listOf(postbox),
+            dictionary.getByTerm("Post", country = "DE").toList()
+        )
+
+        assertEquals(
+            listOf(postboxUS),
+            dictionary.getByTerm("Post", country = "US").toList()
+        )
+    }
+
     //endregion
 
     //region by id
@@ -594,6 +646,34 @@ class FeatureDictionaryTest {
         val dictionary = dictionary(ditsch)
         assertEquals(ditsch, dictionary.byId("shop/bakery/Ditsch").inCountry("AT").get())
         assertEquals(ditsch, dictionary.byId("shop/bakery/Ditsch").inCountry("DE").get())
+    }
+
+    @Test
+    fun find_country_specific_feature_by_id() {
+        val dictionary = dictionary(postbox, postboxUS)
+
+        assertEquals(
+            postbox,
+            dictionary.getById("amenity/post_box", country = "DE")
+        )
+        assertEquals(
+            null,
+            dictionary.getById("amenity/post_box", country = "US")
+        )
+
+        assertEquals(
+            postboxUS,
+            dictionary.getById("amenity/post_box/post_box-US", country = "US")
+        )
+        assertEquals(
+            null,
+            dictionary.getById("amenity/post_box/post_box-US", country = "DE")
+        )
+
+        assertEquals(
+            null,
+            dictionary.getById("amenity/post_box", country = null)
+        )
     }
 
     //endregion
@@ -693,6 +773,39 @@ class FeatureDictionaryTest {
             .find()
         assertEquals(1, matches3.count())
         assertEquals("Chinese Restaurant", matches3.first().name)
+
+        assertEquals(
+            "amenity/post_box",
+            dictionary.getByTags(
+                tags = mapOf("amenity" to "post_box"),
+                languages = listOf("en"),
+                country = "DE"
+            ).single().id
+        )
+        assertEquals(
+            "amenity/post_box/post_box-US",
+            dictionary.getByTags(
+                tags = mapOf("amenity" to "post_box"),
+                languages = listOf("en"),
+                country = "US"
+            ).single().id
+        )
+        assertEquals(
+            "amenity/post_box",
+            dictionary.getByTerm(
+                search = "Mail Drop Box",
+                languages = listOf("en"),
+                country = "DE"
+            ).single().id
+        )
+        assertEquals(
+            "amenity/post_box/post_box-US",
+            dictionary.getByTerm(
+                search = "Mail Drop Box",
+                languages = listOf("en"),
+                country = "US"
+            ).single().id
+        )
     }
 }
 

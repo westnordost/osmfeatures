@@ -54,6 +54,7 @@ class FeatureDictionary internal constructor(
         country: String? = null
     ): Feature? =
         featureCollection.get(id, languages ?: listOf(defaultLanguage(), null))
+            ?.takeIf { it.matches(country) }
             ?: brandFeatureCollection?.get(id, dissectCountryCode(country))
 
     //endregion
