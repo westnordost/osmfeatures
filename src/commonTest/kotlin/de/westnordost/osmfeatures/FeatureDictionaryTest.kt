@@ -22,7 +22,7 @@ class FeatureDictionaryTest {
         id = "shop/bakery/Ditsch",
         tags = mapOf("shop" to "bakery", "name" to "Ditsch"),
         names = listOf("Ditsch"),
-        countryCodes = listOf("DE", "AT"),
+        includeCountryCodes = listOf("DE", "AT"),
         excludeCountryCodes = listOf("AT-9"),
         addTags = mapOf("wikipedia" to "de:Brezelb%C3%A4ckerei_Ditsch", "brand" to "Ditsch"),
         isSuggestion = true
@@ -31,7 +31,7 @@ class FeatureDictionaryTest {
         id = "shop/bakery/Дитсч",
         tags = mapOf("shop" to "bakery", "name" to "Ditsch"),
         names = listOf("Дитсч"),
-        countryCodes = listOf("RU", "UA-43"),
+        includeCountryCodes = listOf("RU", "UA-43"),
         addTags = mapOf("wikipedia" to "de:Brezelb%C3%A4ckerei_Ditsch", "brand" to "Дитсч"),
         isSuggestion = true
     )
@@ -707,7 +707,7 @@ private fun feature(
     geometries: List<GeometryType> = listOf(GeometryType.POINT),
     names: List<String>,
     terms: List<String> = listOf(),
-    countryCodes: List<String> = listOf(),
+    includeCountryCodes: List<String> = listOf(),
     excludeCountryCodes: List<String> = listOf(),
     searchable: Boolean = true,
     matchScore: Float = 1.0f,
@@ -716,7 +716,7 @@ private fun feature(
     language: String? = null
 ): Feature {
     val f = BaseFeature(
-        id, tags, geometries, null, null, names, terms, countryCodes,
+        id, tags, geometries, null, null, names, terms, includeCountryCodes,
         excludeCountryCodes, searchable, matchScore, isSuggestion, addTags, mapOf()
     )
     return if (language != null) LocalizedFeature(f, language, f.names, f.terms) else f
