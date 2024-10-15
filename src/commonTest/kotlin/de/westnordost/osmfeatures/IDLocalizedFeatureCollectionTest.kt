@@ -117,4 +117,29 @@ class IDLocalizedFeatureCollectionTest {
         val cryllicAustria = listOf("de-Cyrl-AT")
         assertEquals("бацкхусл", c.get("some/id", cryllicAustria)?.name)
     }
+
+    @Test
+    fun load_features_with_placeholder_names() {
+        val c = IDLocalizedFeatureCollection(object : ResourceAccessAdapter {
+            override fun exists(name: String) =
+                name in listOf("presets.json", "en.json")
+
+            override fun open(name: String) = when (name) {
+                "presets.json" -> resource("one_preset_with_placeholder_name.json")
+                "en.json" -> resource("localizations.json")
+                else -> throw Exception("File not found")
+            }
+        })
+        val some = c.get("some/id", listOf("en"))
+        assertNotNull(some)
+        assertEquals("bar", some.name)
+        assertEquals(listOf("bar", "one", "two", "three"), some.names)
+        assertEquals(listOf("a", "b"), some.terms)
+
+        val dingsdongs = c.get("some/id-dingsdongs", listOf("en"))
+        assertNotNull(dingsdongs)
+        assertEquals("bar", dingsdongs.name)
+        assertEquals(listOf("bar", "one", "two", "three"), dingsdongs.names)
+        assertEquals(listOf("a", "b"), dingsdongs.terms)
+    }
 }
