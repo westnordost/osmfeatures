@@ -9,7 +9,7 @@ plugins {
 
 kotlin {
     group = "de.westnordost"
-    version = "6.1"
+    version = "6.2"
 
     jvm()
     androidTarget {

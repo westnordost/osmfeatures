@@ -1,5 +1,11 @@
 # Changelog
 
+# 6.2
+
+- support proper stream parsing using (kotlinx-io's) `Source`
+- fix `FeatureDictionary.getById` didn't always exclude country-specific results when the `country`
+  parameter was `null` even though it was documented as such
+
 # 6.1
 
 - Fix crash when single presets were translated only partially for a dialect (#26), by @logan12358
