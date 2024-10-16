@@ -1,6 +1,6 @@
 plugins {
     kotlin("multiplatform") version "2.0.21"
-    id("com.android.library") version "8.7.1"
+    id("com.android.library") version "8.5.2"
     id("org.jetbrains.dokka") version "1.9.20"
 
     id("maven-publish")
