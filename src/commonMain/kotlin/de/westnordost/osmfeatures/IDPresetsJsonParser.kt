@@ -57,6 +57,7 @@ internal class IDPresetsJsonParser(private val isSuggestion: Boolean = false) {
         val matchScore = p["matchScore"]?.jsonPrimitive?.floatOrNull ?: 1.0f
         val addTags = p["addTags"]?.jsonObject?.mapValues { it.value.jsonPrimitive.content } ?: tags
         val removeTags = p["removeTags"]?.jsonObject?.mapValues { it.value.jsonPrimitive.content } ?: addTags
+        val preserveTags = p["preserveTags"]?.jsonArray?.map { Regex(it.jsonPrimitive.content) } ?: emptyList()
 
         return BaseFeature(
             id = id,
@@ -72,7 +73,8 @@ internal class IDPresetsJsonParser(private val isSuggestion: Boolean = false) {
             matchScore = matchScore,
             isSuggestion = isSuggestion,
             addTags = addTags,
-            removeTags = removeTags
+            removeTags = removeTags,
+            preserveTags = preserveTags,
         )
     }
 }
