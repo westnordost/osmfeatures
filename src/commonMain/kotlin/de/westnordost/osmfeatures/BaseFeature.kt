@@ -15,7 +15,8 @@ data class BaseFeature(
     override val matchScore: Float,
     override val isSuggestion: Boolean,
     override val addTags: Map<String, String>,
-    override val removeTags: Map<String, String>
+    override val removeTags: Map<String, String>,
+    override val preserveTags: List<Regex>
 ): Feature {
     override val canonicalNames: List<String> = names.map { it.canonicalize() }
     override val canonicalTerms: List<String> = terms.map { it.canonicalize() }

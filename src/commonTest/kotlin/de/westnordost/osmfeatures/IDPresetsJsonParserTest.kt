@@ -40,6 +40,7 @@ class IDPresetsJsonParserTest {
         assertFalse(feature.isSearchable)
         assertEquals(mapOf("e" to "f"), feature.addTags)
         assertEquals(mapOf("d" to "g"), feature.removeTags)
+        assertEquals(listOf("^name"), feature.preserveTags.map { it.pattern })
     }
 
     @Test
@@ -62,6 +63,7 @@ class IDPresetsJsonParserTest {
         assertTrue(feature.isSearchable)
         assertEquals(feature.addTags, feature.tags)
         assertEquals(feature.addTags, feature.removeTags)
+        assertEquals(emptyList(), feature.preserveTags)
     }
 
     @Test

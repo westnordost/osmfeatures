@@ -23,6 +23,7 @@ data class LocalizedFeature(
     override val matchScore: Float get() = p.matchScore
     override val addTags: Map<String, String> get() = p.addTags
     override val removeTags: Map<String, String> get() = p.removeTags
+    override val preserveTags: List<Regex> get() = p.preserveTags
     override val isSuggestion: Boolean get() = p.isSuggestion
 
     override fun toString(): String = id
