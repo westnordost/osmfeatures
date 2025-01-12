@@ -13,13 +13,15 @@ data class BaseFeature(
     override val excludeCountryCodes: List<String>,
     override val isSearchable: Boolean,
     override val matchScore: Float,
-    override val isSuggestion: Boolean,
     override val addTags: Map<String, String>,
     override val removeTags: Map<String, String>,
-    override val preserveTags: List<Regex>
+
 ): Feature {
     override val canonicalNames: List<String> = names.map { it.canonicalize() }
     override val canonicalTerms: List<String> = terms.map { it.canonicalize() }
+
+    override val isSuggestion: Boolean get() = false
+    override val preserveTags: List<Regex> get() = emptyList()
 
     override val language: String? get() = null
     override fun toString(): String = id

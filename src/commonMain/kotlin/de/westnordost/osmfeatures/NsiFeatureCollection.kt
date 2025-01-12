@@ -3,10 +3,10 @@ package de.westnordost.osmfeatures
 /** Non-localized feature collection sourcing from (NSI) iD presets defined in JSON.
  *
  * The base path is defined via the given FileAccessAdapter. In the base path, it is expected that
- * there is a presets.json which includes all the features. Additionally, it is possible to place
- * more files like e.g. presets-DE.json, presets-US-NY.json into the directory which will be loaded
+ * there is a nsi.json which includes all the features. Additionally, it is possible to place
+ * more files like e.g. nsi-DE.json, nsi-US-NY.json into the directory which will be loaded
  * lazily on demand  */
-internal class IDBrandPresetsFeatureCollection(
+internal class NsiFeatureCollection(
     private val fileAccess: ResourceAccessAdapter
 ) : PerCountryFeatureCollection {
     // countryCode -> lazy { featureId -> Feature }
@@ -37,14 +37,14 @@ internal class IDBrandPresetsFeatureCollection(
             lazy { loadFeatures(countryCode).associateByTo(LinkedHashMap()) { it.id } }
         }.value
 
-    private fun loadFeatures(countryCode: String?): List<BaseFeature> {
+    private fun loadFeatures(countryCode: String?): List<NsiFeature> {
         val filename = getPresetsFileName(countryCode)
         if (!fileAccess.exists(filename)) return emptyList()
         return fileAccess.open(filename).use { source ->
-            IDPresetsJsonParser(true).parse(source)
+            NsiPresetsJsonParser().parse(source)
         }
     }
 
     private fun getPresetsFileName(countryCode: String?): String =
-        if (countryCode == null) "presets.json" else "presets-$countryCode.json"
+        if (countryCode == null) "nsi.json" else "nsi-$countryCode.json"
 }

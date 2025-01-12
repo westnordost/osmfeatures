@@ -1,0 +1,16 @@
+{
+  "nsi": {
+    "brands/shop/mall": {
+      "properties": {
+        "path": "brands/shop/mall"
+      },
+      "items": [
+        {
+          "id": "duckworths-1234",
+          "displayName": "Duckworths",
+          "tags": { "a": "b", "c": "d" }
+        }
+      ]
+    }
+  }
+}

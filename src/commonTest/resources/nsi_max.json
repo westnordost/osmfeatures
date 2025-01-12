@@ -1,0 +1,20 @@
+{
+  "nsi": {
+    "brands/shop/mall": {
+      "properties": {
+        "path": "brands/shop/mall",
+        "preserveTags": ["x"]
+      },
+      "items": [
+        {
+          "id": "duckworths-1234",
+          "displayName": "Duckworths",
+          "matchNames": ["McScrooge's", "Duck Mart"],
+          "matchTags": ["amenity/bank"],
+          "tags": { "a": "b", "c": "d" },
+          "preserveTags": ["y"]
+        }
+      ]
+    }
+  }
+}

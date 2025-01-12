@@ -416,13 +416,13 @@ class FeatureDictionary internal constructor(
         fun create(
             fileSystem: FileSystem,
             presetsBasePath: String,
-            brandPresetsBasePath: String? = null
+            nsiBasePath: String? = null
         ) = FeatureDictionary(
             featureCollection =
                 IDLocalizedFeatureCollection(FileSystemAccess(fileSystem, presetsBasePath)),
             brandFeatureCollection =
-                brandPresetsBasePath?.let {
-                    IDBrandPresetsFeatureCollection(FileSystemAccess(fileSystem, brandPresetsBasePath))
+                nsiBasePath?.let {
+                    NsiFeatureCollection(FileSystemAccess(fileSystem, nsiBasePath))
                 }
         )
     }

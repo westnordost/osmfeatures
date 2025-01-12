@@ -8,12 +8,12 @@ import android.content.res.AssetManager
 fun FeatureDictionary.Companion.create(
     assetManager: AssetManager,
     presetsBasePath: String,
-    brandPresetsBasePath: String? = null
+    nsiBasePath: String? = null
 ) = FeatureDictionary(
     featureCollection =
         IDLocalizedFeatureCollection(AssetManagerAccess(assetManager, presetsBasePath)),
     brandFeatureCollection =
-        brandPresetsBasePath?.let {
-            IDBrandPresetsFeatureCollection(AssetManagerAccess(assetManager, brandPresetsBasePath))
+        nsiBasePath?.let {
+            NsiFeatureCollection(AssetManagerAccess(assetManager, nsiBasePath))
         }
 )
