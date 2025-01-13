@@ -779,7 +779,7 @@ private fun feature(
 ): Feature {
     val f = BaseFeature(
         id, tags, geometries, null, null, names, terms, includeCountryCodes,
-        excludeCountryCodes, searchable, matchScore, isSuggestion, addTags, mapOf()
+        excludeCountryCodes, searchable, matchScore, isSuggestion, addTags, mapOf(), listOf()
     )
     return if (language != null) LocalizedFeature(f, language, f.names, f.terms) else f
 }

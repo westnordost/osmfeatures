@@ -50,5 +50,6 @@ private fun feature(vararg pairs: Pair<String, String>): Feature = BaseFeature(
     1.0f,
     false,
     mapOf(),
-    mapOf()
+    mapOf(),
+    listOf(),
 )
