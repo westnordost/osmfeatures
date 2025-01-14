@@ -25,7 +25,7 @@ class LivePresetDataAccessAdapter : ResourceAccessAdapter {
         }
 
         // TODO will be able to use Source directly in ktor v3
-        val jsonBytes = runBlocking { client.get(url).readBytes() }
+        val jsonBytes = runBlocking { client.get(url).readRawBytes() }
         val buffer = Buffer()
         buffer.write(jsonBytes)
         return buffer

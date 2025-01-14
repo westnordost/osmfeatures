@@ -1,5 +1,5 @@
 plugins {
-    kotlin("multiplatform") version "2.0.21"
+    kotlin("multiplatform") version "2.1.0"
     id("com.android.library") version "8.5.2"
     id("org.jetbrains.dokka") version "1.9.20"
 
@@ -32,8 +32,8 @@ kotlin {
                 // multiplatform file access
                 api("org.jetbrains.kotlinx:kotlinx-io-core:0.6.0")
                 // parsing the preset.json
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-io:1.7.3")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-io:1.8.0")
                 // for stripping diacritics correctly
                 implementation("com.doist.x:normalize:1.0.5")
             }
