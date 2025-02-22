@@ -150,6 +150,11 @@ class FeatureDictionaryTest {
         names = listOf("Post box in US"),
         includeCountryCodes = listOf("US"),
     )
+    private val amenity = feature(
+        id = "amenity",
+        keys = setOf("amenity"),
+        names = listOf("Some amenity"),
+    )
 
     //region by tags
     
@@ -311,6 +316,20 @@ class FeatureDictionaryTest {
         assertEquals(
             listOf(postboxUS),
             dictionary.getByTags(mapOf("amenity" to "post_box"), country = "US")
+        )
+    }
+
+    @Test
+    fun find_feature_with_wildcard() {
+        val dictionary = dictionary(bank, amenity)
+
+        assertEquals(
+            listOf(bank),
+            dictionary.getByTags(mapOf("amenity" to "bank"))
+        )
+        assertEquals(
+            listOf(amenity),
+            dictionary.getByTags(mapOf("amenity" to "blubber"))
         )
     }
 
@@ -765,7 +784,7 @@ private fun dictionary(vararg entries: Feature) = FeatureDictionary(
 
 private fun feature(
     id: String,
-    tags: Map<String, String>,
+    tags: Map<String, String> = mapOf(),
     geometries: List<GeometryType> = listOf(POINT),
     names: List<String>,
     terms: List<String> = listOf(),
@@ -775,11 +794,28 @@ private fun feature(
     matchScore: Float = 1.0f,
     addTags: Map<String, String> = mapOf(),
     isSuggestion: Boolean = false,
-    language: String? = null
+    language: String? = null,
+    keys: Set<String> = setOf()
 ): Feature {
     val f = BaseFeature(
-        id, tags, geometries, null, null, names, terms, includeCountryCodes,
-        excludeCountryCodes, searchable, matchScore, isSuggestion, addTags, mapOf(), listOf()
+        id = id,
+        tags = tags,
+        geometry = geometries,
+        icon = null,
+        imageURL = null,
+        names = names,
+        terms = terms,
+        includeCountryCodes = includeCountryCodes,
+        excludeCountryCodes = excludeCountryCodes,
+        isSearchable = searchable,
+        matchScore = matchScore,
+        isSuggestion = isSuggestion,
+        addTags = addTags,
+        removeTags = mapOf(),
+        preserveTags = listOf(),
+        keys = keys,
+        addKeys = setOf(),
+        removeKeys = setOf()
     )
     return if (language != null) LocalizedFeature(f, language, f.names, f.terms) else f
 }

@@ -75,9 +75,24 @@ class IDPresetsJsonParserTest {
     }
 
     @Test
-    fun load_features_no_wildcards() {
-        val features = parseResource("one_preset_wildcard.json")
+    fun load_features_no_wildcards_in_keys() {
+        val features = parseResource("preset_wildcard_in_key.json")
         assertTrue(features.isEmpty())
+    }
+
+    @Test
+    fun load_feature_with_wildcard_in_value() {
+        val features = parseResource("preset_wildcard_in_value.json")
+
+        assertEquals(1, features.size)
+
+        val feature = features[0]
+        assertEquals(mapOf("a" to "1"), feature.tags)
+        assertEquals(mapOf("a" to "2"), feature.addTags)
+        assertEquals(mapOf("a" to "3"), feature.removeTags)
+        assertEquals(setOf("x"), feature.keys)
+        assertEquals(setOf("y"), feature.addKeys)
+        assertEquals(setOf("z"), feature.removeKeys)
     }
 
     @Test

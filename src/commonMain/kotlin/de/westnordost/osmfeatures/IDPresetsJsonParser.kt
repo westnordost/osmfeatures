@@ -25,11 +25,25 @@ internal class IDPresetsJsonParser(private val isSuggestion: Boolean = false) {
 
     private fun parseFeature(id: String, p: JsonObject): BaseFeature? {
         val tags = p["tags"]?.jsonObject?.mapValues { it.value.jsonPrimitive.content }.orEmpty()
-        // drop features with * in key or value of tags (for now), because they never describe
-        // a concrete thing, but some category of things.
-        if (tags.anyKeyOrValueContainsWildcard()) return null
+        val addTags = p["addTags"]?.jsonObject?.mapValues { it.value.jsonPrimitive.content } ?: tags
+        val removeTags = p["removeTags"]?.jsonObject?.mapValues { it.value.jsonPrimitive.content } ?: addTags
+        // drop features with "*" in key, because they never describe an actual feature but group(s) of features
+        if (tags.keys.any { it.contains("*") }) return null
+        if (addTags.keys.any { it.contains("*") }) return null
+        if (removeTags.keys.any { it.contains("*") }) return null
         // also dropping features with empty tags (generic point, line, relation)
         if (tags.isEmpty()) return null
+
+        // the `if (tags.values.contains("*"))` is a memory improvement: For the vast majority of features, `keys`,
+        // `addKeys`, `removeKeys` are empty, so they can all link to the same instance (`EmptySet`) instead of
+        // each keeping an instance of `LinkedHashSet` around for all
+        val keys = if (tags.values.contains("*")) tags.filterValues { it == "*" }.keys else emptySet()
+        val addKeys = if (addTags.values.contains("*")) addTags.filterValues { it == "*" }.keys else emptySet()
+        val removeKeys = if (removeTags.values.contains("*")) removeTags.filterValues { it == "*" }.keys else emptySet()
+
+        val tagsNoWildcards = tags.filterValues { it != "*" }
+        val addTagsNoWildcards = addTags.filterValues { it != "*" }
+        val removeTagsNoWildcards = removeTags.filterValues { it != "*" }
 
         val geometry = p["geometry"]?.jsonArray?.map {
             GeometryType.valueOf(it.jsonPrimitive.content.uppercase())
@@ -55,13 +69,11 @@ internal class IDPresetsJsonParser(private val isSuggestion: Boolean = false) {
 
         val searchable = p["searchable"]?.jsonPrimitive?.booleanOrNull ?: true
         val matchScore = p["matchScore"]?.jsonPrimitive?.floatOrNull ?: 1.0f
-        val addTags = p["addTags"]?.jsonObject?.mapValues { it.value.jsonPrimitive.content } ?: tags
-        val removeTags = p["removeTags"]?.jsonObject?.mapValues { it.value.jsonPrimitive.content } ?: addTags
         val preserveTags = p["preserveTags"]?.jsonArray?.map { Regex(it.jsonPrimitive.content) } ?: emptyList()
 
         return BaseFeature(
             id = id,
-            tags = tags,
+            tags = tagsNoWildcards,
             geometry = geometry,
             icon = icon,
             imageURL = imageURL,
@@ -72,9 +84,12 @@ internal class IDPresetsJsonParser(private val isSuggestion: Boolean = false) {
             isSearchable = searchable,
             matchScore = matchScore,
             isSuggestion = isSuggestion,
-            addTags = addTags,
-            removeTags = removeTags,
+            addTags = addTagsNoWildcards,
+            removeTags = removeTagsNoWildcards,
             preserveTags = preserveTags,
+            keys = keys,
+            addKeys = addKeys,
+            removeKeys = removeKeys,
         )
     }
 }
@@ -97,6 +112,3 @@ private fun JsonArray.parseCountryCodes(): List<String>? {
     }
     return result
 }
-
-private fun Map<String, String>.anyKeyOrValueContainsWildcard(): Boolean =
-    any { (key, value) ->  key.contains("*") || value.contains("*") }

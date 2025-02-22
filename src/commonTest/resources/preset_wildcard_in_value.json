@@ -1,0 +1,9 @@
+{
+  "some/id": {
+    "name": "test1",
+    "tags": { "a": "1", "x": "*" },
+    "addTags": { "a": "2", "y": "*" },
+    "removeTags": { "a": "3", "z": "*" },
+    "geometry": ["point"]
+  }
+}
