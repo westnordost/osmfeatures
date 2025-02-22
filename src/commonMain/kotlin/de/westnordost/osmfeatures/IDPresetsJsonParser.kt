@@ -36,7 +36,7 @@ internal class IDPresetsJsonParser(private val isSuggestion: Boolean = false) {
 
         // the `if (tags.values.contains("*"))` is a memory improvement: For the vast majority of features, `keys`,
         // `addKeys`, `removeKeys` are empty, so they can all link to the same instance (`EmptySet`) instead of
-        // keeping an instance of `LinkedHashSet` around for all
+        // each keeping an instance of `LinkedHashSet` around for all
         val keys = if (tags.values.contains("*")) tags.filterValues { it == "*" }.keys else emptySet()
         val addKeys = if (addTags.values.contains("*")) addTags.filterValues { it == "*" }.keys else emptySet()
         val removeKeys = if (removeTags.values.contains("*")) removeTags.filterValues { it == "*" }.keys else emptySet()
