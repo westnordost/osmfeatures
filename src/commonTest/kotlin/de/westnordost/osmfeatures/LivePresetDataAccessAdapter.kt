@@ -4,10 +4,12 @@ import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.utils.io.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.io.Buffer
 import kotlinx.io.IOException
 import kotlinx.io.Source
+import kotlinx.io.buffered
 
 class LivePresetDataAccessAdapter : ResourceAccessAdapter {
 
@@ -24,10 +26,6 @@ class LivePresetDataAccessAdapter : ResourceAccessAdapter {
             else -> "$baseUrl/translations/$name"
         }
 
-        // TODO will be able to use Source directly in ktor v3
-        val jsonBytes = runBlocking { client.get(url).readRawBytes() }
-        val buffer = Buffer()
-        buffer.write(jsonBytes)
-        return buffer
+        return runBlocking { client.get(url).bodyAsChannel().asSource().buffered() }
     }
 }
