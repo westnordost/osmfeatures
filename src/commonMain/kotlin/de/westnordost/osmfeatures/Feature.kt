@@ -21,10 +21,10 @@ interface Feature {
     val names: List<String>
     /** Additional search terms or keywords to find this feature */
     val terms: List<String>
-    /** A list of ISO 3166-1 2 or 3 letter country codes country codes in which this feature is
+    /** A list of ISO 3166-1 alpha 2 or 3-letter country codes in which this feature is
      *  available. Empty if it is available everywhere. */
     val includeCountryCodes: List<String>
-    /** A list of ISO 3166-1 2 or 3 letter country codes country codes in which this feature is
+    /** A list of ISO 3166-1 alpha 2 or 3-letter country codes in which this feature is
      *  not available. Empty if it available everywhere. */
     val excludeCountryCodes: List<String>
     /** Whether this feature should be searchable. E.g. deprecated or generic features are not
@@ -33,7 +33,7 @@ interface Feature {
     /** A number that ranks this preset against others that match the feature. */
     val matchScore: Float
     /** tags that are added when selecting this feature. This can differ from [tags], as those are
-     *  just the minimum tags necessary to match this feature */
+     *  just the minimum tags necessary to match this feature.  */
     val addTags: Map<String, String>
     /** tags that are removed from the feature when deselecting this feature. */
     val removeTags: Map<String, String>
@@ -49,4 +49,13 @@ interface Feature {
     val isSuggestion: Boolean
     /** ISO 639 language code of this feature. `null` if it isn't localized. */
     val language: String?
+
+    /** Keys a feature must have to match this feature, regardless of what is its value. E.g. the "disused amenity"
+     *  feature matches with all elements with tags that have the `disused:amenity` key set to any value. */
+    val keys: Set<String>
+    /** Keys that are added when selecting this feature. This can differ from [keys], as those are just the minimum keys
+     *  necessary to match this feature. If the key is not already present, the value should be set to `"yes"`. */
+    val addKeys: Set<String>
+    /** Keys that are removed from the feature when deselecting this feature, regardless of which value was set. */
+    val removeKeys: Set<String>
 }

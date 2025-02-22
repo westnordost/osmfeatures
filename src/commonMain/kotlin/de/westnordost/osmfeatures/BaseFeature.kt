@@ -16,7 +16,10 @@ data class BaseFeature(
     override val isSuggestion: Boolean,
     override val addTags: Map<String, String>,
     override val removeTags: Map<String, String>,
-    override val preserveTags: List<Regex>
+    override val preserveTags: List<Regex>,
+    override val keys: Set<String>,
+    override val addKeys: Set<String>,
+    override val removeKeys: Set<String>
 ): Feature {
     override val canonicalNames: List<String> = names.map { it.canonicalize() }
     override val canonicalTerms: List<String> = terms.map { it.canonicalize() }

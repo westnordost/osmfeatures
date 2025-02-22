@@ -21,8 +21,12 @@ internal class FeatureTagsIndex(features: Collection<Feature>) {
     fun getAll(tags: Map<String, String>): List<Feature> {
         val result = ArrayList<Feature>()
         for (map in tree.getAll(tags)) {
-            val fs = featureMap[map]
-            if (fs != null) result.addAll(fs)
+            val features = featureMap[map].orEmpty()
+            for (feature in features) {
+                if (feature.keys.all { tags.containsKey(it) }) {
+                    result.add(feature)
+                }
+            }
         }
         return result
     }

@@ -1,0 +1,19 @@
+{
+  "some/id": {
+    "name": "test",
+    "tags": { "addr:*": "b" },
+    "geometry": ["point"]
+  },
+  "some/id2": {
+    "name": "test",
+    "tags": { "a": "b" },
+    "addTags": { "addr:*": "b" },
+    "geometry": ["point"]
+  },
+  "some/id3": {
+    "name": "test",
+    "tags": { "a": "b" },
+    "removeTags": { "addr:*": "c" },
+    "geometry": ["point"]
+  }
+}
