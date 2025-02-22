@@ -43,8 +43,8 @@ kotlin {
                 implementation(kotlin("test"))
                 // we are pulling some current preset json from the iD preset repo to see if parsing
                 // does at least not crash and return something
-                implementation("io.ktor:ktor-client-core:3.0.3")
-                implementation("io.ktor:ktor-client-cio:3.0.3")
+                implementation("io.ktor:ktor-client-core:3.1.0")
+                implementation("io.ktor:ktor-client-cio:3.1.0")
                 // ktor-client is a suspending API, so we need coroutines too
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
             }
