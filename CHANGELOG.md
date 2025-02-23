@@ -1,5 +1,12 @@
 # Changelog
 
+# 7.0
+
+Support wildcards (`*`) for tag values (#16, #28).
+
+See the new properties of a `Feature` `tagKeys`, `addTagKeys`, `removeTagKeys`. This is a breaking change because the 
+data class was changed to accommodate these new values.
+
 # 6.2
 
 - support proper stream parsing using (kotlinx-io's) `Source`
