@@ -813,9 +813,9 @@ private fun feature(
         addTags = addTags,
         removeTags = mapOf(),
         preserveTags = listOf(),
-        keys = keys,
-        addKeys = setOf(),
-        removeKeys = setOf()
+        tagKeys = keys,
+        addTagKeys = setOf(),
+        removeTagKeys = setOf()
     )
     return if (language != null) LocalizedFeature(f, language, f.names, f.terms) else f
 }

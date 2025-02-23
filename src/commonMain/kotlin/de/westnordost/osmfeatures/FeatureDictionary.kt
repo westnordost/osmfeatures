@@ -138,7 +138,7 @@ class FeatureDictionary internal constructor(
         }
         return foundFeatures.sortedWith(Comparator { a: Feature, b: Feature ->
             // 1. features with more matching tags first
-            val tagOrder = (b.tags.size + b.keys.size) - (a.tags.size + a.keys.size)
+            val tagOrder = (b.tags.size + b.tagKeys.size) - (a.tags.size + a.tagKeys.size)
             if (tagOrder != 0) {
                 return@Comparator tagOrder
             }

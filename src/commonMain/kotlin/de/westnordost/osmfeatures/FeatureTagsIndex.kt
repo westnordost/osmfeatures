@@ -23,7 +23,7 @@ internal class FeatureTagsIndex(features: Collection<Feature>) {
         for (map in tree.getAll(tags)) {
             val features = featureMap[map].orEmpty()
             for (feature in features) {
-                if (feature.keys.all { tags.containsKey(it) }) {
+                if (feature.tagKeys.all { tags.containsKey(it) }) {
                     result.add(feature)
                 }
             }

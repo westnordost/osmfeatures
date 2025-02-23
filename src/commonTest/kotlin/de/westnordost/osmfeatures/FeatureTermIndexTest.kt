@@ -62,7 +62,7 @@ private fun feature(vararg terms: String): Feature = BaseFeature(
     addTags = mapOf(),
     removeTags = mapOf(),
     preserveTags = listOf(),
-    keys = setOf(),
-    addKeys = setOf(),
-    removeKeys = setOf()
+    tagKeys = setOf(),
+    addTagKeys = setOf(),
+    removeTagKeys = setOf()
 )

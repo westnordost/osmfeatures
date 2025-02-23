@@ -25,9 +25,9 @@ data class LocalizedFeature(
     override val removeTags: Map<String, String> get() = p.removeTags
     override val preserveTags: List<Regex> get() = p.preserveTags
     override val isSuggestion: Boolean get() = p.isSuggestion
-    override val keys: Set<String> get() = p.keys
-    override val addKeys: Set<String> get() = p.addKeys
-    override val removeKeys: Set<String> get() = p.removeKeys
+    override val tagKeys: Set<String> get() = p.tagKeys
+    override val addTagKeys: Set<String> get() = p.addTagKeys
+    override val removeTagKeys: Set<String> get() = p.removeTagKeys
 
     override fun toString(): String = id
 }

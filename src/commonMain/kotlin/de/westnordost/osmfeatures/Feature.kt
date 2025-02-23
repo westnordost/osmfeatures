@@ -6,7 +6,7 @@ package de.westnordost.osmfeatures
 interface Feature {
     /** unique identifier for this feature */
     val id: String
-    /** tags a feature must have to match this feature */
+    /** tags an element must have to match this feature */
     val tags: Map<String, String>
     /** a list of possible geometry types for this feature */
     val geometry: List<GeometryType>
@@ -32,10 +32,10 @@ interface Feature {
     val isSearchable: Boolean
     /** A number that ranks this preset against others that match the feature. */
     val matchScore: Float
-    /** tags that are added when selecting this feature. This can differ from [tags], as those are
+    /** tags that are added to the element when selecting this feature. This can differ from [tags], as those are
      *  just the minimum tags necessary to match this feature.  */
     val addTags: Map<String, String>
-    /** tags that are removed from the feature when deselecting this feature. */
+    /** tags that are removed from the element when deselecting this feature. */
     val removeTags: Map<String, String>
     /** Regexes for keys of tags which should not be overwritten by [addTags] when selecting a
      *  feature. */
@@ -50,12 +50,13 @@ interface Feature {
     /** ISO 639 language code of this feature. `null` if it isn't localized. */
     val language: String?
 
-    /** Keys a feature must have to match this feature, regardless of what is its value. E.g. the "disused amenity"
+    /** Keys an element must have to match this feature, regardless of what is its value. E.g. the "disused amenity"
      *  feature matches with all elements with tags that have the `disused:amenity` key set to any value. */
-    val keys: Set<String>
-    /** Keys that are added when selecting this feature. This can differ from [keys], as those are just the minimum keys
-     *  necessary to match this feature. If the key is not already present, the value should be set to `"yes"`. */
-    val addKeys: Set<String>
-    /** Keys that are removed from the feature when deselecting this feature, regardless of which value was set. */
-    val removeKeys: Set<String>
+    val tagKeys: Set<String>
+    /** Keys that are added to the element when selecting this feature. This can differ from [tagKeys], as those are
+     * just the minimum keys necessary to match this feature. If the key is not already present, the value should be set
+     * to `"yes"`. */
+    val addTagKeys: Set<String>
+    /** Keys that are removed from the element when deselecting this feature, regardless of which value was set. */
+    val removeTagKeys: Set<String>
 }

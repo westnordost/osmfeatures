@@ -87,9 +87,9 @@ internal class IDPresetsJsonParser(private val isSuggestion: Boolean = false) {
             addTags = addTagsNoWildcards,
             removeTags = removeTagsNoWildcards,
             preserveTags = preserveTags,
-            keys = keys,
-            addKeys = addKeys,
-            removeKeys = removeKeys,
+            tagKeys = keys,
+            addTagKeys = addKeys,
+            removeTagKeys = removeKeys,
         )
     }
 }

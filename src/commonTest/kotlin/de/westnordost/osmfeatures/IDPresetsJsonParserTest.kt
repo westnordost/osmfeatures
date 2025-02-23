@@ -90,9 +90,9 @@ class IDPresetsJsonParserTest {
         assertEquals(mapOf("a" to "1"), feature.tags)
         assertEquals(mapOf("a" to "2"), feature.addTags)
         assertEquals(mapOf("a" to "3"), feature.removeTags)
-        assertEquals(setOf("x"), feature.keys)
-        assertEquals(setOf("y"), feature.addKeys)
-        assertEquals(setOf("z"), feature.removeKeys)
+        assertEquals(setOf("x"), feature.tagKeys)
+        assertEquals(setOf("y"), feature.addTagKeys)
+        assertEquals(setOf("z"), feature.removeTagKeys)
     }
 
     @Test

@@ -77,7 +77,7 @@ private fun feature(
     addTags = mapOf(),
     removeTags = mapOf(),
     preserveTags = listOf(),
-    keys = keys,
-    addKeys = setOf(),
-    removeKeys = setOf()
+    tagKeys = keys,
+    addTagKeys = setOf(),
+    removeTagKeys = setOf()
 )
