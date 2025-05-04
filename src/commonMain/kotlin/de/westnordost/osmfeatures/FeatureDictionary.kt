@@ -334,7 +334,7 @@ class FeatureDictionary internal constructor(
             FeatureTermIndex(emptyList()) { emptyList() }
         } else {
             FeatureTermIndex(brandFeatureCollection.getAll(countryCodes)) { feature ->
-                if (!feature.isSearchable) emptyList() else feature.canonicalNames
+                if (!feature.isSearchable) emptyList() else feature.getSearchableNames().toList()
             }
         }
 
@@ -448,9 +448,12 @@ private fun Feature.matches(geometry: GeometryType?): Boolean =
 private fun Feature.getSearchableNames(): Sequence<String> = sequence {
     if (!isSearchable) return@sequence
     yieldAll(canonicalNames)
+    val wordSeparator = "[\\-()\\[\\],.!?&+=/\\\\ ]+".toRegex()
     for (name in canonicalNames) {
-        if (name.contains(" ")) {
-            yieldAll(name.replace("[()]", "").split(" "))
+        for (boundary in wordSeparator.findAll(name)) {
+            if (boundary.range.endExclusive != 0) {
+                yield(name.substring(boundary.range.endExclusive))
+            }
         }
     }
 }

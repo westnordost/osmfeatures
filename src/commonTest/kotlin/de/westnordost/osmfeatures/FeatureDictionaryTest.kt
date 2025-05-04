@@ -118,6 +118,24 @@ class FeatureDictionaryTest {
         names = listOf("Deutsche Bank"),
         isSuggestion = true
     )
+    private val ms_food = feature( // Combined letter + punctuation words in the middle of the brand
+        id = "shop/convenience/Some M&S Food",
+        tags = mapOf("shop" to "convenience", "name" to "Some M&S Food"),
+        names = listOf("Some M&S Food"),
+        isSuggestion = true
+    )
+    private val seven_eleven = feature( // Brand with non-space word separator
+        id = "shop/convenience/7-Eleven",
+        tags = mapOf("shop" to "convenience", "name" to "7-Eleven"),
+        names = listOf("7-Eleven"),
+        isSuggestion = true
+    )
+    private val seven_eleven_jp = feature( // Brand with non-space word separator, localized to Japan
+        id = "shop/convenience/7-Eleven-JP",
+        tags = mapOf("shop" to "convenience", "name" to "セブン-イレブン", "name:en" to "7-Eleven"),
+        names = listOf("セブン-イレブン"),
+        isSuggestion = true
+    )
     private val baenk = feature( // amenity=bänk, to see if diacritics match non-strictly ("a" finds "ä")
         id = "amenity/bänk",
         tags = mapOf("amenity" to "bänk"),
@@ -519,11 +537,26 @@ class FeatureDictionaryTest {
 
     @Test
     fun find_multi_word_brand_feature() {
-        val dictionary = dictionary(deutsche_bank)
+        val dictionary = dictionary(deutsche_bank, seven_eleven, seven_eleven_jp, ms_food)
         assertEquals(listOf(deutsche_bank), dictionary.getByTerm("Deutsche Ba").toList())
         assertEquals(listOf(deutsche_bank), dictionary.getByTerm("Deut").toList())
-        // by-word only for non-brand features
-        assertEquals(0, dictionary.getByTerm("Ban").count())
+        assertEquals(listOf(deutsche_bank), dictionary.getByTerm("Bank").toList())
+
+        // if we use other languages in search than just the english name, as discussed in
+        // https://github.com/westnordost/osmfeatures/issues/29, we might want to adjust the tests
+        // below to properly reflect what would be happening
+        assertEquals(listOf(seven_eleven), dictionary.getByTerm("7").toList())
+        assertEquals(listOf(seven_eleven), dictionary.getByTerm("Eleven").toList())
+
+        assertEquals(listOf(seven_eleven_jp), dictionary.getByTerm("セ").toList())
+        assertEquals(listOf(seven_eleven_jp), dictionary.getByTerm("イレブ").toList())
+
+        assertEquals(listOf(ms_food), dictionary.getByTerm("M").toList())
+        assertEquals(listOf(ms_food), dictionary.getByTerm("M&S").toList())
+
+        // don't search sub-strings, only starts of words
+        assertEquals(0, dictionary.getByTerm("sche").count())
+        assertEquals(0, dictionary.getByTerm("hop").count())
     }
 
     @Test
@@ -549,7 +582,10 @@ class FeatureDictionaryTest {
             listOf(miniature_train_shop),
             dictionary.getByTerm("Miniature Train Shop", languages = listOf(null)).toList()
         )
-        assertEquals(0, dictionary.getByTerm("Train Sho", languages = listOf(null)).count())
+        assertEquals(
+            listOf(miniature_train_shop),
+            dictionary.getByTerm("Train Sho", languages = listOf(null)).toList()
+        )
     }
 
     @Test
@@ -674,10 +710,10 @@ class FeatureDictionaryTest {
                 bad_bank,  // starts-with-word name matches
                 bank_of_america,  // starts-with brand name matches
                 bank_of_liechtenstein,  // starts-with brand name matches - lower matchScore
+                deutsche_bank, // starts-with in second word matches
                 bench,  // found word in terms - higher matchScore
                 stock_exchange // found word in terms - lower matchScore
                 // casino,       // not included: "Spielbank" does not start with "bank"
-                // deutsche_bank // not included: "Deutsche Bank" does not start with "bank" and is a brand
             ),
             dictionary.getByTerm("Bank", languages = listOf(null)).toList()
         )
