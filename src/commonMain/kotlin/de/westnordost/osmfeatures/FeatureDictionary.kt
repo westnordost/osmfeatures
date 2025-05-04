@@ -7,6 +7,7 @@ class FeatureDictionary internal constructor(
     private val brandFeatureCollection: PerCountryFeatureCollection?
 ) {
     private val brandNamesIndexes = HashMap<List<String?>, Lazy<FeatureTermIndex>>()
+    private val brandTermsIndexes = HashMap<List<String?>, Lazy<FeatureTermIndex>>()
     private val brandTagsIndexes = HashMap<List<String?>, Lazy<FeatureTagsIndex>>()
 
     // language list -> index
@@ -256,26 +257,43 @@ class FeatureDictionary internal constructor(
             if (isSuggestion == null || !isSuggestion) {
                 // a. matches with presets first
                 yieldAll(
-                    getNamesIndex(languagesOrDefault).getAll(canonicalSearch).sortedWith(sortNames)
+                    getNamesIndex(languagesOrDefault)
+                        .getAll(canonicalSearch)
+                        .sortedWith(sortNames)
                 )
             }
             if (isSuggestion == null || isSuggestion) {
                 // b. matches with brand names second
                 val countryCodes = dissectCountryCode(country)
                 yieldAll(
-                    getBrandNamesIndex(countryCodes).getAll(canonicalSearch).sortedWith(sortNames)
+                    getBrandNamesIndex(countryCodes)
+                        .getAll(canonicalSearch)
+                        .sortedWith(sortNames)
                 )
             }
             if (isSuggestion == null || !isSuggestion) {
                 // c. matches with terms third
                 yieldAll(
-                    getTermsIndex(languagesOrDefault).getAll(canonicalSearch).sortedWith(sortMatchScore)
+                    getTermsIndex(languagesOrDefault)
+                        .getAll(canonicalSearch)
+                        .sortedWith(sortMatchScore)
+                )
+            }
+            if (isSuggestion == null || isSuggestion) {
+                // d. matches with terms of brands fourth
+                val countryCodes = dissectCountryCode(country)
+                yieldAll(
+                    getBrandTermsIndex(countryCodes)
+                        .getAll(canonicalSearch)
+                        .sortedWith(sortMatchScore)
                 )
             }
             if (isSuggestion == null || !isSuggestion) {
-                // d. matches with tag values fourth
+                // e. matches with tag values fifth
                 yieldAll(
-                    getTagValuesIndex(languagesOrDefault).getAll(canonicalSearch).sortedWith(sortMatchScore)
+                    getTagValuesIndex(languagesOrDefault)
+                        .getAll(canonicalSearch)
+                        .sortedWith(sortMatchScore)
                 )
             }
         }
@@ -335,6 +353,19 @@ class FeatureDictionary internal constructor(
         } else {
             FeatureTermIndex(brandFeatureCollection.getAll(countryCodes)) { feature ->
                 if (!feature.isSearchable) emptyList() else feature.canonicalNames
+            }
+        }
+
+    /** lazily get or create brand terms index for country  */
+    private fun getBrandTermsIndex(countryCodes: List<String?>): FeatureTermIndex =
+        brandTermsIndexes.getOrPut(countryCodes) { lazy { createBrandTermsIndex(countryCodes) } }.value
+
+    private fun createBrandTermsIndex(countryCodes: List<String?>): FeatureTermIndex =
+        if (brandFeatureCollection == null) {
+            FeatureTermIndex(emptyList()) { emptyList() }
+        } else {
+            FeatureTermIndex(brandFeatureCollection.getAll(countryCodes)) { feature ->
+                if (!feature.isSearchable) emptyList() else feature.canonicalTerms
             }
         }
 

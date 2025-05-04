@@ -155,6 +155,13 @@ class FeatureDictionaryTest {
         keys = setOf("amenity"),
         names = listOf("Some amenity"),
     )
+    private val seven_eleven_jp = feature( // Brand with non-space word separator, terms and localized to Japan
+        id = "shop/convenience/7-Eleven-JP",
+        tags = mapOf("shop" to "convenience", "name" to "セブン-イレブン", "name:en" to "7-Eleven"),
+        names = listOf("セブン-イレブン"),
+        isSuggestion = true,
+        terms = listOf("7-eleven", "seven-eleven"),
+    )
 
     //region by tags
     
@@ -577,6 +584,23 @@ class FeatureDictionaryTest {
         assertEquals(
             listOf(postboxUS),
             dictionary.getByTerm("Post", country = "US").toList()
+        )
+    }
+
+    @Test
+    fun find_brand_feature_by_term() {
+        val dictionary = dictionary(seven_eleven_jp)
+        assertEquals(
+            listOf(seven_eleven_jp),
+            dictionary.getByTerm("seven").toList()
+        )
+        assertEquals(
+            listOf(seven_eleven_jp),
+            dictionary.getByTerm("7").toList()
+        )
+        assertEquals(
+            listOf(),
+            dictionary.getByTerm("8").toList()
         )
     }
 
