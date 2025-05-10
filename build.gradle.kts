@@ -74,7 +74,7 @@ publishing {
 
             pom {
                 name.set("osmfeatures")
-                description.set("Java library to translate OSM tags to and from localized names.")
+                description.set("Kotlin multiplatform library to translate OSM tags to and from localized names.")
                 url.set("https://github.com/westnordost/osmfeatures")
 
                 licenses {
