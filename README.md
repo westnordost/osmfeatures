@@ -8,7 +8,7 @@ It is currently used in [StreetComplete](https://github.com/streetcomplete/stree
 
 ## Copyright and License
 
-© 2019-2024 Tobias Zwick. This library is released under the terms of the Apache License Version 2.0.
+© 2019-2025 Tobias Zwick. This library is released under the terms of the Apache License Version 2.0.
 
 ## Usage
 
