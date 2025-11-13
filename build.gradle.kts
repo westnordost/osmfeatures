@@ -38,9 +38,9 @@ kotlin {
                 api("org.jetbrains.kotlinx:kotlinx-io-core:0.8.0")
                 // parsing the preset.json
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-io:1.8.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-io:1.9.0")
                 // for stripping diacritics correctly
-                implementation("com.doist.x:normalize:1.0.5")
+                implementation("com.doist.x:normalize:1.2.0")
             }
         }
         commonTest {
@@ -48,8 +48,8 @@ kotlin {
                 implementation(kotlin("test"))
                 // we are pulling some current preset json from the iD preset repo to see if parsing
                 // does at least not crash and return something
-                implementation("io.ktor:ktor-client-core:3.3.1")
-                implementation("io.ktor:ktor-client-cio:3.1.0")
+                implementation("io.ktor:ktor-client-core:3.3.2")
+                implementation("io.ktor:ktor-client-cio:3.3.2")
                 // ktor-client is a suspending API, so we need coroutines too
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
             }
