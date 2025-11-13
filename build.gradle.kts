@@ -1,11 +1,16 @@
 plugins {
     kotlin("multiplatform") version "2.1.0"
     id("com.android.library") version "8.5.2"
-    id("org.jetbrains.dokka") version "1.9.20"
-
-    id("maven-publish")
-    id("signing")
+    id("com.vanniktech.maven.publish") version "0.34.0"
+    id("org.jetbrains.dokka") version "2.1.0"
 }
+
+repositories {
+    mavenCentral()
+}
+
+group = "de.westnordost"
+version = "7.0"
 
 kotlin {
     group = "de.westnordost"
@@ -52,6 +57,17 @@ kotlin {
     }
 }
 
+dokka {
+    moduleName.set("osmfeatures")
+    dokkaSourceSets {
+        configureEach {
+            sourceLink {
+                remoteUrl("https://github.com/westnordost/osmfeatures/tree/v${project.version}/")
+                localDirectory = rootDir
+            }
+        }
+    }
+}
 
 android {
     namespace = "de.westnordost.osmfeatures"
@@ -61,67 +77,38 @@ android {
     }
 }
 
-val javadocJar = tasks.register<Jar>("javadocJar") {
-    archiveClassifier.set("javadoc")
-    from(tasks.dokkaHtml)
-}
+mavenPublishing {
+    publishToMavenCentral()
 
-publishing {
-    publications {
-        withType<MavenPublication> {
-            artifactId = rootProject.name + if (name != "kotlinMultiplatform") "-$name" else ""
-            artifact(javadocJar)
+    signAllPublications()
 
-            pom {
-                name.set("osmfeatures")
-                description.set("Kotlin multiplatform library to translate OSM tags to and from localized names.")
-                url.set("https://github.com/westnordost/osmfeatures")
-
-                licenses {
-                    license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("https://raw.githubusercontent.com/westnordost/osmfeatures/master/LICENSE")
-                    }
-                }
-                issueManagement {
-                    system.set("GitHub")
-                    url.set("https://github.com/westnordost/osmfeatures/issues")
-                }
-                scm {
-                    connection.set("https://github.com/westnordost/osmfeatures.git")
-                    url.set("https://github.com/westnordost/osmfeatures")
-                }
-                developers {
-                    developer {
-                        id.set("westnordost")
-                        name.set("Tobias Zwick")
-                        email.set("osm@westnordost.de")
-                    }
-                }
+    coordinates(group.toString(), rootProject.name, version.toString())
+    
+    pom {
+        name = "osmfeatures"
+        description = "Kotlin multiplatform library to translate OSM tags to and from localized names."
+        url = "https://github.com/westnordost/osmfeatures"
+        licenses {
+            license {
+                name = "The Apache License, Version 2.0"
+                url = "https://raw.githubusercontent.com/westnordost/osmfeatures/master/LICENSE"
+            }
+        }
+        issueManagement {
+            system = "GitHub"
+            url = "https://github.com/westnordost/osmfeatures/issues"
+        }
+        scm {
+            connection = "https://github.com/westnordost/osmfeatures.git"
+            url = "https://github.com/westnordost/osmfeatures"
+            developerConnection = connection
+        }
+        developers {
+            developer {
+                id = "westnordost"
+                name = "Tobias Zwick"
+                email = "osm@westnordost.de"
             }
         }
     }
-    repositories {
-        maven {
-            name = "oss"
-            url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
-            credentials {
-                val ossrhUsername: String by project
-                val ossrhPassword: String by project
-                username = ossrhUsername
-                password = ossrhPassword
-            }
-        }
-    }
-}
-
-signing {
-    sign(publishing.publications)
-}
-
-
-// FIXME - workaround for https://github.com/gradle/gradle/issues/26091
-val signingTasks = tasks.withType<Sign>()
-tasks.withType<AbstractPublishToMaven>().configureEach {
-    mustRunAfter(signingTasks)
 }
