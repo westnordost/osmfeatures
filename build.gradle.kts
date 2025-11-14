@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "de.westnordost"
-version = "7.0"
+version = "7.1.0"
 
 kotlin {
     jvm()

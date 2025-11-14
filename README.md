@@ -12,7 +12,7 @@ It is currently used in [StreetComplete](https://github.com/streetcomplete/stree
 
 ## Usage
 
-Add [de.westnordost:osmfeatures:7.0](https://mvnrepository.com/artifact/de.westnordost/osmfeatures/7.0) as a Maven dependency or download the jar from there.
+Add [de.westnordost:osmfeatures:7.1.0](https://mvnrepository.com/artifact/de.westnordost/osmfeatures/7.1.0) as a Maven dependency or download the jar from there.
 
 ### Get the data
 
