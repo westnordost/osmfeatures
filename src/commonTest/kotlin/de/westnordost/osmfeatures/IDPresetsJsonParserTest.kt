@@ -113,7 +113,7 @@ class IDPresetsJsonParserTest {
         val client = HttpClient(CIO) { expectSuccess = true }
 
         val presets = client
-            .get("https://github.com/osmlab/name-suggestion-index/raw/main/dist/presets/nsi-id-presets.json")
+            .get("https://cdn.jsdelivr.net/npm/name-suggestion-index@latest/dist/presets/nsi-id-presets.min.json")
             .bodyAsText()
 
         val features = IDPresetsJsonParser().parse(presets)
