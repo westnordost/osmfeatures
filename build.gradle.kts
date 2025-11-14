@@ -1,33 +1,27 @@
+import com.android.build.api.dsl.androidLibrary
+
 plugins {
-    kotlin("multiplatform") version "2.1.0"
-    id("com.android.library") version "8.12.3"
+    id("org.jetbrains.kotlin.multiplatform") version "2.2.21"
+    id("com.android.kotlin.multiplatform.library") version "8.12.3"
     id("com.vanniktech.maven.publish") version "0.35.0"
     id("org.jetbrains.dokka") version "2.1.0"
-}
-
-repositories {
-    mavenCentral()
 }
 
 group = "de.westnordost"
 version = "7.0"
 
 kotlin {
-    group = "de.westnordost"
-    version = "7.0"
-
     jvm()
-    androidTarget {
-        publishLibraryVariants("release")
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = "1.8"
-            }
-        }
+
+    androidLibrary {
+        namespace = "de.westnordost.osmfeatures"
+        compileSdk = 36
+        minSdk = 21
     }
+
     iosSimulatorArm64()
-    iosX64()
     iosArm64()
+    iosX64()
 
     applyDefaultHierarchyTemplate()
 
@@ -66,14 +60,6 @@ dokka {
                 localDirectory = rootDir
             }
         }
-    }
-}
-
-android {
-    namespace = "de.westnordost.osmfeatures"
-    compileSdk = 35
-    defaultConfig {
-        minSdk = 21
     }
 }
 
