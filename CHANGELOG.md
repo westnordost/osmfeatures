@@ -1,5 +1,9 @@
 # Changelog
 
+# 7.1.0
+
+Support finding brand features by terms (#29)
+
 # 7.0
 
 Support wildcards (`*`) for tag values (#16, #28).
