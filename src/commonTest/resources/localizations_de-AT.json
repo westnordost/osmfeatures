@@ -4,11 +4,11 @@
       "name": "Backhusl"
     },
     "another/id": {
-      "terms": "ninja"
+      "terms": ["ninja"]
     },
     "yet/another/id": {
       "name": "Brückle",
-      "aliases": "Drüberrüber"
+      "aliases": ["Drüberrüber"]
     }
   }
 }}}
