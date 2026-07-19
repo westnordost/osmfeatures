@@ -21,7 +21,6 @@ kotlin {
 
     iosSimulatorArm64()
     iosArm64()
-    iosX64()
 
     applyDefaultHierarchyTemplate()
 
