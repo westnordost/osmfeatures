@@ -1,14 +1,14 @@
 import com.android.build.api.dsl.androidLibrary
 
 plugins {
-    id("org.jetbrains.kotlin.multiplatform") version "2.2.21"
+    id("org.jetbrains.kotlin.multiplatform") version "2.4.0"
     id("com.android.kotlin.multiplatform.library") version "8.12.3"
-    id("com.vanniktech.maven.publish") version "0.35.0"
-    id("org.jetbrains.dokka") version "2.1.0"
+    id("com.vanniktech.maven.publish") version "0.37.0"
+    id("org.jetbrains.dokka") version "2.2.0"
 }
 
 group = "de.westnordost"
-version = "7.1.0"
+version = "8.0.0"
 
 kotlin {
     jvm()
@@ -21,7 +21,6 @@ kotlin {
 
     iosSimulatorArm64()
     iosArm64()
-    iosX64()
 
     applyDefaultHierarchyTemplate()
 
@@ -31,10 +30,10 @@ kotlin {
                 // multiplatform file access
                 api("org.jetbrains.kotlinx:kotlinx-io-core:0.8.0")
                 // parsing the preset.json
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
-                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-io:1.9.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-io:1.11.0")
                 // for stripping diacritics correctly
-                implementation("com.doist.x:normalize:1.2.0")
+                implementation("com.doist.x:normalize:1.3.3")
             }
         }
         commonTest {
@@ -42,10 +41,10 @@ kotlin {
                 implementation(kotlin("test"))
                 // we are pulling some current preset json from the iD preset repo to see if parsing
                 // does at least not crash and return something
-                implementation("io.ktor:ktor-client-core:3.3.2")
-                implementation("io.ktor:ktor-client-cio:3.3.2")
+                implementation("io.ktor:ktor-client-core:3.5.1")
+                implementation("io.ktor:ktor-client-cio:3.5.1")
                 // ktor-client is a suspending API, so we need coroutines too
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
             }
         }
     }

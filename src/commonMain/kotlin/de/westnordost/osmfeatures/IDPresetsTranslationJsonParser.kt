@@ -35,20 +35,6 @@ internal class IDPresetsTranslationJsonParser {
             if (f != null) localizedFeatures[key] = f
         }
 
-        for (baseFeature in baseFeatures.values) {
-            val name = baseFeature.names.firstOrNull() ?: continue
-            val isPlaceholder = name.startsWith("{") && name.endsWith("}")
-            if (!isPlaceholder) continue
-            val placeholderId = name.substring(1, name.length - 1)
-            val localizedFeature = localizedFeatures[placeholderId] ?: continue
-            localizedFeatures[baseFeature.id] = LocalizedFeature(
-                p = baseFeature,
-                language = language,
-                names = localizedFeature.names,
-                terms = localizedFeature.terms
-            )
-        }
-
         return localizedFeatures.values.toList()
     }
 
@@ -57,20 +43,17 @@ internal class IDPresetsTranslationJsonParser {
 
         val name = localization["name"]?.jsonPrimitive?.contentOrNull.orEmpty()
 
-        val aliases = localization["aliases"]?.jsonPrimitive?.content
-            .orEmpty()
-            .lineSequence()
+        val aliases = localization["aliases"]?.jsonArray?.map { it.jsonPrimitive.content }.orEmpty()
 
-        val names = (sequenceOf(name) + aliases)
+        val names = (listOf(name) + aliases)
             .map { it.trim() }
-            .filter { it.isNotEmpty() }
+            .filter { it.isNotBlank() }
             .toList()
 
-        val terms = localization["terms"]?.jsonPrimitive?.content
+        val terms = localization["terms"]?.jsonArray?.map { it.jsonPrimitive.content }
             .orEmpty()
-            .splitToSequence(",")
             .map { it.trim() }
-            .filter { it.isNotEmpty() }
+            .filter { it.isNotBlank() }
             .toList()
 
         return LocalizedFeature(

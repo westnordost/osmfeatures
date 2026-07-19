@@ -38,21 +38,6 @@ class IDPresetsTranslationJsonParserTest {
     }
 
     @Test
-    fun load_features_and_localization_with_placeholder_name() {
-        val features = parseResource("one_preset_with_placeholder_name.json", "localizations.json")
-        val featuresById = features.associateBy { it.id }
-        assertEquals(2, features.size)
-
-        val feature = featuresById["some/id-dingsdongs"]
-        assertEquals("some/id-dingsdongs", feature?.id)
-        assertEquals(mapOf("a" to "b", "c" to "d"), feature?.tags)
-        assertEquals(listOf(GeometryType.POINT), feature?.geometry)
-        assertEquals("bar", feature?.name)
-        assertEquals(listOf("bar", "one", "two", "three"), feature?.names)
-        assertEquals(listOf("a", "b"), feature?.terms)
-    }
-
-    @Test
     fun parse_some_real_data() = runBlocking {
         val client = HttpClient(CIO) { expectSuccess = true }
 

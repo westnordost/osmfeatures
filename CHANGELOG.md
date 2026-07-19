@@ -1,5 +1,9 @@
 # Changelog
 
+# 8.0.0
+
+Support version [v7.x.x](https://github.com/openstreetmap/id-tagging-schema/releases/tag/v7.0.0) of the iD preset schema.
+
 # 7.1.0
 
 Support finding brand features by terms (#29)

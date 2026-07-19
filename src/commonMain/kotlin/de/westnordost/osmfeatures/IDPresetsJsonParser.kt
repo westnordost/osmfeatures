@@ -103,9 +103,10 @@ private fun JsonArray.parseCountryCodes(): List<String>? {
     val list = map { it.jsonPrimitive.content }
     val result = ArrayList<String>(list.size)
     for (item in list) {
-        val cc = item.uppercase()
         // don't need this, 001 stands for "whole world"
-        if (cc == "001") continue
+        if (item == "001" || item == "Planet") continue
+
+        val cc = item.uppercase()
         // ISO-3166-2 codes are supported but not m49 code such as "150" or geojsons like "city_national_bank_fl.geojson"
         if (!cc.matches(ISO3166_2)) return null
         result.add(cc)
