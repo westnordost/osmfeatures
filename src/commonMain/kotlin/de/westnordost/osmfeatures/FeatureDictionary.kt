@@ -448,13 +448,19 @@ class FeatureDictionary internal constructor(
             fileSystem: FileSystem,
             presetsBasePath: String,
             brandPresetsBasePath: String? = null
+        ) = create(
+            presetsAccess = FileSystemAccess(fileSystem, presetsBasePath),
+            brandPresetsAccess = brandPresetsBasePath?.let { FileSystemAccess(fileSystem, it) }
+        )
+
+        /** Create a new FeatureDictionary which gets its data from the given resource access.
+         *  Optionally, access to brand presets can be specified.  */
+        fun create(
+            presetsAccess: ResourceAccessAdapter,
+            brandPresetsAccess: ResourceAccessAdapter? = null
         ) = FeatureDictionary(
-            featureCollection =
-                IDLocalizedFeatureCollection(FileSystemAccess(fileSystem, presetsBasePath)),
-            brandFeatureCollection =
-                brandPresetsBasePath?.let {
-                    IDBrandPresetsFeatureCollection(FileSystemAccess(fileSystem, brandPresetsBasePath))
-                }
+            featureCollection = IDLocalizedFeatureCollection(presetsAccess),
+            brandFeatureCollection = brandPresetsAccess?.let { IDBrandPresetsFeatureCollection(it) }
         )
     }
 }
