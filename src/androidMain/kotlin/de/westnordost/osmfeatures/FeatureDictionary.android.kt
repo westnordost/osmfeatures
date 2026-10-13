@@ -9,11 +9,7 @@ fun FeatureDictionary.Companion.create(
     assetManager: AssetManager,
     presetsBasePath: String,
     brandPresetsBasePath: String? = null
-) = FeatureDictionary(
-    featureCollection =
-        IDLocalizedFeatureCollection(AssetManagerAccess(assetManager, presetsBasePath)),
-    brandFeatureCollection =
-        brandPresetsBasePath?.let {
-            IDBrandPresetsFeatureCollection(AssetManagerAccess(assetManager, brandPresetsBasePath))
-        }
+) = FeatureDictionary.create(
+    presetsAccess = AssetManagerAccess(assetManager, presetsBasePath),
+    brandPresetsAccess = brandPresetsBasePath?.let { AssetManagerAccess(assetManager, it) }
 )
